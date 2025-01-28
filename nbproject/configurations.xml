@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="/home/dode/dev/avrrfm" name="0">
+      <in>avrrfm.c</in>
+      <in>rfm69.c</in>
+      <in>rfm69.h</in>
+      <in>spi.c</in>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>/home/dode/dev/avrrfm/Makefile</itemPath>
+      <itemPath>/home/dode/dev/avrrfm/nbproject/private/launcher.properties</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>/home/dode/dev/avrrfm</Elem>
+  </sourceRootList>
+  <projectmakefile>/home/dode/dev/avrrfm/Makefile</projectmakefile>
+  <confs>
+    <conf name="Custom" type="1">
+      <toolsSet>
+        <compilerSet>AVR|GNU</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>BAUD=38400</Elem>
+            <Elem>DRIVER=1</Elem>
+            <Elem>F_CPU=16000000UL</Elem>
+            <Elem>__AVR_ATmega328P__</Elem>
+            <Elem>__flash=volatile</Elem>
+          </preprocessorList>
+        </cTool>
+      </compileType>
+      <item path="/home/dode/dev/avrrfm/avrrfm.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="/home/dode/dev/avrrfm/spi.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="rfm69.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="rfm69.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
