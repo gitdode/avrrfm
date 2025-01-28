@@ -23,16 +23,6 @@ void spiSlow(void);
 void spiFast(void);
 
 /**
- * Selects the radio to talk to via SPI.
- */
-void radioSel(void);
-
-/**
- * Deselects the display to talk to via SPI.
- */
-void radioDes(void);
-
-/**
  * Transmits the given byte and returns the byte reveived at the same time.
  * @param data byte to be written
  * @return byte read while writing

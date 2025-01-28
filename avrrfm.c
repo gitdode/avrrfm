@@ -94,6 +94,8 @@ int main(void) {
     // enable global interrupts
     sei();
     
+    doStuff();
+    
     while (true) {
         if (int0) {
             int0 = false;

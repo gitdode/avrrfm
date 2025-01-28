@@ -15,10 +15,20 @@
 #include "spi.h"
 #include "usart.h"
 
+#define FIFO      0x00
+#define OP_MODE   0x01
+
+#define NODE_ADDR 0x39
+
 /**
  * Initializes the radio module.
  */
 void initRadio(void);
+
+/**
+ * Do super useful stuff.
+ */
+void doStuff(void);
 
 #endif /* RFM69_H */
 

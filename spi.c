@@ -18,14 +18,6 @@ void spiFast(void) {
     SPSR &= ~(1 << SPI2X);
 }
 
-void radioSel(void) {
-    PORT_RFM &= ~(1 << PIN_RCS);
-}
-
-void radioDes(void) {
-    PORT_RFM |= (1 << PIN_RCS);
-}
-
 uint8_t transmit(uint8_t data) {
     SPDR = data;
     loop_until_bit_is_set(SPSR, SPIF);
