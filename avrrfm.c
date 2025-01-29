@@ -89,7 +89,8 @@ int main(void) {
     initSPI();
     initI2C();
     initRadioInt();
-    initRadio();
+    
+    initRadio(868600);
 
     // enable global interrupts
     sei();

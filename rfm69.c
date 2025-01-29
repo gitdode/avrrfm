@@ -49,14 +49,24 @@ static uint8_t regRead(uint8_t reg) {
     return value;
 }
 
-void initRadio(void) {
-    // wait a bit after POR
+void initRadio(uint32_t kHz) {
+    // wait a bit after power on
     _delay_ms(10);
     
     // pull reset LOW to turn on the module
     PORT_RFM &= ~(1 << PIN_RRST);
     
-    _delay_ms(5);    
+    _delay_ms(5);
+    
+    setFreq(kHz);
+}
+
+void setFreq(uint32_t kHz) {
+    kHz = kHz * 1000 / 61;
+    
+    regWrite(FRF_MSB, kHz >> 16);
+    regWrite(FRF_MID, kHz >> 8);
+    regWrite(FRF_LSB, kHz >> 0);
 }
 
 void doStuff(void) {
