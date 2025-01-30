@@ -17,12 +17,26 @@
 
 #define FIFO        0x00
 #define OP_MODE     0x01
-
 #define FRF_MSB     0x07
 #define FRF_MID     0x08
 #define FRF_LSB     0x09
-
+#define DIO_MAP1    0x25
+#define DIO_MAP2    0x26
+#define IRQ_FLAGS1  0x27
+#define PREAMB_MSB  0x2c
+#define PREAMB_LSB  0x2d
+#define IRQ_FLAGS2  0x28
+#define PCK_CFG1    0x37
 #define NODE_ADDR   0x39
+#define FIFO_THRESH 0x3c
+
+#define MASK_MODE   0x0e
+
+#define MODE_SLEEP  0x00
+#define MODE_STDBY  0x04
+#define MODE_FS     0x08
+#define MODE_TX     0x0c
+#define MODE_RX     0x10
 
 /**
  * Initializes the radio module with the given carrier frequency in kilohertz.
@@ -34,12 +48,12 @@ void initRadio(uint32_t kHz);
  * 
  * @param kHz
  */
-void setFreq(uint32_t kHz);
+void setFreq(uint32_t freq);
 
 /**
- * Do super useful stuff.
+ * Transmits one byte and prints some info.
  */
-void doStuff(void);
+void sendByte(uint8_t byte);
 
 #endif /* RFM69_H */
 

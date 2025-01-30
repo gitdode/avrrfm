@@ -8,6 +8,14 @@
 #include "rfm69.h"
 
 /**
+ * Sets the module to the given operating mode.
+ */
+#define set_mode(mode) regWrite(OP_MODE, (opMode & ~MASK_MODE) | (mode & MASK_MODE))
+
+static volatile uint8_t irqFlags1;
+static volatile uint8_t irqFlags2;
+
+/**
  * Selects the radio to talk to via SPI.
  */
 static void spiSel(void) {
@@ -49,6 +57,12 @@ static uint8_t regRead(uint8_t reg) {
     return value;
 }
 
+ISR(INT0_vect) {
+    irqFlags1 = regRead(IRQ_FLAGS1);
+    irqFlags2 = regRead(IRQ_FLAGS2);
+    // printString("irq\r\n");
+}
+
 void initRadio(uint32_t kHz) {
     // wait a bit after power on
     _delay_ms(10);
@@ -61,21 +75,45 @@ void initRadio(uint32_t kHz) {
     setFreq(kHz);
 }
 
-void setFreq(uint32_t kHz) {
-    kHz = kHz * 1000 / 61;
+void setFreq(uint32_t freq) {
+    freq = freq * 1000 / 61;
     
-    regWrite(FRF_MSB, kHz >> 16);
-    regWrite(FRF_MID, kHz >> 8);
-    regWrite(FRF_LSB, kHz >> 0);
+    regWrite(FRF_MSB, freq >> 16);
+    regWrite(FRF_MID, freq >> 8);
+    regWrite(FRF_LSB, freq >> 0);
 }
 
-void doStuff(void) {
+void sendByte(uint8_t payload) {
     uint8_t opMode = regRead(OP_MODE);
     printString("OpMode: ");
     printByte(opMode);
     
+    /*
     regWrite(NODE_ADDR, 0xaa);
     uint8_t nodeAddr = regRead(NODE_ADDR);
     printString("NodeAddr: ");
     printByte(nodeAddr);
+     */
+    
+    // set variable packet length, turn off CRC for now
+    regWrite(PCK_CFG1, (regRead(PCK_CFG1) | 0x80) & ~0x10);
+    
+    // set TX start condition to "at least one byte in FIFO"
+    regWrite(FIFO_THRESH, regRead(FIFO_THRESH) | 0x80);
+    
+    regWrite(FIFO, 1); // packet length
+    regWrite(FIFO, payload); // 1 byte payload
+    
+    // get "PacketSent" on DIO0 (default)
+    regWrite(DIO_MAP1, regRead(DIO_MAP1) & ~0xc0);
+    
+    printString("Sending payload: ");
+    printByte(payload);
+    
+    set_mode(MODE_TX);
+    
+    loop_until_bit_is_set(irqFlags2, 3);
+    printString("PacketSent\r\n");
+    
+    set_mode(MODE_SLEEP);
 } 

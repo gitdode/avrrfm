@@ -27,12 +27,6 @@
 #include "utils.h"
 #include "rfm69.h"
 
-static volatile bool int0 = false;
-
-ISR(INT0_vect) {
-    int0 = true;
-}
-
 /**
  * Sets up the pins.
  */
@@ -79,8 +73,8 @@ static void initI2C(void) {
 static void initRadioInt(void) {
     EIMSK |= (1 << INT0);
     // EICRA |= (1 << ISC00); // interrupt on any logical change
-    EICRA |= (1 << ISC01); // interrupt on falling edge
-    // EICRA |= (1 << ISC01) | (1 << ISC00); // interrupt on rising edge
+    // EICRA |= (1 << ISC01); // interrupt on falling edge
+    EICRA |= (1 << ISC01) | (1 << ISC00); // interrupt on rising edge
 }
 
 int main(void) {
@@ -89,20 +83,17 @@ int main(void) {
     initSPI();
     initI2C();
     initRadioInt();
-    
-    initRadio(868600);
 
     // enable global interrupts
     sei();
     
-    doStuff();
+    printString("Hello Radio!\r\n");
+    
+    initRadio(868600);
+    sendByte(0xaa);
     
     while (true) {
-        if (int0) {
-            int0 = false;
-            printString("radio int!\r\n");
-        }
-        
+        // do useful stuff
     }
 
     return 0;
