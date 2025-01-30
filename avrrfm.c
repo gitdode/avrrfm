@@ -91,6 +91,7 @@ int main(void) {
     
     initRadio(868600);
     sendByte(0xaa);
+    sendString("Hello Radio!");
     
     while (true) {
         // do useful stuff

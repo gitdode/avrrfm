@@ -8,6 +8,8 @@
 #ifndef RFM69_H
 #define RFM69_H
 
+#include <stdbool.h>
+#include <math.h>
 #include <util/delay.h>
 
 #include "rfm69.h"
@@ -53,7 +55,16 @@ void setFreq(uint32_t freq);
 /**
  * Transmits one byte and prints some info.
  */
-void sendByte(uint8_t byte);
+void sendByte(uint8_t payload);
+
+/**
+ * Transmits up to 64 characters of the given string, excluding the
+ * terminal '\\0' character. 
+ * 
+ * @param payload string to be sent
+ * @return characters sent
+ */
+size_t sendString(char *payload);
 
 #endif /* RFM69_H */
 

@@ -10,7 +10,7 @@
 /**
  * Sets the module to the given operating mode.
  */
-#define set_mode(mode) regWrite(OP_MODE, (opMode & ~MASK_MODE) | (mode & MASK_MODE))
+#define set_mode(mode) regWrite(OP_MODE, (regRead(OP_MODE) & ~MASK_MODE) | (mode & MASK_MODE))
 
 static volatile uint8_t irqFlags1;
 static volatile uint8_t irqFlags2;
@@ -116,4 +116,29 @@ void sendByte(uint8_t payload) {
     printString("PacketSent\r\n");
     
     set_mode(MODE_SLEEP);
-} 
+}
+
+size_t sendString(char *payload) {
+    size_t len = fmin(strlen(payload), 64);
+    
+    regWrite(PCK_CFG1, (regRead(PCK_CFG1) | 0x80) & ~0x10);
+    regWrite(FIFO_THRESH, regRead(FIFO_THRESH) | 0x80);
+    
+    spiSel();
+    transmit(FIFO);
+    transmit(len);
+    for (size_t i = 0; i < len; i++) {
+        transmit(payload[i]);
+    }
+    spiDes();
+    
+    printString("Sending payload...\r\n");    
+    set_mode(MODE_TX);
+    
+    loop_until_bit_is_set(irqFlags2, 3);
+    printString("PacketSent\r\n");
+    
+    set_mode(MODE_SLEEP);
+    
+    return len;
+}
