@@ -7,11 +7,6 @@
 
 #include "rfm69.h"
 
-/**
- * Sets the module to the given operating mode.
- */
-#define set_mode(mode) regWrite(OP_MODE, (regRead(OP_MODE) & ~MASK_MODE) | (mode & MASK_MODE))
-
 static volatile uint8_t irqFlags1;
 static volatile uint8_t irqFlags2;
 
@@ -55,6 +50,13 @@ static uint8_t regRead(uint8_t reg) {
     spiDes();
     
     return value;
+}
+
+/**
+ * Sets the module to the given operating mode.
+ */
+static void setMode(uint8_t mode) {
+    regWrite(OP_MODE, (regRead(OP_MODE) & ~MASK_MODE) | (mode & MASK_MODE));
 }
 
 ISR(INT0_vect) {
@@ -110,12 +112,14 @@ void sendByte(uint8_t payload) {
     printString("Sending payload: ");
     printByte(payload);
     
-    set_mode(MODE_TX);
+    setMode(MODE_TX);
     
     loop_until_bit_is_set(irqFlags2, 3);
     printString("PacketSent\r\n");
-    
-    set_mode(MODE_SLEEP);
+
+    // better wait a bit before going to standby?
+    _delay_ms(10);
+    setMode(MODE_STDBY);
 }
 
 size_t sendString(char *payload) {
@@ -133,12 +137,42 @@ size_t sendString(char *payload) {
     spiDes();
     
     printString("Sending payload...\r\n");    
-    set_mode(MODE_TX);
+    setMode(MODE_TX);
     
     loop_until_bit_is_set(irqFlags2, 3);
     printString("PacketSent\r\n");
     
-    set_mode(MODE_SLEEP);
+    _delay_ms(10);
+    setMode(MODE_STDBY);
     
     return len;
+}
+
+uint8_t receiveByte(void) {
+    
+    // set variable packet length, turn off CRC for now
+    regWrite(PCK_CFG1, (regRead(PCK_CFG1) | 0x80) & ~0x10);
+    
+    // get "PayloadReady" on DIO0
+    regWrite(DIO_MAP1, (regRead(DIO_MAP1) & ~0x80) | 0x40);
+    
+    printString("Starting receiving...\r\n");    
+    setMode(MODE_RX);
+    
+    loop_until_bit_is_set(irqFlags2, 2);
+    printString("PayloadReady\r\n");
+    
+    // can also read FIFO after going to standby
+    uint8_t len = regRead(FIFO);
+    uint8_t payload = regRead(FIFO);
+    
+    printString("Length: ");
+    printUint(len);
+    printString("Payload: ");
+    printByte(payload);
+    
+    _delay_ms(10);
+    setMode(MODE_STDBY);
+    
+    return payload;
 }

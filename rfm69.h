@@ -66,5 +66,7 @@ void sendByte(uint8_t payload);
  */
 size_t sendString(char *payload);
 
+uint8_t receiveByte(void);
+
 #endif /* RFM69_H */
 
