@@ -30,9 +30,10 @@
 #define IRQ_FLAGS2  0x28
 #define PCK_CFG1    0x37
 #define NODE_ADDR   0x39
+#define BROAD_ADDR  0x3a
 #define FIFO_THRESH 0x3c
 
-#define MASK_MODE   0x0e
+#define MASK_MODE   0x1c
 
 #define MODE_SLEEP  0x00
 #define MODE_STDBY  0x04
@@ -55,7 +56,14 @@ void setFreq(uint32_t freq);
 /**
  * Transmits one byte and prints some info.
  */
-void sendByte(uint8_t payload);
+void transmitByte(uint8_t payload);
+
+/**
+ * Waits for one byte received and returns it.
+ * 
+ * @return received byte
+ */
+uint8_t receiveByte(void);
 
 /**
  * Transmits up to 64 characters of the given string, excluding the
@@ -64,9 +72,7 @@ void sendByte(uint8_t payload);
  * @param payload string to be sent
  * @return characters sent
  */
-size_t sendString(char *payload);
-
-uint8_t receiveByte(void);
+size_t transmitString(char *payload);
 
 #endif /* RFM69_H */
 

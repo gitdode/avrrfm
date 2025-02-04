@@ -90,13 +90,13 @@ int main(void) {
     printString("Hello Radio!\r\n");
     
     initRadio(868600);
-    // sendByte(0xaa);
+    // sendByte(0x7b);
     // sendString("Hello Radio!");
-    receiveByte();
     
     while (true) {
-        // sendByte(0xaa);
+        // transmitByte(0x7b);
         // _delay_ms(1000);
+        receiveByte();
     }
 
     return 0;

@@ -7,8 +7,8 @@
 
 #include "rfm69.h"
 
-static volatile uint8_t irqFlags1;
-static volatile uint8_t irqFlags2;
+static volatile uint8_t irqFlags1 = 0;
+static volatile uint8_t irqFlags2 = 0;
 
 /**
  * Selects the radio to talk to via SPI.
@@ -59,6 +59,14 @@ static void setMode(uint8_t mode) {
     regWrite(OP_MODE, (regRead(OP_MODE) & ~MASK_MODE) | (mode & MASK_MODE));
 }
 
+/**
+ * Clears the IRQ flags read from the module.
+ */
+static void clearIrqFlags(void) {
+    irqFlags1 = 0;
+    irqFlags2 = 0;
+}
+
 ISR(INT0_vect) {
     irqFlags1 = regRead(IRQ_FLAGS1);
     irqFlags2 = regRead(IRQ_FLAGS2);
@@ -74,7 +82,13 @@ void initRadio(uint32_t kHz) {
     
     _delay_ms(5);
     
+    // turn off CLKOUT
+    regWrite(DIO_MAP2, 0x07);
+    
     setFreq(kHz);
+    // regWrite(NODE_ADDR, 0x42);
+    
+    // add initialization so both modules actually talk to each other :-)
 }
 
 void setFreq(uint32_t freq) {
@@ -85,48 +99,62 @@ void setFreq(uint32_t freq) {
     regWrite(FRF_LSB, freq >> 0);
 }
 
-void sendByte(uint8_t payload) {
-    uint8_t opMode = regRead(OP_MODE);
-    printString("OpMode: ");
-    printByte(opMode);
-    
-    /*
-    regWrite(NODE_ADDR, 0xaa);
-    uint8_t nodeAddr = regRead(NODE_ADDR);
-    printString("NodeAddr: ");
-    printByte(nodeAddr);
-     */
-    
+void transmitByte(uint8_t payload) {
     // set variable packet length, turn off CRC for now
-    regWrite(PCK_CFG1, (regRead(PCK_CFG1) | 0x80) & ~0x10);
+    regWrite(PCK_CFG1, 0x80);
     
     // set TX start condition to "at least one byte in FIFO"
-    regWrite(FIFO_THRESH, regRead(FIFO_THRESH) | 0x80);
+    regWrite(FIFO_THRESH, 0x8f);
     
-    regWrite(FIFO, 1); // packet length
-    regWrite(FIFO, payload); // 1 byte payload
+    spiSel();
+    transmit(FIFO | 0x80);
+    transmit(2); // TODO includes address?
+    transmit(0x42);
+    transmit(payload);
+    spiDes();
     
     // get "PacketSent" on DIO0 (default)
-    regWrite(DIO_MAP1, regRead(DIO_MAP1) & ~0xc0);
-    
-    printString("Sending payload: ");
-    printByte(payload);
+    regWrite(DIO_MAP1, 0x00);
     
     setMode(MODE_TX);
     
     loop_until_bit_is_set(irqFlags2, 3);
-    printString("PacketSent\r\n");
+    clearIrqFlags();
 
-    // better wait a bit before going to standby?
-    _delay_ms(10);
     setMode(MODE_STDBY);
+    
+    printString("PacketSent\r\n");
 }
 
-size_t sendString(char *payload) {
+uint8_t receiveByte(void) {
+    // set variable packet length, turn off CRC for now, address filtering
+    regWrite(PCK_CFG1, 0x84);
+    // regWrite(PCK_CFG1, 0x80);
+    
+    // get "PayloadReady" on DIO0
+    regWrite(DIO_MAP1, 0x40);
+    
+    printString("Starting receiving...\r\n");
+    setMode(MODE_RX);
+    
+    loop_until_bit_is_set(irqFlags2, 2);
+    clearIrqFlags();
+    
+    setMode(MODE_STDBY);
+    
+    // can also read FIFO after going to standby
+    printByte(regRead(FIFO));
+    printByte(regRead(FIFO));
+    printByte(regRead(FIFO));
+    
+    return 0;
+}
+
+size_t transmitString(char *payload) {
     size_t len = fmin(strlen(payload), 64);
     
-    regWrite(PCK_CFG1, (regRead(PCK_CFG1) | 0x80) & ~0x10);
-    regWrite(FIFO_THRESH, regRead(FIFO_THRESH) | 0x80);
+    regWrite(PCK_CFG1, 0x80);
+    regWrite(FIFO_THRESH, 0x8f);
     
     spiSel();
     transmit(FIFO);
@@ -136,43 +164,17 @@ size_t sendString(char *payload) {
     }
     spiDes();
     
+    // get "PacketSent" on DIO0 (default)
+    regWrite(DIO_MAP1, 0x00);
+    
     printString("Sending payload...\r\n");    
     setMode(MODE_TX);
     
     loop_until_bit_is_set(irqFlags2, 3);
+    clearIrqFlags();
     printString("PacketSent\r\n");
     
-    _delay_ms(10);
     setMode(MODE_STDBY);
     
     return len;
-}
-
-uint8_t receiveByte(void) {
-    
-    // set variable packet length, turn off CRC for now
-    regWrite(PCK_CFG1, (regRead(PCK_CFG1) | 0x80) & ~0x10);
-    
-    // get "PayloadReady" on DIO0
-    regWrite(DIO_MAP1, (regRead(DIO_MAP1) & ~0x80) | 0x40);
-    
-    printString("Starting receiving...\r\n");    
-    setMode(MODE_RX);
-    
-    loop_until_bit_is_set(irqFlags2, 2);
-    printString("PayloadReady\r\n");
-    
-    // can also read FIFO after going to standby
-    uint8_t len = regRead(FIFO);
-    uint8_t payload = regRead(FIFO);
-    
-    printString("Length: ");
-    printUint(len);
-    printString("Payload: ");
-    printByte(payload);
-    
-    _delay_ms(10);
-    setMode(MODE_STDBY);
-    
-    return payload;
 }

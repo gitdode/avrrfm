@@ -36,8 +36,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/48b9ad18/avrrfm.o \
-	${OBJECTDIR}/_ext/48b9ad18/spi.o \
-	${OBJECTDIR}/rfm69.o
+	${OBJECTDIR}/_ext/48b9ad18/rfm69.o \
+	${OBJECTDIR}/_ext/48b9ad18/spi.o
 
 
 # C Compiler Flags
@@ -68,13 +68,13 @@ ${OBJECTDIR}/_ext/48b9ad18/avrrfm.o: /home/dode/dev/avrrfm/avrrfm.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
 	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -std=c99 -o ${OBJECTDIR}/_ext/48b9ad18/avrrfm.o /home/dode/dev/avrrfm/avrrfm.c
 
+${OBJECTDIR}/_ext/48b9ad18/rfm69.o: /home/dode/dev/avrrfm/rfm69.c
+	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/rfm69.o /home/dode/dev/avrrfm/rfm69.c
+
 ${OBJECTDIR}/_ext/48b9ad18/spi.o: /home/dode/dev/avrrfm/spi.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
 	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -std=c99 -o ${OBJECTDIR}/_ext/48b9ad18/spi.o /home/dode/dev/avrrfm/spi.c
-
-${OBJECTDIR}/rfm69.o: rfm69.c
-	${MKDIR} -p ${OBJECTDIR}
-	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/rfm69.o rfm69.c
 
 # Subprojects
 .build-subprojects:
