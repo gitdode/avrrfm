@@ -46,7 +46,7 @@
 #define SYNC_VAL8   0x36
 #define PCK_CFG1    0x37
 #define NODE_ADDR   0x39
-#define BROAD_ADDR  0x3a
+#define CAST_ADDR   0x3a
 #define FIFO_THRESH 0x3c
 
 #define MASK_MODE   0x1c
@@ -57,7 +57,9 @@
 #define MODE_TX     0x0c
 #define MODE_RX     0x10
 
-#define ADDRESS     0x42
+#define FIFO_SIZE       64
+#define NODE_ADDRESS    0x42
+#define CAST_ADDRESS    0x84
 
 /**
  * Initializes the radio module with the given carrier frequency in kilohertz.
@@ -65,16 +67,14 @@
 void initRadio(uint32_t kHz);
 
 /**
+ * Waits for a packet and prints it.
+ */
+void receive(void);
+
+/**
  * Transmits one byte and prints some info.
  */
 void transmitByte(uint8_t payload);
-
-/**
- * Waits for one byte received and returns it.
- * 
- * @return received byte
- */
-uint8_t receiveByte(void);
 
 /**
  * Transmits up to 64 characters of the given string, excluding the

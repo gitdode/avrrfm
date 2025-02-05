@@ -100,7 +100,7 @@ void initRadio(uint32_t freq) {
     // LNA 200 Ohm, gain AGC (default)
     // regWrite(0x18, 0x88);
     // reduce gain for transmitter and receiver are so close to each other
-    regWrite(LNA, 0x86);
+    regWrite(LNA, 0x8c);
     
     // freq of DC offset canceller and channel filter bandwith (default)
     regWrite(RX_BW, 0x55);
@@ -121,7 +121,7 @@ void initRadio(uint32_t freq) {
     // size of sync word 3
     regWrite(SYNC_CONF, 0x98);
     
-    // just set all sync word values
+    // just set all sync word values to some really creative value
     regWrite(SYNC_VAL1, 0x2f);
     regWrite(SYNC_VAL2, 0x30);
     regWrite(SYNC_VAL3, 0x31);
@@ -132,11 +132,12 @@ void initRadio(uint32_t freq) {
     regWrite(SYNC_VAL8, 0x36);
 
     // variable payload length, crc on, no address matching
-    regWrite(PCK_CFG1, 0x90);
+    // regWrite(PCK_CFG1, 0x90);
+    regWrite(PCK_CFG1, 0x94); // match broadcast or node address
     
     // node and broadcast address
-    // regWrite(NODE_ADDR, ADDRESS);
-    // regWrite(BROAD_ADDR, ADDRESS);
+    regWrite(NODE_ADDR, NODE_ADDRESS);
+    regWrite(CAST_ADDR, CAST_ADDRESS);
     
     // set TX start condition to "at least one byte in FIFO"
     regWrite(FIFO_THRESH, 0x8f);
@@ -144,11 +145,36 @@ void initRadio(uint32_t freq) {
     printString("Init done\r\n");
 }
 
+void receive(void) {
+    // get "PayloadReady" on DIO0
+    regWrite(DIO_MAP1, 0x40);
+    
+    printString("Receiving...\r\n");
+    setMode(MODE_RX);
+    
+    loop_until_bit_is_set(irqFlags2, 2);
+    clearIrqFlags();
+    
+    setMode(MODE_STDBY);
+    
+    size_t len = fmin(regRead(FIFO), FIFO_SIZE) - 1;
+    uint8_t address = regRead(FIFO);
+    
+    printString("Length:  ");
+    printUint(len);
+    printString("Address: ");
+    printHex(address);
+    printString("Payload:\r\n");
+    for (size_t i = 0; i < len; i++) {
+        printUint(regRead(FIFO));
+    }
+}
+
 void transmitByte(uint8_t payload) {
     spiSel();
     transmit(FIFO | 0x80);
-    transmit(3);
-    transmit(ADDRESS);
+    transmit(2);
+    transmit(NODE_ADDRESS);
     transmit(payload);
     spiDes();
     
@@ -165,35 +191,14 @@ void transmitByte(uint8_t payload) {
     printString("PacketSent\r\n");
 }
 
-uint8_t receiveByte(void) {
-    // get "PayloadReady" on DIO0
-    regWrite(DIO_MAP1, 0x40);
-    
-    printString("Receiving...\r\n");
-    setMode(MODE_RX);
-    
-    loop_until_bit_is_set(irqFlags2, 2);
-    clearIrqFlags();
-    
-    setMode(MODE_STDBY);
-    
-    printString("Length:  ");
-    printUint(regRead(FIFO));
-    printString("Address: ");
-    printHex(regRead(FIFO));
-    printString("Payload: ");
-    printByte(regRead(FIFO));
-    
-    return 0;
-}
-
 size_t transmitString(char *payload) {
-    size_t len = fmin(strlen(payload), 64);
+    // payload + address byte
+    size_t len = fmin(strlen(payload), FIFO_SIZE) + 1;
     
     spiSel();
     transmit(FIFO | 0x80);
     transmit(len);
-    transmit(ADDRESS);
+    transmit(NODE_ADDRESS);
     for (size_t i = 0; i < len; i++) {
         transmit(payload[i]);
     }
