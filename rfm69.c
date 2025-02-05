@@ -165,9 +165,12 @@ void receive(void) {
     printString("Address: ");
     printHex(address);
     printString("Payload:\r\n");
+    spiSel();
+    transmit(FIFO);
     for (size_t i = 0; i < len; i++) {
-        printUint(regRead(FIFO));
+        printUint(transmit(FIFO));
     }
+    spiDes();
 }
 
 void transmitByte(uint8_t payload) {
