@@ -73,7 +73,7 @@ ISR(INT0_vect) {
     // printString("irq\r\n");
 }
 
-void initRadio(uint32_t kHz) {
+void initRadio(uint32_t freq) {
     // wait a bit after power on
     _delay_ms(10);
     
@@ -82,34 +82,73 @@ void initRadio(uint32_t kHz) {
     
     _delay_ms(5);
     
-    // turn off CLKOUT
+    uint8_t version = regRead(0x10);
+    printString("Version: ");
+    printHex(version);
+    
+    // packet mode, FSK modulation, no shaping
+    regWrite(DATA_MOD, 0x00);
+    
+    // bit rate 9.6 kBit/s
+    regWrite(BITRATE_MSB, 0x0d);
+    regWrite(BITRATE_LSB, 0x05);
+    
+    // RC calibration, must be done in standby mode (default)
+    regWrite(OSC1, 0x80);
+    do { } while (!(regRead(OSC1) & 0x40));
+    
+    // LNA 200 Ohm, gain AGC (default)
+    // regWrite(0x18, 0x88);
+    // reduce gain for transmitter and receiver are so close to each other
+    regWrite(LNA, 0x86);
+    
+    // freq of DC offset canceller and channel filter bandwith (default)
+    regWrite(RX_BW, 0x55);
+    
+    // RX_BW during AFC (default)
+    regWrite(AFC_BW, 0x8b);
+    
+    // turn off CLKOUT (not needed)
     regWrite(DIO_MAP2, 0x07);
-    
-    setFreq(kHz);
-    // regWrite(NODE_ADDR, 0x42);
-    
-    // add initialization so both modules actually talk to each other :-)
-}
 
-void setFreq(uint32_t freq) {
+    // set the carrier frequency
     freq = freq * 1000 / 61;
-    
     regWrite(FRF_MSB, freq >> 16);
     regWrite(FRF_MID, freq >> 8);
     regWrite(FRF_LSB, freq >> 0);
-}
+    
+    // enable sync word generation and detection, FIFO fill on sync address,
+    // size of sync word 3
+    regWrite(SYNC_CONF, 0x98);
+    
+    // just set all sync word values
+    regWrite(SYNC_VAL1, 0x2f);
+    regWrite(SYNC_VAL2, 0x30);
+    regWrite(SYNC_VAL3, 0x31);
+    regWrite(SYNC_VAL4, 0x32);
+    regWrite(SYNC_VAL5, 0x33);
+    regWrite(SYNC_VAL6, 0x34);
+    regWrite(SYNC_VAL7, 0x35);
+    regWrite(SYNC_VAL8, 0x36);
 
-void transmitByte(uint8_t payload) {
-    // set variable packet length, turn off CRC for now
-    regWrite(PCK_CFG1, 0x80);
+    // variable payload length, crc on, no address matching
+    regWrite(PCK_CFG1, 0x90);
+    
+    // node and broadcast address
+    // regWrite(NODE_ADDR, ADDRESS);
+    // regWrite(BROAD_ADDR, ADDRESS);
     
     // set TX start condition to "at least one byte in FIFO"
     regWrite(FIFO_THRESH, 0x8f);
     
+    printString("Init done\r\n");
+}
+
+void transmitByte(uint8_t payload) {
     spiSel();
     transmit(FIFO | 0x80);
-    transmit(2); // TODO includes address?
-    transmit(0x42);
+    transmit(3);
+    transmit(ADDRESS);
     transmit(payload);
     spiDes();
     
@@ -127,14 +166,10 @@ void transmitByte(uint8_t payload) {
 }
 
 uint8_t receiveByte(void) {
-    // set variable packet length, turn off CRC for now, address filtering
-    regWrite(PCK_CFG1, 0x84);
-    // regWrite(PCK_CFG1, 0x80);
-    
     // get "PayloadReady" on DIO0
     regWrite(DIO_MAP1, 0x40);
     
-    printString("Starting receiving...\r\n");
+    printString("Receiving...\r\n");
     setMode(MODE_RX);
     
     loop_until_bit_is_set(irqFlags2, 2);
@@ -142,9 +177,11 @@ uint8_t receiveByte(void) {
     
     setMode(MODE_STDBY);
     
-    // can also read FIFO after going to standby
-    printByte(regRead(FIFO));
-    printByte(regRead(FIFO));
+    printString("Length:  ");
+    printUint(regRead(FIFO));
+    printString("Address: ");
+    printHex(regRead(FIFO));
+    printString("Payload: ");
     printByte(regRead(FIFO));
     
     return 0;
@@ -153,12 +190,10 @@ uint8_t receiveByte(void) {
 size_t transmitString(char *payload) {
     size_t len = fmin(strlen(payload), 64);
     
-    regWrite(PCK_CFG1, 0x80);
-    regWrite(FIFO_THRESH, 0x8f);
-    
     spiSel();
-    transmit(FIFO);
+    transmit(FIFO | 0x80);
     transmit(len);
+    transmit(ADDRESS);
     for (size_t i = 0; i < len; i++) {
         transmit(payload[i]);
     }
@@ -167,7 +202,7 @@ size_t transmitString(char *payload) {
     // get "PacketSent" on DIO0 (default)
     regWrite(DIO_MAP1, 0x00);
     
-    printString("Sending payload...\r\n");    
+    printString("Sending...\r\n");    
     setMode(MODE_TX);
     
     loop_until_bit_is_set(irqFlags2, 3);
