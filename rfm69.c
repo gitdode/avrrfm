@@ -157,8 +157,8 @@ size_t receivePayload(uint8_t *payload, size_t size) {
     
     setMode(MODE_STDBY);
     
-    size_t len = fmin(regRead(FIFO), FIFO_SIZE) - 1;
-    len = fmin(len, size);
+    size_t len = min(regRead(FIFO), FIFO_SIZE) - 1;
+    len = min(len, size);
     
     // TODO assume and ignore address for now
     regRead(FIFO);
@@ -175,7 +175,7 @@ size_t receivePayload(uint8_t *payload, size_t size) {
 
 size_t transmitPayload(uint8_t *payload, size_t size) {
     // payload + address byte
-    size_t len = fmin(size, FIFO_SIZE) + 1;
+    size_t len = min(size, FIFO_SIZE) + 1;
     
     spiSel();
     transmit(FIFO | 0x80);

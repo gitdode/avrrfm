@@ -9,7 +9,6 @@
 #define RFM69_H
 
 #include <stdbool.h>
-#include <math.h>
 #include <util/delay.h>
 
 #include "rfm69.h"
