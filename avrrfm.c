@@ -45,7 +45,7 @@ static void initPins(void) {
     // set radio CS and RST pin as output pin
     DDR_RFM |= (1 << PIN_RCS);
     DDR_RFM |= (1 << PIN_RRST);
-    
+
     // drive output pins high
     PORT_RFM |= (1 << PIN_RCS);
 }
@@ -77,6 +77,21 @@ static void initRadioInt(void) {
     EICRA |= (1 << ISC01) | (1 << ISC00); // interrupt on rising edge
 }
 
+/**
+ * Prints the given payload with the given size.
+ * 
+ * @param payload
+ * @param size
+ */
+static void printPayload(uint8_t *payload, size_t size) {
+    printString("Length: ");
+    printUint(size);
+    printString("Payload:\r\n");
+    char buf[FIFO_SIZE + 3];
+    snprintf(buf, size + 3, "%s\r\n", payload);
+    printString(buf);
+}
+
 int main(void) {
     initUSART();
     initPins();
@@ -86,16 +101,26 @@ int main(void) {
 
     // enable global interrupts
     sei();
-    
+
     printString("Hello Radio!\r\n");
-    
+
     initRadio(868600);
     
+    bool tx = false;
+
     while (true) {
-        // transmitByte(123);
-        // transmitString("Hello Radio!");
-        // _delay_ms(1000);
-        receive();
+        if (tx) {
+            // uint8_t payload[] = {123};
+            // transmitPayload(payload, sizeof(payload));
+            char hello[] = "Hello Radio!";
+            transmitPayload((uint8_t*)hello, sizeof(hello) - 1);
+            _delay_ms(1000);
+        } else {
+            uint8_t payload[FIFO_SIZE];
+            memset(payload, 0, FIFO_SIZE);
+            uint8_t len = receivePayload(payload, sizeof (payload));
+            printPayload(payload, len);
+        }
     }
 
     return 0;

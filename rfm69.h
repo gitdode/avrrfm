@@ -67,23 +67,21 @@
 void initRadio(uint32_t kHz);
 
 /**
- * Waits for a packet and prints it.
- */
-void receive(void);
-
-/**
- * Transmits one byte and prints some info.
- */
-void transmitByte(uint8_t payload);
-
-/**
- * Transmits up to 64 characters of the given string, excluding the
- * terminal '\\0' character. 
+ * Waits for a packet, puts the payload into the given array with the 
+ * given size, and returns the length of the payload.
  * 
- * @param payload string to be sent
- * @return characters sent
+ * @param payload buffer for payload
+ * @return bytes actually received
  */
-size_t transmitString(char *payload);
+size_t receivePayload(uint8_t *payload, size_t size);
+
+/**
+ * Transmits up to 64 bytes of the given payload.
+ * 
+ * @param payload to be sent
+ * @return bytes actually sent
+ */
+size_t transmitPayload(uint8_t *payload, size_t size);
 
 #endif /* RFM69_H */
 

@@ -145,7 +145,7 @@ void initRadio(uint32_t freq) {
     printString("Init done\r\n");
 }
 
-void receive(void) {
+size_t receivePayload(uint8_t *payload, size_t size) {
     // get "PayloadReady" on DIO0
     regWrite(DIO_MAP1, 0x40);
     
@@ -158,45 +158,24 @@ void receive(void) {
     setMode(MODE_STDBY);
     
     size_t len = fmin(regRead(FIFO), FIFO_SIZE) - 1;
-    uint8_t address = regRead(FIFO);
+    len = fmin(len, size);
     
-    printString("Length:  ");
-    printUint(len);
-    printString("Address: ");
-    printHex(address);
-    printString("Payload:\r\n");
+    // TODO assume and ignore address for now
+    regRead(FIFO);
+    
     spiSel();
     transmit(FIFO);
     for (size_t i = 0; i < len; i++) {
-        printUint(transmit(FIFO));
+        payload[i] = (transmit(FIFO));
     }
     spiDes();
+    
+    return len;
 }
 
-void transmitByte(uint8_t payload) {
-    spiSel();
-    transmit(FIFO | 0x80);
-    transmit(2);
-    transmit(NODE_ADDRESS);
-    transmit(payload);
-    spiDes();
-    
-    // get "PacketSent" on DIO0 (default)
-    regWrite(DIO_MAP1, 0x00);
-    
-    setMode(MODE_TX);
-    
-    loop_until_bit_is_set(irqFlags2, 3);
-    clearIrqFlags();
-
-    setMode(MODE_STDBY);
-    
-    printString("PacketSent\r\n");
-}
-
-size_t transmitString(char *payload) {
+size_t transmitPayload(uint8_t *payload, size_t size) {
     // payload + address byte
-    size_t len = fmin(strlen(payload), FIFO_SIZE) + 1;
+    size_t len = fmin(size, FIFO_SIZE) + 1;
     
     spiSel();
     transmit(FIFO | 0x80);
@@ -210,14 +189,14 @@ size_t transmitString(char *payload) {
     // get "PacketSent" on DIO0 (default)
     regWrite(DIO_MAP1, 0x00);
     
-    printString("Sending...\r\n");    
     setMode(MODE_TX);
     
     loop_until_bit_is_set(irqFlags2, 3);
     clearIrqFlags();
-    printString("PacketSent\r\n");
-    
+
     setMode(MODE_STDBY);
+    
+    printString("PacketSent\r\n");
     
     return len;
 }
