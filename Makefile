@@ -9,7 +9,7 @@ PROGRAMMER_TYPE = avrispmkII
 PROGRAMMER_ARGS = 
 
 MAIN = avrrfm.c
-SRC = rfm69.c spi.c usart.c
+SRC = rfm69.c i2c.c spi.c usart.c
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
@@ -33,7 +33,7 @@ SRC += $(TARGET).c
 OBJ = $(SRC:.c=.o) 
 OBJ = $(SRC:.S=.o)
 	
-$(TARGET).elf: pins.h rfm69.h spi.h usart.h utils.h Makefile
+$(TARGET).elf: pins.h rfm69.h i2c.h spi.h usart.h utils.h Makefile
 
 all: $(TARGET).hex
 

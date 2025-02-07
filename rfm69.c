@@ -98,9 +98,9 @@ void initRadio(uint32_t freq) {
     do { } while (!(regRead(OSC1) & 0x40));
     
     // LNA 200 Ohm, gain AGC (default)
-    // regWrite(0x18, 0x88);
+    // regWrite(LNA, 0x88);
     // reduce gain for transmitter and receiver are so close to each other
-    regWrite(LNA, 0x8c);
+    regWrite(LNA, 0x86);
     
     // freq of DC offset canceller and channel filter bandwith (default)
     regWrite(RX_BW, 0x55);
@@ -166,7 +166,7 @@ size_t receivePayload(uint8_t *payload, size_t size) {
     spiSel();
     transmit(FIFO);
     for (size_t i = 0; i < len; i++) {
-        payload[i] = (transmit(FIFO));
+        payload[i] = transmit(FIFO);
     }
     spiDes();
     

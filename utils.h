@@ -35,6 +35,5 @@
     _a < _b ? _a : _b;       \
 })
 
-
 #endif /* UTILS_H */
 

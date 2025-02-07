@@ -39,8 +39,8 @@ static void initPins(void) {
     PORT_SPI |= (1 << PIN_MISO);
 
     // set SDA and SCL as output pin
-    // DDR_I2C |= (1 << PIN_SCL);
-    // DDR_I2C |= (1 << PIN_SDA);
+    DDR_I2C |= (1 << PIN_SCL);
+    DDR_I2C |= (1 << PIN_SDA);
 
     // set radio CS and RST pin as output pin
     DDR_RFM |= (1 << PIN_RCS);
