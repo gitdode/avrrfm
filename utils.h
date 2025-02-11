@@ -35,5 +35,17 @@
     _a < _b ? _a : _b;       \
 })
 
+/**
+ * Divides the given numerator by the given denominator,
+ * rounds to the nearest int and returns it.
+ * http://stackoverflow.com/a/18067292/709426
+ */
+#define divRoundNearest(num, den)       \
+({                                      \
+    return ((num < 0) ^ (den < 0)) ?    \
+           ((num - den / 2) / den) :   \
+           ((num + den / 2) / den);    \
+})
+
 #endif /* UTILS_H */
 

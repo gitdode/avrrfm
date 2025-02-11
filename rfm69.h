@@ -66,6 +66,16 @@
 void initRadio(uint32_t kHz);
 
 /**
+ * Shuts down the radio.
+ */
+void sleepRadio(void);
+
+/**
+ * Wakes up the radio.
+ */
+void wakeRadio(void);
+
+/**
  * Waits for a packet, puts the payload into the given array with the 
  * given size, and returns the length of the payload.
  * 

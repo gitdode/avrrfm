@@ -98,9 +98,9 @@ void initRadio(uint32_t freq) {
     do { } while (!(regRead(OSC1) & 0x40));
     
     // LNA 200 Ohm, gain AGC (default)
-    // regWrite(LNA, 0x88);
-    // reduce gain for transmitter and receiver are so close to each other
-    regWrite(LNA, 0x86);
+    regWrite(LNA, 0x88);
+    // reduce gain if transmitter and receiver are close to each other
+    // regWrite(LNA, 0x86);
     
     // freq of DC offset canceller and channel filter bandwith (default)
     regWrite(RX_BW, 0x55);
@@ -145,11 +145,20 @@ void initRadio(uint32_t freq) {
     printString("Init done\r\n");
 }
 
+void sleepRadio(void) {
+    setMode(MODE_SLEEP);
+}
+
+void wakeRadio(void) {
+    setMode(MODE_STDBY);
+    // TODO necessary?
+    _delay_ms(5);
+}
+
 size_t receivePayload(uint8_t *payload, size_t size) {
     // get "PayloadReady" on DIO0
     regWrite(DIO_MAP1, 0x40);
     
-    printString("Receiving...\r\n");
     setMode(MODE_RX);
     
     loop_until_bit_is_set(irqFlags2, 2);
@@ -193,10 +202,8 @@ size_t transmitPayload(uint8_t *payload, size_t size) {
     
     loop_until_bit_is_set(irqFlags2, 3);
     clearIrqFlags();
-
-    setMode(MODE_STDBY);
     
-    printString("PacketSent\r\n");
+    setMode(MODE_STDBY);
     
     return len;
 }
