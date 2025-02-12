@@ -13,3 +13,8 @@ is ~57 uA, which is still quite a lot (> 10 uA should be possible), but already
 better than 8 mA :-)
 
 ![IMG_20250212_190518](https://github.com/user-attachments/assets/dd87b7de-c97d-4ecb-ab24-f5a34b849914)
+
+The receiver currently just converts the raw temperature reading to °C and 
+writes it via USART to the awesome GTKTerm.
+
+![GTKTerm](https://github.com/user-attachments/assets/bb4c1676-b46f-414b-aa04-c86cc5ab3af5)
