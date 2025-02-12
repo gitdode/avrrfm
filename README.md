@@ -9,7 +9,7 @@ To do something really extraordinary, the temperature reading of an MCP9803
 sensor is periodically transmitted to the receiver.  
 To save battery power, the controller, radio module and temperature sensor 
 are put to power down/sleep mode in between transmissions. The idle current 
-is ~57 uA, which is still quite a lot (> 10 uA should be possible), but already 
+is ~57 uA, which is still quite a lot (< 10 uA should be possible), but already 
 better than 8 mA :-)
 
 ![IMG_20250212_190518](https://github.com/user-attachments/assets/dd87b7de-c97d-4ecb-ab24-f5a34b849914)
