@@ -29,7 +29,7 @@
 #include "rfm69.h"
 #include "mcp9808.h"
 
-#define MEASURE_INTS 4
+#define MEASURE_INTS 1
 
 /* 1 int = 8 seconds */
 static volatile uint8_t ints = 0;
@@ -52,7 +52,7 @@ static void initPins(void) {
     // set SDA and SCL as output pin
     // DDR_I2C |= (1 << PIN_SCL);
     // DDR_I2C |= (1 << PIN_SDA);
-    
+
     // set radio CS and RST pin as output pin
     DDR_RFM |= (1 << PIN_RCS);
     DDR_RFM |= (1 << PIN_RRST);
@@ -150,7 +150,7 @@ static void receiveTemp(void) {
     uint16_t raw = 0;
     raw |= payload[0] << 8;
     raw |= payload[1];
-    
+
     int16_t tempx10 = convertTemp(raw);
     div_t temp = div(tempx10, 10);
     static char buf[16];
@@ -188,7 +188,7 @@ int main(void) {
                 sleepRadio();
                 disableSPI();
             }
-            
+
             set_sleep_mode(SLEEP_MODE_PWR_DOWN);
             sleep_mode();
         } else {

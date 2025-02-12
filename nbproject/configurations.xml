@@ -45,15 +45,15 @@
       </compileType>
       <item path="/home/dode/dev/avrrfm/avrrfm.c" ex="false" tool="0" flavor2="3">
       </item>
+      <item path="/home/dode/dev/avrrfm/mcp9808.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="/home/dode/dev/avrrfm/mcp9808.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="/home/dode/dev/avrrfm/rfm69.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/rfm69.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/spi.c" ex="false" tool="0" flavor2="3">
-      </item>
-      <item path="mcp9808.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="mcp9808.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

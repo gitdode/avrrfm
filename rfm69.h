@@ -25,6 +25,7 @@
 #define FRF_MID     0x08
 #define FRF_LSB     0x09
 #define OSC1        0x0a
+#define PA_LEVEL    0x11
 #define LNA         0x18
 #define RX_BW       0x19
 #define AFC_BW      0x20

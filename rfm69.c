@@ -86,20 +86,25 @@ void initRadio(uint32_t freq) {
     printString("Version: ");
     printHex(version);
     
-    // packet mode, FSK modulation, no shaping
+    // packet mode, FSK modulation, no shaping (default)
     regWrite(DATA_MOD, 0x00);
     
     // bit rate 9.6 kBit/s
-    regWrite(BITRATE_MSB, 0x0d);
-    regWrite(BITRATE_LSB, 0x05);
+    // regWrite(BITRATE_MSB, 0x0d);
+    // regWrite(BITRATE_LSB, 0x05);
     
-    // RC calibration, must be done in standby mode (default)
+    // RC calibration, must be done in standby mode (default after power on)
     regWrite(OSC1, 0x80);
     do { } while (!(regRead(OSC1) & 0x40));
     
+    // PA level 17 dBm (default 13 dBm)
+    // regWrite(PA_LEVEL, 0x7f);
+    
     // LNA 200 Ohm, gain AGC (default)
     regWrite(LNA, 0x88);
-    // reduce gain if transmitter and receiver are close to each other
+    // max gain
+    // regWrite(LNA, 0x89);
+    // reduced gain
     // regWrite(LNA, 0x86);
     
     // freq of DC offset canceller and channel filter bandwith (default)
@@ -107,6 +112,10 @@ void initRadio(uint32_t freq) {
     
     // RX_BW during AFC (default)
     regWrite(AFC_BW, 0x8b);
+    
+    // Preamble size
+    regWrite(PREAMB_MSB, 0x00);
+    regWrite(PREAMB_LSB, 0x0f);
     
     // turn off CLKOUT (not needed)
     regWrite(DIO_MAP2, 0x07);
@@ -151,7 +160,7 @@ void sleepRadio(void) {
 
 void wakeRadio(void) {
     setMode(MODE_STDBY);
-    // TODO necessary?
+    // should better wait for ModeReady irq?
     _delay_ms(5);
 }
 
