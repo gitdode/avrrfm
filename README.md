@@ -12,4 +12,4 @@ are put to power down/sleep mode in between transmissions. The idle current
 is ~57 uA, which is still quite a lot (> 10 uA should be possible), but already 
 better than 8 mA :-)
 
-![IMG_20250204_202605](https://github.com/user-attachments/assets/9ab786fc-655d-48e0-afa9-cc52b606b4b8)
+![IMG_20250212_190518](https://github.com/user-attachments/assets/dd87b7de-c97d-4ecb-ab24-f5a34b849914)

@@ -29,7 +29,7 @@
 #include "rfm69.h"
 #include "mcp9808.h"
 
-#define MEASURE_INTS 1
+#define MEASURE_INTS 4
 
 /* 1 int = 8 seconds */
 static volatile uint8_t ints = 0;

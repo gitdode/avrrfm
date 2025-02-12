@@ -87,10 +87,9 @@ int16_t convertTemp(uint16_t raw) {
         // T < TA LOWER
     }
 
-    int16_t temp;
-
     // clear flag bits
     upper &= 0x1F;
+    int16_t temp;
     if ((upper & 0x10) == 0x10) {
         // TA < 0°C
         // clear sign

@@ -97,7 +97,9 @@ void initRadio(uint32_t freq) {
     regWrite(OSC1, 0x80);
     do { } while (!(regRead(OSC1) & 0x40));
     
-    // PA level 17 dBm (default 13 dBm)
+    // PA level (default +13 dBm)
+    regWrite(PA_LEVEL, 0x9f);
+    // +17 dBm - doesn't seem to work?
     // regWrite(PA_LEVEL, 0x7f);
     
     // LNA 200 Ohm, gain AGC (default)
