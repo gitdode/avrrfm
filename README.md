@@ -5,7 +5,7 @@ and an Atmega328p MCU.
 
 This is work in progress. Simple Tx-Rx is working so far.  
 
-To do something really extraordinary, the temperature reading of an MCP9803
+To do something really extraordinary, the temperature reading of an MCP9808
 sensor is periodically transmitted to the receiver.  
 To save battery power, the controller, radio module and temperature sensor 
 are put to power down/sleep mode in between transmissions. The idle current 
