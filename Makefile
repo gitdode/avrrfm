@@ -8,8 +8,20 @@ BAUD = 9600
 PROGRAMMER_TYPE = avrispmkII
 PROGRAMMER_ARGS = 
 
+# Display dimensions
+DISPLAY_WIDTH = 320
+DISPLAY_HEIGHT = 240
+# 1 = BGR, 0 = RGB
+BGR = 1
+# Invert color
+INVERT = 1
+# Flip image
+HFLIP = 1
+VFLIP = 0
+
 MAIN = avrrfm.c
-SRC = i2c.c mcp9808.c rfm69.c spi.c usart.c
+SRC = bitmaps.h colorspace.c dejavu.c display.c font.c i2c.c mcp9808.c rfm69.c \
+      spi.c tft.c usart.c
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
@@ -18,6 +30,8 @@ AVRSIZE = avr-size
 AVRDUDE = avrdude
 
 CFLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU)UL -DBAUD=$(BAUD)
+CFLAGS += -DDISPLAY_WIDTH=$(DISPLAY_WIDTH) -DDISPLAY_HEIGHT=$(DISPLAY_HEIGHT)
+CFLAGS += -DINVERT=$(INVERT) -DBGR=$(BGR) -DHFLIP=$(HFLIP) -DVFLIP=$(VFLIP)
 CFLAGS += -O2 -I.
 CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums 
 CFLAGS += -Wall -Wstrict-prototypes
@@ -33,7 +47,8 @@ SRC += $(TARGET).c
 OBJ = $(SRC:.c=.o) 
 OBJ = $(SRC:.S=.o)
 	
-$(TARGET).elf: i2c.h mcp9808.h pins.h rfm69.h spi.h usart.h utils.h Makefile
+$(TARGET).elf: bitmaps.h colorspace.h dejavu.h display.h font.h i2c.h \
+	mcp9808.h pins.h rfm69.h spi.h tft.h types.h usart.h utils.h Makefile
 
 all: $(TARGET).hex
 

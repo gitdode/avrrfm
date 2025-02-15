@@ -45,7 +45,7 @@ static void regWrite(uint8_t reg, uint8_t value) {
  */
 static uint8_t regRead(uint8_t reg) {
     spiSel();
-    transmit(reg);
+    transmit(reg & 0x7f);
     uint8_t value = transmit(0x00);
     spiDes();
     
@@ -144,7 +144,8 @@ void initRadio(uint32_t freq) {
 
     // variable payload length, crc on, no address matching
     // regWrite(PCK_CFG1, 0x90);
-    regWrite(PCK_CFG1, 0x94); // match broadcast or node address
+    // match broadcast or node address
+    regWrite(PCK_CFG1, 0x94);
     
     // node and broadcast address
     regWrite(NODE_ADDR, NODE_ADDRESS);
@@ -153,7 +154,7 @@ void initRadio(uint32_t freq) {
     // set TX start condition to "at least one byte in FIFO"
     regWrite(FIFO_THRESH, 0x8f);
     
-    printString("Init done\r\n");
+    printString("Radio init done\r\n");
 }
 
 void sleepRadio(void) {

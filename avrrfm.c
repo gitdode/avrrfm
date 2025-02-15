@@ -28,11 +28,17 @@
 #include "utils.h"
 #include "rfm69.h"
 #include "mcp9808.h"
+#include "tft.h"
+#include "display.h"
+#include "dejavu.h"
 
-#define MEASURE_INTS 4
+#define MEASURE_INTS 8
 
 /* 1 int = 8 seconds */
 static volatile uint8_t ints = 0;
+
+static uint16_t xoff = 0;
+static uint16_t yoff = 0;
 
 ISR(WDT_vect) {
     ints++;
@@ -56,9 +62,17 @@ static void initPins(void) {
     // set radio CS and RST pin as output pin
     DDR_RFM |= (1 << PIN_RCS);
     DDR_RFM |= (1 << PIN_RRST);
+    
+    // set display CS, D/C and RST pin as output pin
+    DDR_DISP |= (1 << PIN_DCS);
+    DDR_DISP |= (1 << PIN_DDC);
+    DDR_DISP |= (1 << PIN_DRST);
 
     // drive output pins high
-    PORT_RFM |= (1 << PIN_RCS);
+    PORT_RFM  |= (1 << PIN_RCS);
+    PORT_DISP |= (1 << PIN_DCS);
+    PORT_DISP |= (1 << PIN_DDC);
+    PORT_DISP |= (1 << PIN_DRST);
 }
 
 /**
@@ -144,7 +158,7 @@ static void transmitTemp(void) {
  * Receives the temperature and converts it to °C.
  */
 static void receiveTemp(void) {
-    printString("Receiving... ");
+    // printString("Receiving... ");
     uint8_t payload[2];
     receivePayload(payload, sizeof (payload));
     uint16_t raw = 0;
@@ -154,8 +168,18 @@ static void receiveTemp(void) {
     int16_t tempx10 = convertTemp(raw);
     div_t temp = div(tempx10, 10);
     static char buf[16];
-    snprintf(buf, sizeof (buf), "%d.%d°C\r\n", temp.quot, abs(temp.rem));
-    printString(buf);
+    
+    // snprintf(buf, sizeof (buf), "%d.%d°C\r\n", temp.quot, abs(temp.rem));
+    // printString(buf);
+    
+    setFrame(0xffff);
+    const __flash Font *dejaVu = &dejaVuFont;
+    snprintf(buf, sizeof (buf), "%4d.%d°", temp.quot, abs(temp.rem));
+    width_t width = writeString(xoff, yoff, dejaVu, buf);
+    xoff += 10;
+    yoff += 10;
+    if (xoff > DISPLAY_WIDTH - width) xoff = 0;
+    if (yoff > DISPLAY_HEIGHT - dejaVu->height) yoff = 0;
 }
 
 int main(void) {
@@ -171,9 +195,12 @@ int main(void) {
 
     printString("Hello Radio!\r\n");
 
-    initRadio(868600);
-
-    bool tx = true;
+    initRadio(868600);    
+    initDisplay();
+    
+    setFrame(0xffff);
+    
+    bool tx = false;
 
     while (true) {
         if (tx) {

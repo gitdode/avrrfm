@@ -33,4 +33,11 @@
 #define PIN_RCS   PB1 // radio chip select
 #define PIN_RRST  PB0 // radio reset
 
+/* Display */
+#define DDR_DISP  DDRD
+#define PORT_DISP PORTD
+#define PIN_DCS   PD5 // display chip select
+#define PIN_DDC   PD6 // display data/command
+#define PIN_DRST  PD7 // display reset
+
 #endif /* PINS_H */

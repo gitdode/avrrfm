@@ -63,7 +63,7 @@ void wakeTemp(void) {
     
     // TODO need to wait for first conversion result after wake up
     // can use an alert irq to wake up sleeping MCU instead?
-    _delay_ms(500);
+    _delay_ms(300);
 }
 
 uint16_t readTemp(void) {
