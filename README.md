@@ -15,6 +15,7 @@ better than 8 mA :-)
 ![IMG_20250212_190518](https://github.com/user-attachments/assets/dd87b7de-c97d-4ecb-ab24-f5a34b849914)
 
 The receiver currently just converts the raw temperature reading to °C and 
-writes it via USART to the awesome GTKTerm.
+displays it "screensaver style" on a nice IPS TFT display.
 
-![GTKTerm](https://github.com/user-attachments/assets/bb4c1676-b46f-414b-aa04-c86cc5ab3af5)
+![IMG_20250216_003419](https://github.com/user-attachments/assets/0116ceec-fb97-4eec-a0f7-bb66f7e432c5)
+
