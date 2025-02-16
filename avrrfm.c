@@ -32,13 +32,18 @@
 #include "display.h"
 #include "dejavu.h"
 
-#define MEASURE_INTS 8
+#define MEASURE_INTS    8
+#define LABEL_OFFSET    10
 
 /* 1 int = 8 seconds */
 static volatile uint8_t ints = 0;
 
-static uint16_t xoff = 0;
-static uint16_t yoff = 0;
+/* Temp. label coordinates */
+static x_t x = 0;
+static y_t y = 0;
+static x_t xo = 0;
+static y_t yo = 0;
+static width_t width = 0;
 
 ISR(WDT_vect) {
     ints++;
@@ -172,14 +177,16 @@ static void receiveTemp(void) {
     // snprintf(buf, sizeof (buf), "%d.%d°C\r\n", temp.quot, abs(temp.rem));
     // printString(buf);
     
-    setFrame(0xffff);
     const __flash Font *dejaVu = &dejaVuFont;
+    if (width > 0) fillArea(xo, yo, width, dejaVu->height, 0xffff);
     snprintf(buf, sizeof (buf), "%4d.%d°", temp.quot, abs(temp.rem));
-    width_t width = writeString(xoff, yoff, dejaVu, buf);
-    xoff += 10;
-    yoff += 10;
-    if (xoff > DISPLAY_WIDTH - width) xoff = 0;
-    if (yoff > DISPLAY_HEIGHT - dejaVu->height) yoff = 0;
+    width = writeString(x, y, dejaVu, buf);
+    xo = x;
+    yo = y;
+    x += LABEL_OFFSET;
+    y += LABEL_OFFSET;
+    if (x > DISPLAY_WIDTH - width) x = 0;
+    if (y > DISPLAY_HEIGHT - dejaVu->height) y = 0;
 }
 
 int main(void) {
