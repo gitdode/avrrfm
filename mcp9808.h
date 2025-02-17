@@ -18,26 +18,26 @@
 /**
  * Shuts down the temperature sensor.
  */
-void sleepTemp(void);
+void sleepTSens(void);
 
 /**
  * Wakes up the temperature sensor.
  */
-void wakeTemp(void);
+void wakeTSens(void);
 
 /**
  * Reads the current raw temperature and returns it.
  * 
  * @return temperature
  */
-uint16_t readTemp(void);
+uint16_t readTSens(void);
 
 /**
  * Converts the given raw temperature and returns it in °C x 10.
  * 
  * @return temperature x 10
  */
-int16_t convertTemp(uint16_t raw);
+int16_t convertTSens(uint16_t raw);
 
 #endif /* MCP9808_H */
 

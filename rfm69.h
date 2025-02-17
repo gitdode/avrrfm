@@ -77,7 +77,30 @@ void sleepRadio(void);
 void wakeRadio(void);
 
 /**
- * Waits for a packet, puts the payload into the given array with the 
+ * Sets the radio to receive mode and maps "PayloadReady" to DIO0.
+ */
+void startReceive(void);
+
+/**
+ * Returns true if a "PayloadReady" interrupt arrived and clears the
+ * interrupt state.
+ * 
+ * @return true if "PayloadReady"
+ */
+bool payloadReady(void);
+
+/**
+ * Sets the radio in standby mode, puts the payload into the given array 
+ * with the given size, and returns the length of the payload.
+ * 
+ * @param payload
+ * @param size
+ * @return actual length of the payload
+ */
+size_t readPayload(uint8_t *payload, size_t size);
+
+/**
+ * Waits for "PayloadReady", puts the payload into the given array with the 
  * given size, and returns the length of the payload.
  * 
  * @param payload buffer for payload
