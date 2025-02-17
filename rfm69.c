@@ -167,15 +167,24 @@ void wakeRadio(void) {
     _delay_ms(5);
 }
 
-size_t receivePayload(uint8_t *payload, size_t size) {
+void startReceive(void) {
     // get "PayloadReady" on DIO0
     regWrite(DIO_MAP1, 0x40);
     
     setMode(MODE_RX);
+}
+
+bool payloadReady(void) {
+    if (irqFlags2 & (1 << 2)) {
+        clearIrqFlags();
+        
+        return true;
+    }
     
-    loop_until_bit_is_set(irqFlags2, 2);
-    clearIrqFlags();
-    
+    return false;
+}
+
+size_t readPayload(uint8_t *payload, size_t size) {
     setMode(MODE_STDBY);
     
     size_t len = min(regRead(FIFO), FIFO_SIZE) - 1;
@@ -192,6 +201,15 @@ size_t receivePayload(uint8_t *payload, size_t size) {
     spiDes();
     
     return len;
+}
+
+size_t receivePayload(uint8_t *payload, size_t size) {
+    startReceive();
+    
+    loop_until_bit_is_set(irqFlags2, 2);
+    clearIrqFlags();
+    
+    return readPayload(payload, size);
 }
 
 size_t transmitPayload(uint8_t *payload, size_t size) {

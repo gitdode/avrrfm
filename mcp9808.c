@@ -50,13 +50,13 @@ static uint16_t regRead(uint8_t address) {
     return value;
 }
 
-void sleepTemp(void) {
+void sleepTSens(void) {
     uint16_t conf = regRead(MCP9808_CONF);
     conf |= (1 << 8);
     regWrite(MCP9808_CONF, conf);
 }
 
-void wakeTemp(void) {
+void wakeTSens(void) {
     uint16_t conf = regRead(MCP9808_CONF);
     conf &= ~(1 << 8);
     regWrite(MCP9808_CONF, conf);
@@ -66,13 +66,13 @@ void wakeTemp(void) {
     _delay_ms(300);
 }
 
-uint16_t readTemp(void) {
+uint16_t readTSens(void) {
     uint16_t raw = regRead(MCP9808_TEMP);
     
     return raw;
 }
 
-int16_t convertTemp(uint16_t raw) {
+int16_t convertTSens(uint16_t raw) {
     uint8_t upper = raw >> 8;
     uint8_t lower = raw & 0x00ff;
     

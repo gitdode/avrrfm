@@ -35,6 +35,10 @@
 #define MEASURE_INTS    8
 #define LABEL_OFFSET    10
 
+#ifndef RECEIVER
+    #define RECEIVER    1
+#endif
+
 /* 1 int = 8 seconds */
 static volatile uint8_t ints = 0;
 
@@ -67,14 +71,14 @@ static void initPins(void) {
     // set radio CS and RST pin as output pin
     DDR_RFM |= (1 << PIN_RCS);
     DDR_RFM |= (1 << PIN_RRST);
-    
+
     // set display CS, D/C and RST pin as output pin
     DDR_DISP |= (1 << PIN_DCS);
     DDR_DISP |= (1 << PIN_DDC);
     DDR_DISP |= (1 << PIN_DRST);
 
     // drive output pins high
-    PORT_RFM  |= (1 << PIN_RCS);
+    PORT_RFM |= (1 << PIN_RCS);
     PORT_DISP |= (1 << PIN_DCS);
     PORT_DISP |= (1 << PIN_DDC);
     PORT_DISP |= (1 << PIN_DRST);
@@ -150,33 +154,28 @@ static void printPayload(uint8_t *payload, size_t size) {
 }
 
 /**
- * Reads the temperature from the senor and transmits it.
+ * Reads the temperature from the sensor and transmits it.
  */
 static void transmitTemp(void) {
-    uint16_t temp = readTemp();
+    uint16_t temp = readTSens();
     uint8_t payload[] = {(temp >> 8), temp & 0x00ff};
     transmitPayload(payload, sizeof (payload));
     // printString("Transmitted\r\n");
 }
 
 /**
- * Receives the temperature and converts it to °C.
+ * Converts the raw temperature to °C and lets it float around the display.
+ * 
+ * @param raw temperature
  */
-static void receiveTemp(void) {
-    // printString("Receiving... ");
-    uint8_t payload[2];
-    receivePayload(payload, sizeof (payload));
-    uint16_t raw = 0;
-    raw |= payload[0] << 8;
-    raw |= payload[1];
-
-    int16_t tempx10 = convertTemp(raw);
+static void displayTemp(uint16_t raw) {
+    int16_t tempx10 = convertTSens(raw);
     div_t temp = div(tempx10, 10);
     static char buf[16];
-    
-    // snprintf(buf, sizeof (buf), "%d.%d°C\r\n", temp.quot, abs(temp.rem));
-    // printString(buf);
-    
+
+    snprintf(buf, sizeof (buf), "%d.%d°C\r\n", temp.quot, abs(temp.rem));
+    printString(buf);
+
     const __flash Font *dejaVu = &dejaVuFont;
     if (width > 0) fillArea(xo, yo, width, dejaVu->height, 0xffff);
     snprintf(buf, sizeof (buf), "%4d.%d°", temp.quot, abs(temp.rem));
@@ -187,6 +186,37 @@ static void receiveTemp(void) {
     y += LABEL_OFFSET;
     if (x > DISPLAY_WIDTH - width) x = 0;
     if (y > DISPLAY_HEIGHT - dejaVu->height) y = 0;
+}
+
+/**
+ * Blocks until the raw temperature is received, then returns it.
+ * 
+ * @return raw temp
+ */
+static uint16_t receiveTemp(void) {
+    // printString("Receiving... ");
+    uint8_t payload[2];
+    receivePayload(payload, sizeof (payload));
+    uint16_t raw = 0;
+    raw |= payload[0] << 8;
+    raw |= payload[1];
+
+    return raw;
+}
+
+/**
+ * Reads and returns the raw temperature.
+ * 
+ * @return raw temp
+ */
+static uint16_t readTemp(void) {
+    uint8_t payload[2];
+    readPayload(payload, sizeof (payload));
+    uint16_t raw = 0;
+    raw |= payload[0] << 8;
+    raw |= payload[1];
+
+    return raw;
 }
 
 int main(void) {
@@ -202,23 +232,25 @@ int main(void) {
 
     printString("Hello Radio!\r\n");
 
-    initRadio(868600);    
+    initRadio(868600);
     initDisplay();
-    
+
     setFrame(0xffff);
-    
-    bool tx = false;
+
+    if (RECEIVER) {
+        startReceive();
+    }
 
     while (true) {
-        if (tx) {
+        if (! RECEIVER) {
             if (ints % MEASURE_INTS == 0) {
                 ints = 0;
 
                 enableSPI();
-                wakeTemp();
+                wakeTSens();
                 wakeRadio();
                 transmitTemp();
-                sleepTemp();
+                sleepTSens();
                 sleepRadio();
                 disableSPI();
             }
@@ -226,7 +258,22 @@ int main(void) {
             set_sleep_mode(SLEEP_MODE_PWR_DOWN);
             sleep_mode();
         } else {
-            receiveTemp();
+            // uint16_t raw = receiveTemp();
+            // displayTemp(raw);
+            
+            if (payloadReady()) {
+                uint16_t raw = readTemp();
+                displayTemp(raw);
+                startReceive();
+            }
+            
+            // do something else...
+            printString("Running...\r\n");
+            _delay_ms(1000);
+            
+            // and/or go to sleep until next watchdog bark or payload received
+            set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+            sleep_mode();
         }
     }
 
