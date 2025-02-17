@@ -93,9 +93,9 @@ void initRadio(uint32_t freq) {
     // regWrite(BITRATE_MSB, 0x0d);
     // regWrite(BITRATE_LSB, 0x05);
     
-    // RC calibration, must be done in standby mode (default after power on)
-    regWrite(OSC1, 0x80);
-    do { } while (!(regRead(OSC1) & 0x40));
+    // RC calibration, automatically done at device power-up
+    // regWrite(OSC1, 0x80);
+    // do { } while (!(regRead(OSC1) & 0x40));
     
     // PA level (default +13 dBm)
     regWrite(PA_LEVEL, 0x9f);
@@ -114,6 +114,9 @@ void initRadio(uint32_t freq) {
     
     // RX_BW during AFC (default)
     regWrite(AFC_BW, 0x8b);
+    
+    // RSSI threshold (default, POR 0xff)
+    regWrite(RSSI_THRESH, 0xe4);
     
     // Preamble size
     regWrite(PREAMB_MSB, 0x00);

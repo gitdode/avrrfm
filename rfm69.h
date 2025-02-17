@@ -32,6 +32,7 @@
 #define DIO_MAP1    0x25
 #define DIO_MAP2    0x26
 #define IRQ_FLAGS1  0x27
+#define RSSI_THRESH 0x29
 #define PREAMB_MSB  0x2c
 #define PREAMB_LSB  0x2d
 #define IRQ_FLAGS2  0x28
