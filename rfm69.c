@@ -99,7 +99,7 @@ void initRadio(uint32_t freq) {
     
     // PA level (default +13 dBm)
     regWrite(PA_LEVEL, 0x9f);
-    // +17 dBm - doesn't seem to work?
+    // +17 dBm - doesn't seem to work just like that?
     // regWrite(PA_LEVEL, 0x7f);
     
     // LNA 200 Ohm, gain AGC (default)
@@ -180,6 +180,7 @@ void startReceive(void) {
 bool payloadReady(void) {
     if (irqFlags2 & (1 << 2)) {
         clearIrqFlags();
+        setMode(MODE_STDBY);
         
         return true;
     }
@@ -188,8 +189,6 @@ bool payloadReady(void) {
 }
 
 size_t readPayload(uint8_t *payload, size_t size) {
-    setMode(MODE_STDBY);
-    
     size_t len = min(regRead(FIFO), FIFO_SIZE) - 1;
     len = min(len, size);
     
@@ -211,6 +210,7 @@ size_t receivePayload(uint8_t *payload, size_t size) {
     
     loop_until_bit_is_set(irqFlags2, 2);
     clearIrqFlags();
+    setMode(MODE_STDBY);
     
     return readPayload(payload, size);
 }

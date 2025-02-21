@@ -139,21 +139,6 @@ static void disableSPI(void) {
 }
 
 /**
- * Prints the given payload with the given size.
- * 
- * @param payload
- * @param size
- */
-static void printPayload(uint8_t *payload, size_t size) {
-    printString("Length: ");
-    printUint(size);
-    printString("Payload:\r\n");
-    char buf[FIFO_SIZE + 3];
-    snprintf(buf, size + 3, "%s\r\n", payload);
-    printString(buf);
-}
-
-/**
  * Reads the temperature from the sensor and transmits it.
  */
 static void transmitTemp(void) {
@@ -225,7 +210,10 @@ int main(void) {
     initSPI();
     initI2C();
     initRadioInt();
-    initWatchdog();
+    if (! RECEIVER) {
+        // used only for tx
+        initWatchdog();
+    }
 
     // enable global interrupts
     sei();
@@ -236,12 +224,16 @@ int main(void) {
     initDisplay();
 
     setFrame(0xffff);
-
     if (RECEIVER) {
+        // initial rx mode
         startReceive();
     }
 
     while (true) {
+        // do something else besides tx/rx
+        // printString("Running...\r\n");
+        // _delay_ms(10);
+        
         if (! RECEIVER) {
             if (ints % MEASURE_INTS == 0) {
                 ints = 0;
@@ -254,27 +246,18 @@ int main(void) {
                 sleepRadio();
                 disableSPI();
             }
-
-            set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-            sleep_mode();
         } else {
-            // uint16_t raw = receiveTemp();
-            // displayTemp(raw);
-            
             if (payloadReady()) {
                 uint16_t raw = readTemp();
                 displayTemp(raw);
                 startReceive();
             }
-            
-            // do something else...
-            printString("Running...\r\n");
-            _delay_ms(1000);
-            
-            // and/or go to sleep until next watchdog bark or payload received
-            set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-            sleep_mode();
         }
+        
+        // power down until woken up by watchdog (tx)
+        // or "PayloadReady" (rx) interrupt
+        set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+        sleep_mode();
     }
 
     return 0;
