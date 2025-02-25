@@ -49,6 +49,11 @@
 #define NODE_ADDR   0x39
 #define CAST_ADDR   0x3a
 #define FIFO_THRESH 0x3c
+#define TEST_LNA    0x58
+#define TEST_PA1    0x5a
+#define TEST_PA2    0x5c
+#define TEST_DAGC   0x6f
+#define TEST_AFC    0x71
 
 #define MASK_MODE   0x1c
 

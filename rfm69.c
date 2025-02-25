@@ -48,7 +48,7 @@ static uint8_t regRead(uint8_t reg) {
     transmit(reg & 0x7f);
     uint8_t value = transmit(0x00);
     spiDes();
-    
+
     return value;
 }
 
@@ -76,52 +76,55 @@ ISR(INT0_vect) {
 void initRadio(uint32_t freq) {
     // wait a bit after power on
     _delay_ms(10);
-    
+
     // pull reset LOW to turn on the module
     PORT_RFM &= ~(1 << PIN_RRST);
-    
+
     _delay_ms(5);
-    
+
     uint8_t version = regRead(0x10);
     printString("Version: ");
     printHex(version);
-    
+
     // packet mode, FSK modulation, no shaping (default)
     regWrite(DATA_MOD, 0x00);
-    
+
     // bit rate 9.6 kBit/s
     // regWrite(BITRATE_MSB, 0x0d);
     // regWrite(BITRATE_LSB, 0x05);
-    
+
     // RC calibration, automatically done at device power-up
     // regWrite(OSC1, 0x80);
     // do { } while (!(regRead(OSC1) & 0x40));
-    
+
     // PA level (default +13 dBm)
     regWrite(PA_LEVEL, 0x9f);
     // +17 dBm - doesn't seem to work just like that?
     // regWrite(PA_LEVEL, 0x7f);
-    
+
     // LNA 200 Ohm, gain AGC (default)
-    regWrite(LNA, 0x88);
+    // regWrite(LNA, 0x88);
+    // LNA 50 Ohm, gain AGC
+    regWrite(LNA, 0x08);
     // max gain
     // regWrite(LNA, 0x89);
-    // reduced gain
-    // regWrite(LNA, 0x86);
-    
+
+    // LNA high sensitivity mode
+    regWrite(TEST_LNA, 0x2d);
+
     // freq of DC offset canceller and channel filter bandwith (default)
     regWrite(RX_BW, 0x55);
-    
+
     // RX_BW during AFC (default)
     regWrite(AFC_BW, 0x8b);
-    
+
     // RSSI threshold (default, POR 0xff)
     regWrite(RSSI_THRESH, 0xe4);
-    
+
     // Preamble size
     regWrite(PREAMB_MSB, 0x00);
     regWrite(PREAMB_LSB, 0x0f);
-    
+
     // turn off CLKOUT (not needed)
     regWrite(DIO_MAP2, 0x07);
 
@@ -130,11 +133,11 @@ void initRadio(uint32_t freq) {
     regWrite(FRF_MSB, freq >> 16);
     regWrite(FRF_MID, freq >> 8);
     regWrite(FRF_LSB, freq >> 0);
-    
+
     // enable sync word generation and detection, FIFO fill on sync address,
     // size of sync word 3
     regWrite(SYNC_CONF, 0x98);
-    
+
     // just set all sync word values to some really creative value
     regWrite(SYNC_VAL1, 0x2f);
     regWrite(SYNC_VAL2, 0x30);
@@ -149,14 +152,14 @@ void initRadio(uint32_t freq) {
     // regWrite(PCK_CFG1, 0x90);
     // match broadcast or node address
     regWrite(PCK_CFG1, 0x94);
-    
+
     // node and broadcast address
     regWrite(NODE_ADDR, NODE_ADDRESS);
     regWrite(CAST_ADDR, CAST_ADDRESS);
-    
+
     // set TX start condition to "at least one byte in FIFO"
     regWrite(FIFO_THRESH, 0x8f);
-    
+
     printString("Radio init done\r\n");
 }
 
@@ -173,7 +176,7 @@ void wakeRadio(void) {
 void startReceive(void) {
     // get "PayloadReady" on DIO0
     regWrite(DIO_MAP1, 0x40);
-    
+
     setMode(MODE_RX);
 }
 
@@ -181,44 +184,44 @@ bool payloadReady(void) {
     if (irqFlags2 & (1 << 2)) {
         clearIrqFlags();
         setMode(MODE_STDBY);
-        
+
         return true;
     }
-    
+
     return false;
 }
 
 size_t readPayload(uint8_t *payload, size_t size) {
     size_t len = min(regRead(FIFO), FIFO_SIZE) - 1;
     len = min(len, size);
-    
+
     // TODO assume and ignore address for now
     regRead(FIFO);
-    
+
     spiSel();
     transmit(FIFO);
     for (size_t i = 0; i < len; i++) {
         payload[i] = transmit(FIFO);
     }
     spiDes();
-    
+
     return len;
 }
 
 size_t receivePayload(uint8_t *payload, size_t size) {
     startReceive();
-    
+
     loop_until_bit_is_set(irqFlags2, 2);
     clearIrqFlags();
     setMode(MODE_STDBY);
-    
+
     return readPayload(payload, size);
 }
 
 size_t transmitPayload(uint8_t *payload, size_t size) {
     // payload + address byte
     size_t len = min(size, FIFO_SIZE) + 1;
-    
+
     spiSel();
     transmit(FIFO | 0x80);
     transmit(len);
@@ -227,16 +230,16 @@ size_t transmitPayload(uint8_t *payload, size_t size) {
         transmit(payload[i]);
     }
     spiDes();
-    
+
     // get "PacketSent" on DIO0 (default)
     regWrite(DIO_MAP1, 0x00);
-    
+
     setMode(MODE_TX);
-    
+
     loop_until_bit_is_set(irqFlags2, 3);
     clearIrqFlags();
-    
+
     setMode(MODE_STDBY);
-    
+
     return len;
 }

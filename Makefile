@@ -21,7 +21,7 @@ VFLIP = 0
 
 MAIN = avrrfm.c
 SRC = bitmaps.h colorspace.c dejavu.c display.c font.c i2c.c mcp9808.c rfm69.c \
-      spi.c tft.c usart.c
+      spi.c tft.c unifont.c usart.c
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
@@ -48,7 +48,8 @@ OBJ = $(SRC:.c=.o)
 OBJ = $(SRC:.S=.o)
 	
 $(TARGET).elf: bitmaps.h colorspace.h dejavu.h display.h font.h i2c.h \
-	mcp9808.h pins.h rfm69.h spi.h tft.h types.h usart.h utils.h Makefile
+	mcp9808.h pins.h rfm69.h spi.h tft.h types.h unifont.h usart.h utils.h \
+	Makefile
 
 all: $(TARGET).hex
 

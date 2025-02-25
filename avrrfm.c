@@ -31,6 +31,7 @@
 #include "tft.h"
 #include "display.h"
 #include "dejavu.h"
+#include "unifont.h"
 
 #define MEASURE_INTS    8
 #define LABEL_OFFSET    10
@@ -42,9 +43,12 @@
 /* 1 int = 8 seconds */
 static volatile uint8_t ints = 0;
 
+/* Temp. "log" */
+static y_t yu = 0;
+
 /* Temp. label coordinates */
-static x_t x = 0;
-static y_t y = 0;
+static x_t xl = 0;
+static y_t yl = 0;
 static x_t xo = 0;
 static y_t yo = 0;
 static width_t width = 0;
@@ -157,20 +161,28 @@ static void displayTemp(uint16_t raw) {
     int16_t tempx10 = convertTSens(raw);
     div_t temp = div(tempx10, 10);
     static char buf[16];
-
+    
     snprintf(buf, sizeof (buf), "%d.%d°C\r\n", temp.quot, abs(temp.rem));
     printString(buf);
 
+    snprintf(buf, sizeof (buf), "%4d.%d°", temp.quot, abs(temp.rem));
+    
+    x_t x;
+    const __flash Font *unifont = &unifontFont;
+    x = writeString(0, yu, unifont, buf);
+    yu += unifont->height;
+    if (yu + unifont->height > DISPLAY_HEIGHT) yu = 0; 
+
+    if (xl == 0) xl = x;
     const __flash Font *dejaVu = &dejaVuFont;
     if (width > 0) fillArea(xo, yo, width, dejaVu->height, 0xffff);
-    snprintf(buf, sizeof (buf), "%4d.%d°", temp.quot, abs(temp.rem));
-    width = writeString(x, y, dejaVu, buf);
-    xo = x;
-    yo = y;
-    x += LABEL_OFFSET;
-    y += LABEL_OFFSET;
-    if (x > DISPLAY_WIDTH - width) x = 0;
-    if (y > DISPLAY_HEIGHT - dejaVu->height) y = 0;
+    width = writeString(xl, yl, dejaVu, buf);
+    xo = xl;
+    yo = yl;
+    xl += LABEL_OFFSET;
+    yl += LABEL_OFFSET;
+    if (xl > DISPLAY_WIDTH - width) xl = x;
+    if (yl > DISPLAY_HEIGHT - dejaVu->height) yl = 0;
 }
 
 /**
