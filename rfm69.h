@@ -123,13 +123,5 @@ size_t receivePayload(uint8_t *payload, size_t size);
  */
 size_t transmitPayload(uint8_t *payload, size_t size);
 
-/**
- * Transmits up to 64 bytes of the given payload using auto mode.
- * 
- * @param payload to be sent
- * @return bytes actually sent
- */
-size_t transmitPayloadAuto(uint8_t *payload, size_t size);
-
 #endif /* RFM69_H */
 

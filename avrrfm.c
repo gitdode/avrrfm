@@ -148,7 +148,7 @@ static void disableSPI(void) {
 static void transmitTemp(void) {
     uint16_t temp = readTSens();
     uint8_t payload[] = {(temp >> 8), temp & 0x00ff};
-    transmitPayloadAuto(payload, sizeof (payload));
+    transmitPayload(payload, sizeof (payload));
     // printString("Transmitted\r\n");
 }
 

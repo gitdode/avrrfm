@@ -243,32 +243,3 @@ size_t transmitPayload(uint8_t *payload, size_t size) {
     
     return len;
 }
-
-size_t transmitPayloadAuto(uint8_t *payload, size_t size) {
-    // make sure to be in standby
-    setMode(MODE_STDBY);
-    _delay_ms(5);
-    
-    // payload + address byte
-    size_t len = min(size, FIFO_SIZE) + 1;
-
-    spiSel();
-    transmit(FIFO | 0x80);
-    transmit(len);
-    transmit(NODE_ADDRESS);
-    for (size_t i = 0; i < len; i++) {
-        transmit(payload[i]);
-    }
-    spiDes();
-
-    /*
-     * Auto mode:
-     * Enter condition: FifoNotEmpty
-     * Intermediate mode: Transmitter
-     * Exit condition: PacketSent
-     * Final mode: equals initial mode (standby)
-     */
-    regWrite(AUTO_MODES, 0x3b);
-
-    return len;
-}
