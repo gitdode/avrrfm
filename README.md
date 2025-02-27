@@ -41,5 +41,8 @@ The temperature calculated (assuming >= 0°C):
 
 So, 21.2 °C 🙂
 
-The first 15 `0b10101010` are the preamble, then there are 4 sync word bytes.
-After the 4 payload bytes, there are 2 CRC bytes.  
+The first 15 `0b10101010` bytes are the preamble, then there are 4 sync word bytes.
+After the 4 payload bytes, there are 2 CRC bytes as described in the datasheet of the RFM69HCW:
+
+![PackageFormat](https://github.com/user-attachments/assets/959babe5-9f1f-4f3d-9568-a4edbbca4bb2)
+
