@@ -48,6 +48,7 @@
 #define PCK_CFG1    0x37
 #define NODE_ADDR   0x39
 #define CAST_ADDR   0x3a
+#define AUTO_MODES  0x3b
 #define FIFO_THRESH 0x3c
 #define TEST_LNA    0x58
 #define TEST_PA1    0x5a

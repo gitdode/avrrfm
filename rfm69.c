@@ -238,8 +238,8 @@ size_t transmitPayload(uint8_t *payload, size_t size) {
 
     loop_until_bit_is_set(irqFlags2, 3);
     clearIrqFlags();
-
+    
     setMode(MODE_STDBY);
-
+    
     return len;
 }

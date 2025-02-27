@@ -33,11 +33,11 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define MEASURE_INTS    8
+#define MEASURE_INTS    4
 #define LABEL_OFFSET    10
 
 #ifndef RECEIVER
-    #define RECEIVER    1
+    #define RECEIVER    0
 #endif
 
 /* 1 int = 8 seconds */
@@ -161,17 +161,17 @@ static void displayTemp(uint16_t raw) {
     int16_t tempx10 = convertTSens(raw);
     div_t temp = div(tempx10, 10);
     static char buf[16];
-    
+
     snprintf(buf, sizeof (buf), "%d.%d°C\r\n", temp.quot, abs(temp.rem));
     printString(buf);
 
     snprintf(buf, sizeof (buf), "%4d.%d°", temp.quot, abs(temp.rem));
-    
+
     x_t x;
     const __flash Font *unifont = &unifontFont;
     x = writeString(0, yu, unifont, buf);
     yu += unifont->height;
-    if (yu + unifont->height > DISPLAY_HEIGHT) yu = 0; 
+    if (yu + unifont->height > DISPLAY_HEIGHT) yu = 0;
 
     if (xl == 0) xl = x;
     const __flash Font *dejaVu = &dejaVuFont;
@@ -222,7 +222,7 @@ int main(void) {
     initSPI();
     initI2C();
     initRadioInt();
-    if (! RECEIVER) {
+    if (!RECEIVER) {
         // used only for tx
         initWatchdog();
     }
@@ -233,10 +233,11 @@ int main(void) {
     printString("Hello Radio!\r\n");
 
     initRadio(868600);
-    initDisplay();
-
-    setFrame(0xffff);
     if (RECEIVER) {
+        initDisplay();
+
+        setFrame(0xffff);
+    
         // initial rx mode
         startReceive();
     }
@@ -245,8 +246,8 @@ int main(void) {
         // do something else besides tx/rx
         // printString("Running...\r\n");
         // _delay_ms(10);
-        
-        if (! RECEIVER) {
+
+        if (!RECEIVER) {
             if (ints % MEASURE_INTS == 0) {
                 ints = 0;
 
@@ -265,7 +266,7 @@ int main(void) {
                 startReceive();
             }
         }
-        
+
         // power down until woken up by watchdog (tx)
         // or "PayloadReady" (rx) interrupt
         set_sleep_mode(SLEEP_MODE_PWR_DOWN);
