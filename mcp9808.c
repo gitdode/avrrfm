@@ -46,7 +46,7 @@ static uint16_t regRead(uint8_t address) {
     uint16_t value = 0;
     value |= upper << 8;
     value |= lower;
-    
+
     return value;
 }
 
@@ -60,7 +60,7 @@ void wakeTSens(void) {
     uint16_t conf = regRead(MCP9808_CONF);
     conf &= ~(1 << 8);
     regWrite(MCP9808_CONF, conf);
-    
+
     // TODO need to wait for first conversion result after wake up
     // can use an alert irq to wake up sleeping MCU instead?
     _delay_ms(300);
@@ -68,14 +68,14 @@ void wakeTSens(void) {
 
 uint16_t readTSens(void) {
     uint16_t raw = regRead(MCP9808_TEMP);
-    
+
     return raw;
 }
 
 int16_t convertTSens(uint16_t raw) {
     uint8_t upper = raw >> 8;
     uint8_t lower = raw & 0x00ff;
-    
+
     // check flags
     if ((upper & 0x80) == 0x80) {
         // T >= TA CRIT
@@ -99,6 +99,6 @@ int16_t convertTSens(uint16_t raw) {
         // TA >= 0°C
         temp = (upper * 160 + lower * 10 / 16);
     }
-    
+
     return temp;
 }

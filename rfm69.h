@@ -48,6 +48,7 @@
 #define PCK_CFG1    0x37
 #define NODE_ADDR   0x39
 #define CAST_ADDR   0x3a
+#define AUTO_MODES  0x3b
 #define FIFO_THRESH 0x3c
 #define TEST_LNA    0x58
 #define TEST_PA1    0x5a
@@ -121,6 +122,14 @@ size_t receivePayload(uint8_t *payload, size_t size);
  * @return bytes actually sent
  */
 size_t transmitPayload(uint8_t *payload, size_t size);
+
+/**
+ * Transmits up to 64 bytes of the given payload using auto mode.
+ * 
+ * @param payload to be sent
+ * @return bytes actually sent
+ */
+size_t transmitPayloadAuto(uint8_t *payload, size_t size);
 
 #endif /* RFM69_H */
 
