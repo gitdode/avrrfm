@@ -34,7 +34,7 @@ The four selected payload bytes are:
 - `0b11000001` Upper byte of raw temperature value from MCP9808
 - `0b01010011` Lower byte of raw temperature value from MCP9808
 
-The temperature calculated (assuming >= 0°C):  
+Calculating the temperature (assuming >= 0°C):  
 
     jshell> (0b11000001 & 0x1f) * 16 + 0b01010011 / 16f
     $1 ==> 21.1875
