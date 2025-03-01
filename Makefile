@@ -12,7 +12,7 @@ PROGRAMMER_ARGS =
 DISPLAY_WIDTH = 320
 DISPLAY_HEIGHT = 240
 # 1 = BGR, 0 = RGB
-BGR = 1
+BGR = 0
 # Invert color
 INVERT = 1
 # Flip image

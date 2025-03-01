@@ -37,7 +37,7 @@
 #define LABEL_OFFSET    10
 
 #ifndef RECEIVER
-    #define RECEIVER    0
+    #define RECEIVER    1
 #endif
 
 /* 1 int = 8 seconds */
@@ -169,14 +169,14 @@ static void displayTemp(uint16_t raw) {
 
     x_t x;
     const __flash Font *unifont = &unifontFont;
-    x = writeString(0, yu, unifont, buf);
+    x = writeString(0, yu, unifont, buf, 0xffff, 0x001f);
     yu += unifont->height;
     if (yu + unifont->height > DISPLAY_HEIGHT) yu = 0;
 
     if (xl == 0) xl = x;
     const __flash Font *dejaVu = &dejaVuFont;
     if (width > 0) fillArea(xo, yo, width, dejaVu->height, 0xffff);
-    width = writeString(xl, yl, dejaVu, buf);
+    width = writeString(xl, yl, dejaVu, buf, 0xffff, 0x0000);
     xo = xl;
     yo = yl;
     xl += LABEL_OFFSET;
