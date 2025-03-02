@@ -17,9 +17,9 @@ better than 8 mA :-)
 ![IMG_20250212_190518](https://github.com/user-attachments/assets/dd87b7de-c97d-4ecb-ab24-f5a34b849914)
 
 The receiver currently just converts the raw temperature reading to °C and 
-displays it "screensaver style" with a tiny log on a nice IPS TFT display.
+displays it with the RSSI value on a nice IPS TFT display.
 
-![IMG_20250227_234615](https://github.com/user-attachments/assets/14fe1841-46ef-48e8-8049-b5c7a1bcf857)
+![IMG_20250302_232819](https://github.com/user-attachments/assets/79664821-19f2-4b61-93cf-4a1bf9e0cd16)
 
 ## Fun Stuff
 
