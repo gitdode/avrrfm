@@ -159,6 +159,9 @@ void initRadio(uint32_t freq) {
 
     // set TX start condition to "at least one byte in FIFO"
     regWrite(FIFO_THRESH, 0x8f);
+    
+    // Fading Margin Improvement, improved margin, use if AfcLowBetaOn=0
+    regWrite(TEST_DAGC, 0x30);
 
     printString("Radio init done\r\n");
 }
