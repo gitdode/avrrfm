@@ -153,9 +153,11 @@ void setArea(x_t x, y_t y,
  * @param width width of the bitmap in pixels
  * @param height height of the bitmap in pixels
  * @param space color space of the bitmap
+ * @param bg background color (used only with SPACE_MONO1)
+ * @param fg foreground color (used only with SPACE_MONO1)
  */
 void writeData(const __flash uint8_t *bitmap,
                width_t width, height_t height,
-               space_t space);
+               space_t space, uint16_t bg, uint16_t fg);
 
 #endif /* TFT_H */

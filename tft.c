@@ -261,8 +261,8 @@ void setArea(x_t x, y_t y,
 
 void writeData(const __flash uint8_t *bitmap,
                width_t width, height_t height,
-               space_t space) {
+               space_t space, uint16_t bg, uint16_t fg) {
     writeStart();
-    writeSpace(bitmap, width, height, space);
+    writeSpace(bitmap, width, height, space, bg, fg);
     writeEnd();
 }

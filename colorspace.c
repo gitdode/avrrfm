@@ -9,14 +9,20 @@
 
 /**
  * Converts the given 8 pixel in 1-Bit monochrome to 16-Bit RGB (5/6/5) color
- * stored in the given array of 16 bytes.
+ * stored in the given array of 16 bytes, with the given background and 
+ * foreground color.
  * 
  * @param mono 8 pixel in 1-Bit monochrome
  * @param rgb 8 pixel in 16-Bit RGB (5/6/5) color
+ * @param bg background color
+ * @param fg foreground color
  */
-static void mono1ToRGB16(uint8_t mono, uint8_t *rgb) {
+static void mono1ToRGB16(uint8_t mono, uint8_t *rgb, 
+                         uint16_t bg, uint16_t fg) {
     for (uint8_t i = 0; i < 16; i++) {
-        rgb[i] = (mono & (1 << ((15 - i) >> 1))) ? 0x0 : 0xff;
+        uint8_t _bg = i % 2 == 0 ? bg >> 8 : bg;
+        uint8_t _fg = i % 2 == 0 ? fg >> 8 : fg;
+        rgb[i] = (mono & (1 << ((15 - i) >> 1))) ? _fg : _bg;
     }
 }
 
@@ -50,13 +56,13 @@ static void grey4ToRGB16(uint8_t grey, uint8_t *rgb) {
 
 void writeSpace(const __flash uint8_t *bitmap,
                 width_t width, height_t height,
-                space_t space) {
+                space_t space, uint16_t bg, uint16_t fg) {
     switch (space) {
         case SPACE_MONO1: {
             bytes_t bytes = width * height / 8;
             for (uint16_t i = 0; i < bytes; i++) {
                 uint8_t rgb[16];
-                mono1ToRGB16(bitmap[i], rgb);
+                mono1ToRGB16(bitmap[i], rgb, bg, fg);
                 for (uint8_t j = 0; j < 16; j++) {
                     transmit(rgb[j]);
                 }

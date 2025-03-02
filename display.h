@@ -36,9 +36,12 @@ void setFrame(uint16_t color);
  * @param x
  * @param y
  * @param index
+ * @param bg background color (used only with SPACE_MONO1)
+ * @param fg foreground color (used only with SPACE_MONO1)
  * @return bitmap width
  */
-width_t writeBitmap(x_t x, y_t y, uint16_t index);
+width_t writeBitmap(x_t x, y_t y, uint16_t index, 
+                    uint16_t bg, uint16_t fg);
 
 /**
  * Writes the glyph with the given pseudo UTF-8 code point with the given
@@ -48,18 +51,26 @@ width_t writeBitmap(x_t x, y_t y, uint16_t index);
  * @param y
  * @param font
  * @param code
+ * @param bg background color (used only with SPACE_MONO1)
+ * @param fg foreground color (used only with SPACE_MONO1)
  * @return glyph width
  */
-width_t writeGlyph(x_t x, y_t y, const __flash Font *font, code_t code);
+width_t writeGlyph(x_t x, y_t y, const __flash Font *font, code_t code, 
+                   uint16_t bg, uint16_t fg);
 
 /**
- * Writes the given string with the given font to the given row and column.
+ * Writes the given string with the given font to the given row and column 
+ * and returns the width of the string.
  * 
  * @param x
  * @param y
  * @param font
  * @param string
+ * @param bg background color (used only with SPACE_MONO1)
+ * @param fg foreground color (used only with SPACE_MONO1)
+ * @return glyph width
  */
-width_t writeString(x_t x, y_t y, const __flash Font *font, const char *string);
+width_t writeString(x_t x, y_t y, const __flash Font *font, const char *string, 
+                    uint16_t bg, uint16_t fg);
 
 #endif /* DISPLAY_H */
