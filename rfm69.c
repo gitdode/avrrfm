@@ -183,6 +183,10 @@ void startReceive(void) {
     setMode(MODE_RX);
 }
 
+uint8_t readRssi(void) {
+    return regRead(RSSI_VALUE);
+}
+
 bool payloadReady(void) {
     if (irqFlags2 & (1 << 2)) {
         clearIrqFlags();
