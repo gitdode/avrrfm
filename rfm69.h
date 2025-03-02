@@ -29,6 +29,8 @@
 #define LNA         0x18
 #define RX_BW       0x19
 #define AFC_BW      0x20
+#define RSSI_CONFIG 0x23
+#define RSSI_VALUE  0x24
 #define DIO_MAP1    0x25
 #define DIO_MAP2    0x26
 #define IRQ_FLAGS1  0x27
@@ -87,6 +89,10 @@ void wakeRadio(void);
  * Sets the radio to receive mode and maps "PayloadReady" to DIO0.
  */
 void startReceive(void);
+
+bool rssiDone(void);
+
+uint8_t readRssi(void);
 
 /**
  * Returns true if a "PayloadReady" interrupt arrived and clears the

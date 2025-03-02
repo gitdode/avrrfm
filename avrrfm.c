@@ -43,9 +43,6 @@
 /* 1 int = 8 seconds */
 static volatile uint8_t ints = 0;
 
-/* Temp. "log" */
-static y_t yu = 0;
-
 /* Temp. label coordinates */
 static x_t xl = 0;
 static y_t yl = 0;
@@ -157,32 +154,32 @@ static void transmitTemp(void) {
  * 
  * @param raw temperature
  */
-static void displayTemp(uint16_t raw) {
+static void displayTemp(uint8_t rssi, uint16_t raw) {
+    uint8_t _rssi = divRoundNearest(rssi, 2);
     int16_t tempx10 = convertTSens(raw);
     div_t temp = div(tempx10, 10);
-    static char buf[16];
+    
+    static char buf[32];
 
-    snprintf(buf, sizeof (buf), "%d.%d°C\r\n", temp.quot, abs(temp.rem));
+    snprintf(buf, sizeof (buf), "RSSI: -%d dBm, %d.%d°C\r\n", 
+            _rssi, temp.quot, abs(temp.rem));
     printString(buf);
+    
+    snprintf(buf, sizeof (buf), "RSSI: -%d dBm", _rssi);
+    const __flash Font *unifont = &unifontFont;
+    writeString(0, 0, unifont, buf, 0xffff, 0x0000);
 
     snprintf(buf, sizeof (buf), "%4d.%d°", temp.quot, abs(temp.rem));
-
-    x_t x;
-    const __flash Font *unifont = &unifontFont;
-    x = writeString(0, yu, unifont, buf, 0xffff, 0x001f);
-    yu += unifont->height;
-    if (yu + unifont->height > DISPLAY_HEIGHT) yu = 0;
-
-    if (xl == 0) xl = x;
     const __flash Font *dejaVu = &dejaVuFont;
     if (width > 0) fillArea(xo, yo, width, dejaVu->height, 0xffff);
+    if (yl == 0) yl = unifont->height;
     width = writeString(xl, yl, dejaVu, buf, 0xffff, 0x0000);
     xo = xl;
     yo = yl;
     xl += LABEL_OFFSET;
     yl += LABEL_OFFSET;
-    if (xl > DISPLAY_WIDTH - width) xl = x;
-    if (yl > DISPLAY_HEIGHT - dejaVu->height) yl = 0;
+    if (xl > DISPLAY_WIDTH - width) xl = 0;
+    if (yl > DISPLAY_HEIGHT - dejaVu->height) yl = unifont->height;
 }
 
 /**
@@ -261,8 +258,9 @@ int main(void) {
             }
         } else {
             if (payloadReady()) {
+                uint8_t rssi = readRssi();
                 uint16_t raw = readTemp();
-                displayTemp(raw);
+                displayTemp(rssi, raw);
                 startReceive();
             }
         }
