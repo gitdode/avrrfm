@@ -21,11 +21,9 @@ displays it with the RSSI value on a nice IPS TFT display.
 
 ## Range
 
-With the default ouput power setting (register `RegPaLevel (0x11)` set to `0x9f`), 
-which should give +13 dBm with `PA0`, the range was very bad; just up to 10 m indoor 
-plain sight. Setting `RegPaLevel` to `0x5f`, which also gives +13 dBm but with `PA1`, 
-changes it all: very good RSSI everywhere and in an actual "field" test, at 1.6 km, 
-packet reception was still reliable with an RSSI of about -100 dBm.
+Setting `RegPaLevel` to `0x5f`, which gives +13 dBm with `PA1`, indoor range is very good 
+and in an actual "field" test, packet reception was still reliable with an RSSI of about -100 dBm 
+at about 1.6 km distance.
 
 ![IMG_20250303_1733461c](https://github.com/user-attachments/assets/2aaa5fcb-6c89-4a07-a375-faa7fd152bbd)
 
