@@ -33,7 +33,7 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define MEASURE_INTS    4
+#define MEASURE_INTS    1
 #define LABEL_OFFSET    10
 
 #define BLACK   0x0000
