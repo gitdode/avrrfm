@@ -21,6 +21,8 @@
 #define DATA_MOD    0x02
 #define BITRATE_MSB 0x03
 #define BITRATE_LSB 0x04
+#define FDEV_MSB    0x05
+#define FDEV_LSB    0x06
 #define FRF_MSB     0x07
 #define FRF_MID     0x08
 #define FRF_LSB     0x09

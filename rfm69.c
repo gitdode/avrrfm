@@ -93,12 +93,18 @@ void initRadio(uint32_t freq) {
     // regWrite(BITRATE_MSB, 0x0d);
     // regWrite(BITRATE_LSB, 0x05);
 
+    // frequency deviation 100 kHz (default 5 kHz)
+    regWrite(FDEV_MSB, 0x17);
+    regWrite(FDEV_LSB, 0xd4);
+
     // RC calibration, automatically done at device power-up
     // regWrite(OSC1, 0x80);
     // do { } while (!(regRead(OSC1) & 0x40));
 
-    // PA level (default +13 dBm)
-    regWrite(PA_LEVEL, 0x9f);
+    // PA level (default +13 dBm with PA0, yields very weak output power, why?)
+    // regWrite(PA_LEVEL, 0x9f);
+    // +13 dBm on PA1, yields the expected output power
+    regWrite(PA_LEVEL, 0x5f);
     // +17 dBm - doesn't seem to work just like that?
     // regWrite(PA_LEVEL, 0x7f);
 
@@ -110,7 +116,7 @@ void initRadio(uint32_t freq) {
     // regWrite(LNA, 0x89);
 
     // LNA high sensitivity mode
-    regWrite(TEST_LNA, 0x2d);
+    // regWrite(TEST_LNA, 0x2d);
 
     // freq of DC offset canceller and channel filter bandwith (default)
     regWrite(RX_BW, 0x55);
