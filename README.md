@@ -19,7 +19,17 @@ better than 8 mA :-)
 The receiver currently just converts the raw temperature reading to °C and 
 displays it with the RSSI value on a nice IPS TFT display.
 
-![IMG_20250302_232819](https://github.com/user-attachments/assets/79664821-19f2-4b61-93cf-4a1bf9e0cd16)
+## Range
+
+With the default ouput power setting (register `RegPaLevel (0x11)` set to `0x9f`), 
+which should give +13 dBm with `PA0`, the range was very bad; just up to 10 m indoor 
+plain sight. Setting `RegPaLevel` to `0x5f`, which also gives +13 dBm but with `PA1`, 
+changes it all: very good RSSI everywhere and in an actual "field" test, at 1.6 km, 
+packet reception was still reliable with an RSSI of about -100 dBm.
+
+![IMG_20250303_1733461c](https://github.com/user-attachments/assets/2aaa5fcb-6c89-4a07-a375-faa7fd152bbd)
+
+![FieldTest1c](https://github.com/user-attachments/assets/c1f98778-df27-42a5-9ef3-afd779d8b309)
 
 ## Fun Stuff
 
