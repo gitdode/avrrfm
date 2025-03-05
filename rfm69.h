@@ -13,6 +13,7 @@
 
 #include "rfm69.h"
 #include "pins.h"
+#include "types.h"
 #include "spi.h"
 #include "usart.h"
 
@@ -30,6 +31,7 @@
 #define PA_LEVEL    0x11
 #define LNA         0x18
 #define RX_BW       0x19
+#define AFC_FEI     0x1e
 #define AFC_BW      0x20
 #define RSSI_CONFIG 0x23
 #define RSSI_VALUE  0x24
@@ -37,6 +39,8 @@
 #define DIO_MAP2    0x26
 #define IRQ_FLAGS1  0x27
 #define RSSI_THRESH 0x29
+#define RX_TIMEOUT1 0x2a
+#define RX_TIMEOUT2 0x2b
 #define PREAMB_MSB  0x2c
 #define PREAMB_LSB  0x2d
 #define IRQ_FLAGS2  0x28
@@ -54,6 +58,7 @@
 #define CAST_ADDR   0x3a
 #define AUTO_MODES  0x3b
 #define FIFO_THRESH 0x3c
+#define PCK_CFG2    0x3d
 #define TEST_LNA    0x58
 #define TEST_PA1    0x5a
 #define TEST_PA2    0x5c
@@ -105,7 +110,7 @@ uint8_t readRssi(void);
  * 
  * @return true if "PayloadReady"
  */
-bool payloadReady(void);
+PayloadFlags payloadReady(void);
 
 /**
  * Sets the radio in standby mode, puts the payload into the given array 

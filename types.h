@@ -38,6 +38,14 @@ typedef struct {
 } Point;
 
 /**
+ * Flags for "payload ready" event.
+ */
+typedef struct {
+    bool ready;
+    bool crc;
+} PayloadFlags;
+
+/**
  * Pointer to a function that takes an array of bytes
  * and returns a boolean.
  */

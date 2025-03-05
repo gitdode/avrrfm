@@ -6,6 +6,7 @@
  */
 
 #include "rfm69.h"
+#include "types.h"
 
 static volatile uint8_t irqFlags1 = 0;
 static volatile uint8_t irqFlags2 = 0;
@@ -93,9 +94,9 @@ void initRadio(uint32_t freq) {
     // regWrite(BITRATE_MSB, 0x0d);
     // regWrite(BITRATE_LSB, 0x05);
 
-    // frequency deviation 100 kHz (default 5 kHz)
-    regWrite(FDEV_MSB, 0x17);
-    regWrite(FDEV_LSB, 0xd4);
+    // frequency deviation 5 kHz (default)
+    // regWrite(FDEV_MSB, 0x00);
+    // regWrite(FDEV_LSB, 0x52);
 
     // RC calibration, automatically done at device power-up
     // regWrite(OSC1, 0x80);
@@ -123,10 +124,13 @@ void initRadio(uint32_t freq) {
 
     // RX_BW during AFC (default)
     regWrite(AFC_BW, 0x8b);
+    
+    // AFC auto on
+    // regWrite(AFC_FEI, 0x04);
 
     // RSSI threshold (default, POR 0xff)
     regWrite(RSSI_THRESH, 0xe4);
-
+    
     // Preamble size
     regWrite(PREAMB_MSB, 0x00);
     regWrite(PREAMB_LSB, 0x0f);
@@ -141,8 +145,8 @@ void initRadio(uint32_t freq) {
     regWrite(FRF_LSB, freq >> 0);
 
     // enable sync word generation and detection, FIFO fill on sync address,
-    // size of sync word 3
-    regWrite(SYNC_CONF, 0x98);
+    // 4 bytes sync word, tolerate 3 bit errors
+    regWrite(SYNC_CONF, 0x9b);
 
     // just set all sync word values to some really creative value
     regWrite(SYNC_VAL1, 0x2f);
@@ -157,7 +161,12 @@ void initRadio(uint32_t freq) {
     // variable payload length, crc on, no address matching
     // regWrite(PCK_CFG1, 0x90);
     // match broadcast or node address
-    regWrite(PCK_CFG1, 0x94);
+    // regWrite(PCK_CFG1, 0x94);
+    // + CrcAutoClearOff
+    regWrite(PCK_CFG1, 0x9c);
+
+    // disable automatic RX restart
+    regWrite(PCK_CFG2, 0x00);
 
     // node and broadcast address
     regWrite(NODE_ADDR, NODE_ADDRESS);
@@ -193,15 +202,16 @@ uint8_t readRssi(void) {
     return regRead(RSSI_VALUE);
 }
 
-bool payloadReady(void) {
+PayloadFlags payloadReady(void) {
+    PayloadFlags flags = {.ready = false, .crc = false};
     if (irqFlags2 & (1 << 2)) {
+        flags.ready = true;
+        flags.crc = irqFlags2 & (1 << 1);
         clearIrqFlags();
         setMode(MODE_STDBY);
-
-        return true;
     }
 
-    return false;
+    return flags;
 }
 
 size_t readPayload(uint8_t *payload, size_t size) {
