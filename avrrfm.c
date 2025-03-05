@@ -36,6 +36,10 @@
 #define MEASURE_INTS    4
 #define LABEL_OFFSET    10
 
+#define BLACK   0x0000
+#define RED     0xf800
+#define WHITE   0xffff
+
 #ifndef RECEIVER
     #define RECEIVER    1
 #endif
@@ -154,48 +158,32 @@ static void transmitTemp(void) {
  * 
  * @param raw temperature
  */
-static void displayTemp(uint8_t rssi, uint16_t raw) {
+static void displayTemp(uint8_t rssi, bool crc, uint16_t raw) {
     uint8_t _rssi = divRoundNearest(rssi, 2);
     int16_t tempx10 = convertTSens(raw);
     div_t temp = div(tempx10, 10);
     
-    static char buf[32];
+    static char buf[42];
 
-    snprintf(buf, sizeof (buf), "RSSI: -%d dBm, %d.%d°C\r\n", 
-            _rssi, temp.quot, abs(temp.rem));
+    snprintf(buf, sizeof (buf), "RSSI: -%d dBm, CRC: %d, %d.%d°C\r\n", 
+            _rssi, crc, temp.quot, abs(temp.rem));
     printString(buf);
     
-    snprintf(buf, sizeof (buf), "RSSI: -%d dBm", _rssi);
+    snprintf(buf, sizeof (buf), "RSSI: -%d dBm, CRC: %d", _rssi, crc);
     const __flash Font *unifont = &unifontFont;
-    writeString(0, 0, unifont, buf, 0xffff, 0x0000);
+    writeString(0, 0, unifont, buf, WHITE, BLACK);
 
     snprintf(buf, sizeof (buf), "%4d.%d°", temp.quot, abs(temp.rem));
     const __flash Font *dejaVu = &dejaVuFont;
-    if (width > 0) fillArea(xo, yo, width, dejaVu->height, 0xffff);
+    if (width > 0) fillArea(xo, yo, width, dejaVu->height, WHITE);
     if (yl == 0) yl = unifont->height;
-    width = writeString(xl, yl, dejaVu, buf, 0xffff, 0x0000);
+    width = writeString(xl, yl, dejaVu, buf, WHITE, crc ? BLACK : RED);
     xo = xl;
     yo = yl;
     xl += LABEL_OFFSET;
     yl += LABEL_OFFSET;
     if (xl > DISPLAY_WIDTH - width) xl = 0;
     if (yl > DISPLAY_HEIGHT - dejaVu->height) yl = unifont->height;
-}
-
-/**
- * Blocks until the raw temperature is received, then returns it.
- * 
- * @return raw temp
- */
-static uint16_t receiveTemp(void) {
-    // printString("Receiving... ");
-    uint8_t payload[2];
-    receivePayload(payload, sizeof (payload));
-    uint16_t raw = 0;
-    raw |= payload[0] << 8;
-    raw |= payload[1];
-
-    return raw;
 }
 
 /**
@@ -242,7 +230,7 @@ int main(void) {
     while (true) {
         // do something else besides tx/rx
         // printString("Running...\r\n");
-        // _delay_ms(10);
+        // _delay_ms(1000);
 
         if (!RECEIVER) {
             if (ints % MEASURE_INTS == 0) {
@@ -257,10 +245,11 @@ int main(void) {
                 disableSPI();
             }
         } else {
-            if (payloadReady()) {
+            PayloadFlags flags = payloadReady();
+            if (flags.ready) {
                 uint8_t rssi = readRssi();
                 uint16_t raw = readTemp();
-                displayTemp(rssi, raw);
+                displayTemp(rssi, flags.crc, raw);
                 startReceive();
             }
         }
