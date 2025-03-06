@@ -94,11 +94,11 @@ int16_t convertTSens(uint16_t raw) {
         // TA < 0°C
         // clear sign
         upper &= 0x0f;
-        temp = 2560 - (upper * 160 + lower * 10 / 16);
+        temp = -(2560 - (upper * 160 + lower * 10 / 16));
     } else {
         // TA >= 0°C
         temp = (upper * 160 + lower * 10 / 16);
     }
-
+    
     return temp;
 }

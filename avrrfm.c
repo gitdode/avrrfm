@@ -169,7 +169,7 @@ static void displayTemp(uint8_t rssi, bool crc, uint16_t raw) {
             _rssi, crc, temp.quot, abs(temp.rem));
     printString(buf);
     
-    snprintf(buf, sizeof (buf), "RSSI: -%d dBm, CRC: %d", _rssi, crc);
+    snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d", -_rssi, crc);
     const __flash Font *unifont = &unifontFont;
     writeString(0, 0, unifont, buf, WHITE, BLACK);
 
