@@ -94,9 +94,11 @@ void initRadio(uint32_t freq) {
     // regWrite(BITRATE_MSB, 0x0d);
     // regWrite(BITRATE_LSB, 0x05);
 
-    // frequency deviation 5 kHz (default)
-    // regWrite(FDEV_MSB, 0x00);
-    // regWrite(FDEV_LSB, 0x52);
+    // frequency deviation (default 5 kHz) - increasing to 40 kHz 
+    // completely removes suspectibility to temperature changes
+    // RX_BW must be increased accordingly
+    regWrite(FDEV_MSB, 0x02);
+    regWrite(FDEV_LSB, 0x80);
 
     // RC calibration, automatically done at device power-up
     // regWrite(OSC1, 0x80);
@@ -110,20 +112,20 @@ void initRadio(uint32_t freq) {
     // regWrite(PA_LEVEL, 0x7f);
 
     // LNA 200 Ohm, gain AGC (default)
-    // regWrite(LNA, 0x88);
+    regWrite(LNA, 0x88);
     // LNA 50 Ohm, gain AGC
-    regWrite(LNA, 0x08);
-    // max gain
-    // regWrite(LNA, 0x89);
+    // regWrite(LNA, 0x08);
 
     // LNA high sensitivity mode
     // regWrite(TEST_LNA, 0x2d);
 
-    // freq of DC offset canceller and channel filter bandwith (default)
-    regWrite(RX_BW, 0x55);
+    // freq of DC offset canceller and channel filter bandwith (default 10.4 kHz)
+    // increasing to 80.3 kHz in connection with setting FDEV_*SB  to 40 kHz 
+    // completely removes suspectibility to temperature changes
+    regWrite(RX_BW, 0x52);
 
     // RX_BW during AFC (default)
-    regWrite(AFC_BW, 0x8b);
+    regWrite(AFC_BW, 0x88);
     
     // AFC auto on
     // regWrite(AFC_FEI, 0x04);
