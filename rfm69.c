@@ -98,7 +98,7 @@ void initRadio(uint32_t freq) {
     // completely removes suspectibility to temperature changes
     // RX_BW must be increased accordingly
     regWrite(FDEV_MSB, 0x02);
-    regWrite(FDEV_LSB, 0x80);
+    regWrite(FDEV_LSB, 0x90);
 
     // RC calibration, automatically done at device power-up
     // regWrite(OSC1, 0x80);
