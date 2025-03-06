@@ -165,8 +165,8 @@ static void displayTemp(uint8_t rssi, bool crc, uint16_t raw) {
     
     static char buf[42];
 
-    snprintf(buf, sizeof (buf), "RSSI: -%d dBm, CRC: %d, %d.%d°C\r\n", 
-            _rssi, crc, temp.quot, abs(temp.rem));
+    snprintf(buf, sizeof (buf), "RSSI: %d dBm, CRC: %d, %d.%d°C\r\n", 
+            -_rssi, crc, temp.quot, abs(temp.rem));
     printString(buf);
     
     snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d", -_rssi, crc);
