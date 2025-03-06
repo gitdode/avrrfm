@@ -95,7 +95,7 @@ void initRadio(uint32_t freq) {
     // regWrite(BITRATE_LSB, 0x05);
 
     // frequency deviation (default 5 kHz) - increasing to 40 kHz 
-    // completely removes suspectibility to temperature changes
+    // completely removes susceptibility to temperature changes
     // RX_BW must be increased accordingly
     regWrite(FDEV_MSB, 0x02);
     regWrite(FDEV_LSB, 0x90);
@@ -121,7 +121,7 @@ void initRadio(uint32_t freq) {
 
     // freq of DC offset canceller and channel filter bandwith (default 10.4 kHz)
     // increasing to 80.3 kHz in connection with setting FDEV_*SB  to 40 kHz 
-    // completely removes suspectibility to temperature changes
+    // completely removes susceptibility to temperature changes
     regWrite(RX_BW, 0x52);
 
     // RX_BW during AFC (default)
