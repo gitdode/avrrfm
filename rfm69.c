@@ -94,11 +94,11 @@ void initRadio(uint32_t freq) {
     // regWrite(BITRATE_MSB, 0x0d);
     // regWrite(BITRATE_LSB, 0x05);
 
-    // frequency deviation (default 5 kHz) - increasing to 40 kHz 
+    // frequency deviation (default 5 kHz) - increasing to 10 kHz 
     // completely removes susceptibility to temperature changes
     // RX_BW must be increased accordingly
-    regWrite(FDEV_MSB, 0x02);
-    regWrite(FDEV_LSB, 0x90);
+    regWrite(FDEV_MSB, 0x00);
+    regWrite(FDEV_LSB, 0xa4);
 
     // RC calibration, automatically done at device power-up
     // regWrite(OSC1, 0x80);
@@ -120,12 +120,12 @@ void initRadio(uint32_t freq) {
     // regWrite(TEST_LNA, 0x2d);
 
     // freq of DC offset canceller and channel filter bandwith (default 10.4 kHz)
-    // increasing to 80.3 kHz in connection with setting FDEV_*SB  to 40 kHz 
+    // increasing to 20.8 kHz in connection with setting FDEV_*SB to 10 kHz 
     // completely removes susceptibility to temperature changes
-    regWrite(RX_BW, 0x52);
+    regWrite(RX_BW, 0x54);
 
-    // RX_BW during AFC (default)
-    regWrite(AFC_BW, 0x88);
+    // RX_BW during AFC (default 0x8b)
+    regWrite(AFC_BW, 0x8a);
     
     // AFC auto on
     // regWrite(AFC_FEI, 0x04);

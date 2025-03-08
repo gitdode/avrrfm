@@ -162,18 +162,16 @@ static void displayTemp(uint8_t rssi, bool crc, uint16_t raw) {
     uint8_t _rssi = divRoundNearest(rssi, 2);
     int16_t tempx10 = convertTSens(raw);
     div_t temp = div(tempx10, 10);
-    
-    static char buf[42];
 
-    snprintf(buf, sizeof (buf), "RSSI: %d dBm, CRC: %d, %d.%d°C\r\n", 
-            -_rssi, crc, temp.quot, abs(temp.rem));
-    printString(buf);
-    
+    char buf[32];
+
     snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d", -_rssi, crc);
     const __flash Font *unifont = &unifontFont;
     writeString(0, 0, unifont, buf, WHITE, BLACK);
 
-    snprintf(buf, sizeof (buf), "%4d.%d°", temp.quot, abs(temp.rem));
+    snprintf(buf, sizeof (buf), "%c%d.%d°", tempx10 < 0 ? '-' : ' ',
+            abs(temp.quot), abs(temp.rem));
+
     const __flash Font *dejaVu = &dejaVuFont;
     if (width > 0) fillArea(xo, yo, width, dejaVu->height, WHITE);
     if (yl == 0) yl = unifont->height;
@@ -222,7 +220,7 @@ int main(void) {
         initDisplay();
 
         setFrame(0xffff);
-    
+
         // initial rx mode
         startReceive();
     }

@@ -38,16 +38,16 @@ With the default Frequency Deviation of 5 kHz and Receiver Bandwidth of 10.4 kHz
 is very unreliable and fails completely for me, when the temperature of the transmitter is below 
 ~10°C and above 40°C, while the receiver temperature is at 20°C. The receiver does not seem to be 
 prone to temperature changes.  
-Increasing Frequency Deviation to 40 kHz and Receiver Bandwidth to 80.3 kHz, temperature susceptibility 
+Increasing Frequency Deviation to 10 kHz and Receiver Bandwidth to 20.8 kHz, temperature susceptibility 
 is eliminated; when testing with transmitter temperature from -20°C to 50°C, packet transmission is 
 perfectly reliable.
 
-Frequency Deviation = 40 kHz (transmitter)  
-`RegFdevMsb` = `0x02`  
-`RegFdevLsb` = `0x90`  
+Frequency Deviation = 10 kHz (transmitter)  
+`RegFdevMsb` = `0x00`  
+`RegFdevLsb` = `0xa4`  
 
-Receiver Bandwidth = 80.3 kHz  
-`RegRxBw` = `0x52`  
+Receiver Bandwidth = 20.8 kHz  
+`RegRxBw` = `0x54`  
 
 ## Fun Stuff
 
