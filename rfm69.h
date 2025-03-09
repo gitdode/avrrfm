@@ -74,13 +74,14 @@
 #define MODE_RX     0x10
 
 #define FIFO_SIZE       64
+#define F_STEP          6103515625ULL
 #define NODE_ADDRESS    0x42
 #define CAST_ADDRESS    0x84
 
 /**
  * Initializes the radio module with the given carrier frequency in kilohertz.
  */
-void initRadio(uint32_t kHz);
+void initRadio(uint64_t kHz);
 
 /**
  * Shuts down the radio.

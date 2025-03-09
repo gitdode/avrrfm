@@ -74,7 +74,7 @@ ISR(INT0_vect) {
     // printString("irq\r\n");
 }
 
-void initRadio(uint32_t freq) {
+void initRadio(uint64_t freq) {
     // wait a bit after power on
     _delay_ms(10);
 
@@ -137,14 +137,14 @@ void initRadio(uint32_t freq) {
     regWrite(PREAMB_MSB, 0x00);
     regWrite(PREAMB_LSB, 0x0f);
 
-    // turn off CLKOUT (not needed)
+    // turn off CLKOUT (not used)
     regWrite(DIO_MAP2, 0x07);
 
     // set the carrier frequency
-    freq = freq * 1000 / 61;
-    regWrite(FRF_MSB, freq >> 16);
-    regWrite(FRF_MID, freq >> 8);
-    regWrite(FRF_LSB, freq >> 0);
+    uint32_t frf = freq * 100000000000ULL / F_STEP;
+    regWrite(FRF_MSB, frf >> 16);
+    regWrite(FRF_MID, frf >> 8);
+    regWrite(FRF_LSB, frf >> 0);
 
     // enable sync word generation and detection, FIFO fill on sync address,
     // 4 bytes sync word, tolerate 3 bit errors
