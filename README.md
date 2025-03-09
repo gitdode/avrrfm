@@ -36,7 +36,7 @@ decent antennas?
 
 With the default Frequency Deviation of 5 kHz and Receiver Bandwidth of 10.4 kHz, packet transmission
 is very unreliable and fails completely for me, when the temperature of the transmitter is below 
-~10°C and above 40°C, while the receiver temperature is at 20°C. The receiver does not seem to be 
+10°C and above 40°C, while the receiver temperature is at 20°C. The receiver does not seem to be 
 prone to temperature changes.  
 Increasing Frequency Deviation to 10 kHz and Receiver Bandwidth to 20.8 kHz, temperature susceptibility 
 is eliminated; when testing with transmitter temperature from -20°C to 50°C, packet transmission is 
