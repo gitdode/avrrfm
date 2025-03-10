@@ -74,7 +74,7 @@ ISR(INT0_vect) {
     // printString("irq\r\n");
 }
 
-void initRadio(uint64_t freq) {
+void initRadio(uint64_t freq, uint8_t node) {
     // wait a bit after power on
     _delay_ms(10);
 
@@ -171,7 +171,7 @@ void initRadio(uint64_t freq) {
     regWrite(PCK_CFG2, 0x00);
 
     // node and broadcast address
-    regWrite(NODE_ADDR, NODE_ADDRESS);
+    regWrite(NODE_ADDR, node);
     regWrite(CAST_ADDR, CAST_ADDRESS);
 
     // set TX start condition to "at least one byte in FIFO"
@@ -243,14 +243,14 @@ size_t receivePayload(uint8_t *payload, size_t size) {
     return readPayload(payload, size);
 }
 
-size_t transmitPayload(uint8_t *payload, size_t size) {
+size_t transmitPayload(uint8_t *payload, size_t size, uint8_t node) {
     // payload + address byte
     size_t len = min(size, FIFO_SIZE) + 1;
 
     spiSel();
     transmit(FIFO | 0x80);
     transmit(len);
-    transmit(NODE_ADDRESS);
+    transmit(node);
     for (size_t i = 0; i < size; i++) {
         transmit(payload[i]);
     }

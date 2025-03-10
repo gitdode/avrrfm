@@ -33,15 +33,18 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define MEASURE_INTS    4
+#define MEASURE_INTS    1
 #define LABEL_OFFSET    10
 
 #define BLACK   0x0000
 #define RED     0xf800
 #define WHITE   0xffff
 
+#define NODE1   0x24
+#define NODE2   0x42
+
 #ifndef RECEIVER
-    #define RECEIVER    1
+    #define RECEIVER    0
 #endif
 
 /* 1 int = 8 seconds */
@@ -144,12 +147,13 @@ static void disableSPI(void) {
 }
 
 /**
- * Reads the temperature from the sensor and transmits it.
+ * Reads the temperature from the sensor and transmits it with the given
+ * node address.
  */
-static void transmitTemp(void) {
+static void transmitTemp(uint8_t node) {
     uint16_t temp = readTSens();
     uint8_t payload[] = {(temp >> 8), temp & 0x00ff};
-    transmitPayload(payload, sizeof (payload));
+    transmitPayload(payload, sizeof (payload), node);
     // printString("Transmitted\r\n");
 }
 
@@ -214,13 +218,13 @@ int main(void) {
     sei();
 
     printString("Hello Radio!\r\n");
+    
+    uint8_t node = RECEIVER ? NODE1 : NODE2;
 
-    initRadio(868600);
+    initRadio(868600, node);
     if (RECEIVER) {
         initDisplay();
-
-        setFrame(0xffff);
-
+        setFrame(WHITE);
         // initial rx mode
         startReceive();
     }
@@ -237,7 +241,7 @@ int main(void) {
                 enableSPI();
                 wakeTSens();
                 wakeRadio();
-                transmitTemp();
+                transmitTemp(NODE1);
                 sleepTSens();
                 sleepRadio();
                 disableSPI();

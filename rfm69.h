@@ -75,13 +75,13 @@
 
 #define FIFO_SIZE       64
 #define F_STEP          6103515625ULL
-#define NODE_ADDRESS    0x42
 #define CAST_ADDRESS    0x84
 
 /**
- * Initializes the radio module with the given carrier frequency in kilohertz.
+ * Initializes the radio module with the given carrier frequency in kilohertz
+ * and node address.
  */
-void initRadio(uint64_t kHz);
+void initRadio(uint64_t freq, uint8_t node);
 
 /**
  * Shuts down the radio.
@@ -117,9 +117,9 @@ PayloadFlags payloadReady(void);
  * Sets the radio in standby mode, puts the payload into the given array 
  * with the given size, and returns the length of the payload.
  * 
- * @param payload
- * @param size
- * @return actual length of the payload
+ * @param payload buffer for payload
+ * @param size of payload buffer
+ * @return payload bytes actually received
  */
 size_t readPayload(uint8_t *payload, size_t size);
 
@@ -128,17 +128,20 @@ size_t readPayload(uint8_t *payload, size_t size);
  * given size, and returns the length of the payload.
  * 
  * @param payload buffer for payload
- * @return bytes actually received
+ * @param size of payload buffer
+ * @return payload bytes actually received
  */
 size_t receivePayload(uint8_t *payload, size_t size);
 
 /**
- * Transmits up to 64 bytes of the given payload.
+ * Transmits up to 64 bytes of the given payload with the given node address.
  * 
  * @param payload to be sent
- * @return bytes actually sent
+ * @param size of payload
+ * @param node address
+ * @return payload bytes actually sent
  */
-size_t transmitPayload(uint8_t *payload, size_t size);
+size_t transmitPayload(uint8_t *payload, size_t size, uint8_t node);
 
 #endif /* RFM69_H */
 
