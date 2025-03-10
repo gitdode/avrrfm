@@ -251,7 +251,7 @@ size_t transmitPayload(uint8_t *payload, size_t size) {
     transmit(FIFO | 0x80);
     transmit(len);
     transmit(NODE_ADDRESS);
-    for (size_t i = 0; i < len; i++) {
+    for (size_t i = 0; i < size; i++) {
         transmit(payload[i]);
     }
     spiDes();
