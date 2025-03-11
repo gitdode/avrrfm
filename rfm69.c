@@ -125,7 +125,7 @@ void initRadio(uint64_t freq, uint8_t node) {
     regWrite(RX_BW, 0x54);
 
     // RX_BW during AFC (default 0x8b)
-    regWrite(AFC_BW, 0x8a);
+    regWrite(AFC_BW, 0x54);
     
     // AFC auto on
     // regWrite(AFC_FEI, 0x04);
@@ -181,6 +181,10 @@ void initRadio(uint64_t freq, uint8_t node) {
     regWrite(TEST_DAGC, 0x30);
 
     printString("Radio init done\r\n");
+}
+
+void setTimeoutRxStart(uint8_t value) {
+    regWrite(RX_TIMEOUT1, value);
 }
 
 void sleepRadio(void) {

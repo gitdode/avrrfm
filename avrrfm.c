@@ -48,7 +48,9 @@
 #endif
 
 /* 1 int = 8 seconds */
-static volatile uint8_t ints = 0;
+static volatile uint8_t wdInts = 0;
+
+static volatile uint8_t t0Ints = 0;
 
 /* Temp. label coordinates */
 static x_t xl = 0;
@@ -58,7 +60,11 @@ static y_t yo = 0;
 static width_t width = 0;
 
 ISR(WDT_vect) {
-    ints++;
+    wdInts++;
+}
+
+ISR(TIMER0_COMPA_vect) {
+    t0Ints++;
 }
 
 /**
@@ -129,6 +135,20 @@ static void initWatchdog(void) {
     WDTCSR |= (1 << WDCE) | (1 << WDE);
     // enable interrupt, disable system reset, bark every 8 seconds
     WDTCSR = (1 << WDIE) | (0 << WDE) | (1 << WDP3) | (1 << WDP0);
+}
+
+/**
+ * Sets up the timer.
+ */
+static void initTimer(void) {
+	// timer0 clear timer on compare match mode, TOP OCR0A
+	TCCR0A |= (1 << WGM01);
+	// timer0 clock prescaler/1024/255 ~ 46 Hz @ 12 MHz ~ 61 Hz @ 16 MHz
+	TCCR0B |= (1 << CS02) | (1 << CS00);
+	OCR0A = 255;
+
+	// enable timer0 compare match A interrupt
+	TIMSK0 |= (1 << OCIE0A);
 }
 
 /**
@@ -212,6 +232,7 @@ int main(void) {
     if (!RECEIVER) {
         // used only for tx
         initWatchdog();
+        initTimer();
     }
 
     // enable global interrupts
@@ -220,7 +241,6 @@ int main(void) {
     printString("Hello Radio!\r\n");
     
     uint8_t node = RECEIVER ? NODE1 : NODE2;
-
     initRadio(868600, node);
     if (RECEIVER) {
         initDisplay();
@@ -235,13 +255,24 @@ int main(void) {
         // _delay_ms(1000);
 
         if (!RECEIVER) {
-            if (ints % MEASURE_INTS == 0) {
-                ints = 0;
+            if (wdInts % MEASURE_INTS == 0) {
+                wdInts = 0;
 
                 enableSPI();
                 wakeTSens();
                 wakeRadio();
                 transmitTemp(NODE1);
+
+                // TODO timeout
+                /*
+                uint8_t response[1];
+                receivePayload(response, sizeof (response));
+                // receiver RSSI
+                int8_t rssi = divRoundNearest(response[0], 2);
+                printUint(rssi);
+                _delay_ms(10);
+                 */
+
                 sleepTSens();
                 sleepRadio();
                 disableSPI();
@@ -251,6 +282,11 @@ int main(void) {
             if (flags.ready) {
                 uint8_t rssi = readRssi();
                 uint16_t raw = readTemp();
+
+                _delay_ms(10);
+                uint8_t payload[] = {rssi};
+                transmitPayload(payload, sizeof (payload), NODE2);
+
                 displayTemp(rssi, flags.crc, raw);
                 startReceive();
             }

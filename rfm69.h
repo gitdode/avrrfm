@@ -84,6 +84,13 @@
 void initRadio(uint64_t freq, uint8_t node);
 
 /**
+ * Sets "RxStart" timeout to the given value.
+ * 
+ * @param value
+ */
+void setTimeoutRxStart(uint8_t value);
+
+/**
  * Shuts down the radio.
  */
 void sleepRadio(void);
