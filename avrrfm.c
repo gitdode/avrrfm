@@ -33,7 +33,9 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define MEASURE_INTS    1
+#define MEASURE_INTS    4
+#define TIMEOUT_INTS    30 // about one second
+
 #define LABEL_OFFSET    10
 
 #define BLACK   0x0000
@@ -44,13 +46,14 @@
 #define NODE2   0x42
 
 #ifndef RECEIVER
-    #define RECEIVER    0
+    #define RECEIVER    1
 #endif
 
 /* 1 int = 8 seconds */
-static volatile uint8_t wdInts = 0;
+static volatile uint8_t wdints = 0;
 
-static volatile uint8_t t0Ints = 0;
+static volatile bool toena = false;
+static volatile uint8_t toints = 0;
 
 /* Temp. label coordinates */
 static x_t xl = 0;
@@ -60,11 +63,15 @@ static y_t yo = 0;
 static width_t width = 0;
 
 ISR(WDT_vect) {
-    wdInts++;
+    wdints++;
 }
 
 ISR(TIMER0_COMPA_vect) {
-    t0Ints++;
+    if (toena && toints++ >= TIMEOUT_INTS) {
+        toints = 0;
+        toena = false;
+        timeoutRadio();
+    }
 }
 
 /**
@@ -141,14 +148,14 @@ static void initWatchdog(void) {
  * Sets up the timer.
  */
 static void initTimer(void) {
-	// timer0 clear timer on compare match mode, TOP OCR0A
-	TCCR0A |= (1 << WGM01);
-	// timer0 clock prescaler/1024/255 ~ 46 Hz @ 12 MHz ~ 61 Hz @ 16 MHz
-	TCCR0B |= (1 << CS02) | (1 << CS00);
-	OCR0A = 255;
+    // timer0 clear timer on compare match mode, TOP OCR0A
+    TCCR0A |= (1 << WGM01);
+    // timer0 clock prescaler/1024/255 ~ 46 Hz @ 12 MHz ~ 61 Hz @ 16 MHz
+    TCCR0B |= (1 << CS02) | (1 << CS00);
+    OCR0A = 255;
 
-	// enable timer0 compare match A interrupt
-	TIMSK0 |= (1 << OCIE0A);
+    // enable timer0 compare match A interrupt
+    TIMSK0 |= (1 << OCIE0A);
 }
 
 /**
@@ -175,6 +182,20 @@ static void transmitTemp(uint8_t node) {
     uint8_t payload[] = {(temp >> 8), temp & 0x00ff};
     transmitPayload(payload, sizeof (payload), node);
     // printString("Transmitted\r\n");
+}
+
+/**
+ * Waits for a response from the receiver with timeout.
+ */
+static void waitResponse(void) {
+    toena = true;
+    uint8_t response[1];
+    int8_t len = receivePayload(response, sizeof (response));
+    if (len > 0) {
+        // receiver RSSI
+        int8_t rssi = divRoundNearest(response[0], 2);
+        printUint(rssi);
+    }
 }
 
 /**
@@ -239,7 +260,7 @@ int main(void) {
     sei();
 
     printString("Hello Radio!\r\n");
-    
+
     uint8_t node = RECEIVER ? NODE1 : NODE2;
     initRadio(868600, node);
     if (RECEIVER) {
@@ -255,24 +276,14 @@ int main(void) {
         // _delay_ms(1000);
 
         if (!RECEIVER) {
-            if (wdInts % MEASURE_INTS == 0) {
-                wdInts = 0;
+            if (wdints % MEASURE_INTS == 0) {
+                wdints = 0;
 
                 enableSPI();
                 wakeTSens();
                 wakeRadio();
                 transmitTemp(NODE1);
-
-                // TODO timeout
-                /*
-                uint8_t response[1];
-                receivePayload(response, sizeof (response));
-                // receiver RSSI
-                int8_t rssi = divRoundNearest(response[0], 2);
-                printUint(rssi);
-                _delay_ms(10);
-                 */
-
+                waitResponse();
                 sleepTSens();
                 sleepRadio();
                 disableSPI();
@@ -283,6 +294,7 @@ int main(void) {
                 uint8_t rssi = readRssi();
                 uint16_t raw = readTemp();
 
+                // TODO delay?
                 _delay_ms(10);
                 uint8_t payload[] = {rssi};
                 transmitPayload(payload, sizeof (payload), NODE2);

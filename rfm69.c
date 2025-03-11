@@ -183,8 +183,8 @@ void initRadio(uint64_t freq, uint8_t node) {
     printString("Radio init done\r\n");
 }
 
-void setTimeoutRxStart(uint8_t value) {
-    regWrite(RX_TIMEOUT1, value);
+void timeoutRadio(void) {
+    irqFlags1 |= (1 << 2);
 }
 
 void sleepRadio(void) {
@@ -234,15 +234,22 @@ size_t readPayload(uint8_t *payload, size_t size) {
     }
     spiDes();
 
+    // FIXME this is not the actual length of the payload received
     return len;
 }
 
 size_t receivePayload(uint8_t *payload, size_t size) {
     startReceive();
 
-    loop_until_bit_is_set(irqFlags2, 2);
+    // wait until "PayloadReady" or timeout
+    do {} while (!(irqFlags2 & (1 << 2)) && !(irqFlags1 & (1 << 2)));
+    bool timeout = irqFlags1 & (1 << 2);
     clearIrqFlags();
     setMode(MODE_STDBY);
+
+    if (timeout) {
+        return 0;
+    }
 
     return readPayload(payload, size);
 }

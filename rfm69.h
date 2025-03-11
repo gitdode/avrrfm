@@ -84,11 +84,9 @@
 void initRadio(uint64_t freq, uint8_t node);
 
 /**
- * Sets "RxStart" timeout to the given value.
- * 
- * @param value
+ * Indicates a timeout.
  */
-void setTimeoutRxStart(uint8_t value);
+void timeoutRadio(void);
 
 /**
  * Shuts down the radio.
@@ -132,7 +130,8 @@ size_t readPayload(uint8_t *payload, size_t size);
 
 /**
  * Waits for "PayloadReady", puts the payload into the given array with the 
- * given size, and returns the length of the payload.
+ * given size, and returns the length of the payload, or 0 if a timeout 
+ * occurred.
  * 
  * @param payload buffer for payload
  * @param size of payload buffer
