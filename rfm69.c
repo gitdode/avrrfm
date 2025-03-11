@@ -74,7 +74,7 @@ ISR(INT0_vect) {
     // printString("irq\r\n");
 }
 
-void initRadio(uint64_t freq) {
+void initRadio(uint64_t freq, uint8_t node) {
     // wait a bit after power on
     _delay_ms(10);
 
@@ -125,7 +125,7 @@ void initRadio(uint64_t freq) {
     regWrite(RX_BW, 0x54);
 
     // RX_BW during AFC (default 0x8b)
-    regWrite(AFC_BW, 0x8a);
+    regWrite(AFC_BW, 0x54);
     
     // AFC auto on
     // regWrite(AFC_FEI, 0x04);
@@ -171,7 +171,7 @@ void initRadio(uint64_t freq) {
     regWrite(PCK_CFG2, 0x00);
 
     // node and broadcast address
-    regWrite(NODE_ADDR, NODE_ADDRESS);
+    regWrite(NODE_ADDR, node);
     regWrite(CAST_ADDR, CAST_ADDRESS);
 
     // set TX start condition to "at least one byte in FIFO"
@@ -181,6 +181,10 @@ void initRadio(uint64_t freq) {
     regWrite(TEST_DAGC, 0x30);
 
     printString("Radio init done\r\n");
+}
+
+void timeoutRadio(void) {
+    irqFlags1 |= (1 << 2);
 }
 
 void sleepRadio(void) {
@@ -230,27 +234,34 @@ size_t readPayload(uint8_t *payload, size_t size) {
     }
     spiDes();
 
+    // FIXME this is not the actual length of the payload received
     return len;
 }
 
 size_t receivePayload(uint8_t *payload, size_t size) {
     startReceive();
 
-    loop_until_bit_is_set(irqFlags2, 2);
+    // wait until "PayloadReady" or timeout
+    do {} while (!(irqFlags2 & (1 << 2)) && !(irqFlags1 & (1 << 2)));
+    bool timeout = irqFlags1 & (1 << 2);
     clearIrqFlags();
     setMode(MODE_STDBY);
+
+    if (timeout) {
+        return 0;
+    }
 
     return readPayload(payload, size);
 }
 
-size_t transmitPayload(uint8_t *payload, size_t size) {
+size_t transmitPayload(uint8_t *payload, size_t size, uint8_t node) {
     // payload + address byte
     size_t len = min(size, FIFO_SIZE) + 1;
 
     spiSel();
     transmit(FIFO | 0x80);
     transmit(len);
-    transmit(NODE_ADDRESS);
+    transmit(node);
     for (size_t i = 0; i < size; i++) {
         transmit(payload[i]);
     }
