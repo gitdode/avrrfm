@@ -5,7 +5,7 @@
 Experimental project to drive an RFM69HCW radio module with plain avr-libc
 and an Atmega328p MCU.  
 
-This is work in progress. Simple Tx-Rx is working so far.  
+This is work in progress. Simple Tx-Rx with response is working so far.  
 I'm impressed how well these radio modules work; the range achieved with 
 simple wire antennas as well as the reliable packet transmission.
 
@@ -18,8 +18,12 @@ better than 8 mA :-)
 
 ![IMG_20250212_190518](https://github.com/user-attachments/assets/dd87b7de-c97d-4ecb-ab24-f5a34b849914)
 
-The receiver currently just converts the raw temperature reading to °C and 
+The receiver currently converts the raw temperature reading to °C and 
 displays it with the RSSI value and CRC result on a nice IPS TFT display.
+It responds to the transmitter as kind of ack with the RSSI, which 
+might be useful do to some sort of power management in the transmitter.
+The transmitter waits for this response with a timeout so it won't be blocked 
+and comsume a lot of power just because there is no response coming back.
 
 ## Range
 
