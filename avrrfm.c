@@ -194,7 +194,7 @@ static void waitResponse(void) {
     if (len > 0) {
         // receiver RSSI
         int8_t rssi = divRoundNearest(response[0], 2);
-        printUint(rssi);
+        setOutputPower(rssi);
     }
 }
 

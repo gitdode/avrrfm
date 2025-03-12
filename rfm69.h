@@ -84,6 +84,13 @@
 void initRadio(uint64_t freq, uint8_t node);
 
 /**
+ * Sets the output power based on the given receiver RSSI.
+ * 
+ * @param rssi
+ */
+void setOutputPower(uint8_t rssi);
+
+/**
  * Indicates a timeout.
  */
 void timeoutRadio(void);

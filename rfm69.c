@@ -183,6 +183,16 @@ void initRadio(uint64_t freq, uint8_t node) {
     printString("Radio init done\r\n");
 }
 
+void setOutputPower(uint8_t rssi) {
+    uint8_t pa = 0x40; // -18 dBm with PA1
+    if (rssi >   0 && rssi <=  40) pa += 16;
+    if (rssi >  40 && rssi <=  60) pa += 21;
+    if (rssi >  60 && rssi <=  90) pa += 26;
+    if (rssi >  90) pa += 31;
+
+    regWrite(PA_LEVEL, pa);
+}
+
 void timeoutRadio(void) {
     irqFlags1 |= (1 << 2);
 }
