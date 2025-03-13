@@ -229,8 +229,8 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
     yo = yl;
     xl += LABEL_OFFSET;
     yl += LABEL_OFFSET;
-    if (xl > DISPLAY_WIDTH - width) xl = 0;
-    if (yl > DISPLAY_HEIGHT - dejaVu->height) yl = unifont->height;
+    if (xl > DISPLAY_WIDTH - width - LABEL_OFFSET) xl = 0;
+    if (yl > DISPLAY_HEIGHT - dejaVu->height- LABEL_OFFSET) yl = unifont->height;
 }
 
 /**

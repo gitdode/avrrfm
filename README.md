@@ -15,7 +15,7 @@ sensor is periodically transmitted to the receiver.
 To save battery power, the controller, radio module and temperature sensor 
 are put to power down/sleep mode in between transmissions. The idle current 
 is ~57 uA, which is still quite a lot (< 10 uA should be possible), but already 
-better than 8 mA :-)
+better than 8 mA 🙂
 
 ![IMG_20250212_190518](https://github.com/user-attachments/assets/dd87b7de-c97d-4ecb-ab24-f5a34b849914)
 
@@ -29,10 +29,10 @@ because there is no response coming back.
 
 ## Range
 
-Setting `RegPaLevel` to `0x5f`, which gives +13 dBm with `PA1`, indoor range is very good 
-and in an actual "field" test, packet reception was still reliable with an RSSI of about -90 dBm 
-at about 2.2 km distance - with simple wire antennas. What would be the range with +20 dBm and 
-decent antennas?  
+Setting `RegPaLevel` to `0x5f`, which gives +13 dBm with `PA1`, indoor range is 
+very good and in an actual "field" test, packet reception was still reliable 
+with an RSSI of about -90 dBm at about 2.2 km distance - with simple wire 
+antennas. What would be the range with +20 dBm and decent antennas?  
 
 ![IMG_20250306_180139c](https://github.com/user-attachments/assets/27c66e7a-ec16-4e98-9f94-7713fe54c7d0)
 
@@ -40,13 +40,14 @@ decent antennas?
 
 ## Susceptibility to Temperature Changes
 
-With the default Frequency Deviation of 5 kHz and Receiver Bandwidth of 10.4 kHz, packet transmission
-is very unreliable and fails completely for me, when the temperature of the transmitter is below 
-10°C and above 40°C, while the receiver temperature is at 20°C. The receiver does not seem to be 
-prone to temperature changes.  
-Increasing Frequency Deviation to 10 kHz and Receiver Bandwidth to 20.8 kHz, temperature susceptibility 
-is eliminated; when testing with transmitter temperature from -20°C to 50°C, packet transmission is 
-perfectly reliable.
+With the default frequency deviation of 5 kHz and receiver bandwidth of 
+10.4 kHz, packet transmission is very unreliable and fails completely for me; 
+when the temperature of the transmitter is below 10°C and above 40°C, while 
+the receiver temperature is at 20°C. The receiver does not seem to be prone to 
+temperature changes.  
+Increasing frequency deviation to 10 kHz and Receiver Bandwidth to 20.8 kHz, 
+temperature susceptibility is eliminated; when testing with transmitter 
+temperature from -20°C to 50°C, packet transmission is perfectly reliable.
 
 Frequency Deviation = 10 kHz (transmitter)  
 `RegFdevMsb` = `0x00`  
@@ -75,7 +76,8 @@ Calculating the temperature (assuming >= 0°C):
 
 So, 21.2 °C 🙂
 
-The first 15 `0b10101010` bytes are the preamble, then there are 4 sync word bytes.
-After the 4 payload bytes, there are 2 CRC bytes as described in the datasheet of the RFM69HCW:
+The first 15 `0b10101010` bytes are the preamble, then there are 4 sync word 
+bytes. After the 4 payload bytes, there are 2 CRC bytes as described in the 
+datasheet of the RFM69HCW:
 
 ![PackageFormat](https://github.com/user-attachments/assets/11687645-552c-46e5-a0bf-ef490b1bca48)
