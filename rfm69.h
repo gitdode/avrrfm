@@ -78,6 +78,23 @@
 #define CAST_ADDRESS    0x84
 
 /**
+ * Flags for "payload ready" event.
+ */
+typedef struct {
+    bool ready;
+    bool crc;
+} PayloadFlags;
+
+/**
+ * Temperature read from transmitter including
+ * additional information.
+ */
+typedef struct {
+    uint16_t raw;
+    uint8_t power;
+} Temperature;
+
+/**
  * Initializes the radio module with the given carrier frequency in kilohertz
  * and node address.
  */
@@ -89,6 +106,13 @@ void initRadio(uint64_t freq, uint8_t node);
  * @param rssi
  */
 void setOutputPower(uint8_t rssi);
+
+/**
+ * Returns the current output power setting.
+ *
+ * @return ouput power
+ */
+uint8_t getOutputPower(void);
 
 /**
  * Indicates a timeout.

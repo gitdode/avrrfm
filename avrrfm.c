@@ -179,7 +179,8 @@ static void disableSPI(void) {
  */
 static void transmitTemp(uint8_t node) {
     uint16_t temp = readTSens();
-    uint8_t payload[] = {(temp >> 8), temp & 0x00ff};
+    uint8_t power = getOutputPower();
+    uint8_t payload[] = {(temp >> 8), temp & 0x00ff, power};
     transmitPayload(payload, sizeof (payload), node);
     // printString("Transmitted\r\n");
 }
@@ -201,21 +202,24 @@ static void waitResponse(void) {
 /**
  * Converts the raw temperature to °C and lets it float around the display.
  * 
- * @param raw temperature
+ * @param rssi RSSI value
+ * @param crc CRC result
+ * @param temp temperature + info
  */
-static void displayTemp(uint8_t rssi, bool crc, uint16_t raw) {
+static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
     uint8_t _rssi = divRoundNearest(rssi, 2);
-    int16_t tempx10 = convertTSens(raw);
-    div_t temp = div(tempx10, 10);
+    int16_t tempx10 = convertTSens(temp->raw);
+    div_t tdiv = div(tempx10, 10);
 
-    char buf[32];
+    char buf[42];
 
-    snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d", -_rssi, crc);
+    snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d, PA: %+3d dBm",
+            -_rssi, crc, -18 + (temp->power & 0x1f));
     const __flash Font *unifont = &unifontFont;
     writeString(0, 0, unifont, buf, WHITE, BLACK);
 
     snprintf(buf, sizeof (buf), "%c%d.%d°", tempx10 < 0 ? '-' : ' ',
-            abs(temp.quot), abs(temp.rem));
+            abs(tdiv.quot), abs(tdiv.rem));
 
     const __flash Font *dejaVu = &dejaVuFont;
     if (width > 0) fillArea(xo, yo, width, dejaVu->height, WHITE);
@@ -230,18 +234,19 @@ static void displayTemp(uint8_t rssi, bool crc, uint16_t raw) {
 }
 
 /**
- * Reads and returns the raw temperature.
+ * Reads and returns the raw temperature + other info.
  * 
- * @return raw temp
+ * @return temperature + info
  */
-static uint16_t readTemp(void) {
-    uint8_t payload[2];
+static Temperature readTemp(void) {
+    uint8_t payload[3];
     readPayload(payload, sizeof (payload));
-    uint16_t raw = 0;
-    raw |= payload[0] << 8;
-    raw |= payload[1];
+    Temperature temp = {0};
+    temp.raw |= payload[0] << 8;
+    temp.raw |= payload[1];
+    temp.power = payload[2];
 
-    return raw;
+    return temp;
 }
 
 int main(void) {
@@ -292,14 +297,14 @@ int main(void) {
             PayloadFlags flags = payloadReady();
             if (flags.ready) {
                 uint8_t rssi = readRssi();
-                uint16_t raw = readTemp();
+                Temperature temp = readTemp();
 
                 // TODO delay?
                 _delay_ms(10);
                 uint8_t payload[] = {rssi};
                 transmitPayload(payload, sizeof (payload), NODE2);
 
-                displayTemp(rssi, flags.crc, raw);
+                displayTemp(rssi, flags.crc, &temp);
                 startReceive();
             }
         }

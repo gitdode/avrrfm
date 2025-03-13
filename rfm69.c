@@ -193,6 +193,10 @@ void setOutputPower(uint8_t rssi) {
     regWrite(PA_LEVEL, pa);
 }
 
+uint8_t getOutputPower(void) {
+    return regRead(PA_LEVEL);
+}
+
 void timeoutRadio(void) {
     irqFlags1 |= (1 << 2);
 }
@@ -258,6 +262,8 @@ size_t receivePayload(uint8_t *payload, size_t size) {
     setMode(MODE_STDBY);
 
     if (timeout) {
+        regWrite(PA_LEVEL, 0x5f);
+
         return 0;
     }
 
