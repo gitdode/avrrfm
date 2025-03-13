@@ -38,6 +38,23 @@ typedef struct {
 } Point;
 
 /**
+ * Flags for "payload ready" event.
+ */
+typedef struct {
+    bool ready;
+    bool crc;
+} PayloadFlags;
+
+/**
+ * Temperature read from transmitter including
+ * additional information.
+ */
+typedef struct {
+    uint16_t raw;
+    uint8_t power;
+} Temperature;
+
+/**
  * Pointer to a function that takes an array of bytes
  * and returns a boolean.
  */
