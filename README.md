@@ -6,6 +6,7 @@ Experimental project to drive an RFM69HCW radio module with plain avr-libc
 and an Atmega328p MCU.  
 
 This is work in progress. Simple Tx-Rx with response is working so far.  
+
 I'm impressed how well these radio modules work; the range achieved with 
 simple wire antennas as well as the reliable packet transmission.
 
@@ -23,7 +24,7 @@ it with the RSSI value, CRC result and transmitter output power on a nice IPS
 TFT display. It responds to the transmitter as kind of ack with the RSSI, which 
 is used for some very basic power management in the transmitter, reducing the 
 supply current from 45 mA down to ~15 mA. The transmitter waits for this 
-response with a timeout so it won't be blocked and comsume a lot of power just 
+response with a timeout so it won't be blocked and consumes a lot of power just 
 because there is no response coming back.
 
 ## Range
