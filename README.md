@@ -45,7 +45,7 @@ With the default frequency deviation of 5 kHz and receiver bandwidth of
 when the temperature of the transmitter is below 10°C and above 40°C, while 
 the receiver temperature is at 20°C. The receiver does not seem to be prone to 
 temperature changes.  
-Increasing frequency deviation to 10 kHz and Receiver Bandwidth to 20.8 kHz, 
+Increasing frequency deviation to 10 kHz and receiver bandwidth to 20.8 kHz, 
 temperature susceptibility is eliminated; when testing with transmitter 
 temperature from -20°C to 50°C, packet transmission is perfectly reliable.
 

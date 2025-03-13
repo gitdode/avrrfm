@@ -213,14 +213,15 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
 
     char buf[42];
 
+    // display some info (receiver RSSI + CRC, transmitter output power)
     snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d, PA: %+3d dBm",
             -_rssi, crc, -18 + (temp->power & 0x1f));
     const __flash Font *unifont = &unifontFont;
     writeString(0, 0, unifont, buf, WHITE, BLACK);
 
+    // display temperature (floating, red if CRC failed)
     snprintf(buf, sizeof (buf), "%c%d.%d°", tempx10 < 0 ? '-' : ' ',
             abs(tdiv.quot), abs(tdiv.rem));
-
     const __flash Font *dejaVu = &dejaVuFont;
     if (width > 0) fillArea(xo, yo, width, dejaVu->height, WHITE);
     if (yl == 0) yl = unifont->height;
