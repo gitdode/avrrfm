@@ -73,6 +73,9 @@
 #define MODE_TX     0x0c
 #define MODE_RX     0x10
 
+#define PA_MIN      16
+#define PA_MAX      31
+
 #define FIFO_SIZE       64
 #define F_STEP          6103515625ULL
 #define CAST_ADDRESS    0x84

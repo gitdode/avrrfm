@@ -33,7 +33,7 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define MEASURE_INTS    4
+#define MEASURE_INTS    4  // about 32 seconds
 #define TIMEOUT_INTS    30 // about one second
 
 #define LABEL_OFFSET    10
@@ -217,7 +217,7 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
     snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d, PA: %+3d dBm",
             -_rssi, crc, -18 + (temp->power & 0x1f));
     const __flash Font *unifont = &unifontFont;
-    writeString(0, 0, unifont, buf, WHITE, BLACK);
+    writeString(0, 0, unifont, buf, BLACK, WHITE);
 
     // display temperature (floating, red if CRC failed)
     snprintf(buf, sizeof (buf), "%c%d.%d°", tempx10 < 0 ? '-' : ' ',
@@ -272,6 +272,7 @@ int main(void) {
     if (RECEIVER) {
         initDisplay();
         setFrame(WHITE);
+        fillArea(0, 0, DISPLAY_WIDTH, 16, BLACK);
         // initial rx mode
         startReceive();
     }

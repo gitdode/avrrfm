@@ -23,7 +23,7 @@ The receiver currently converts the raw temperature reading to °C and displays
 it with the RSSI value, CRC result and transmitter output power on a nice IPS 
 TFT display. It responds to the transmitter as kind of ack with the RSSI, which 
 is used for some very basic power management in the transmitter, reducing the 
-supply current from 45 mA down to ~15 mA. The transmitter waits for this 
+supply current from 50 mA down to 22 mA. The transmitter waits for this 
 response with a timeout so it won't be blocked and consumes a lot of power just 
 because there is no response coming back.
 
