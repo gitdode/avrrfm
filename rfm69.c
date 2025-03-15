@@ -11,8 +11,8 @@
 static volatile uint8_t irqFlags1 = 0;
 static volatile uint8_t irqFlags2 = 0;
 
-static volatile bool toena = false;
-static volatile uint8_t toints = 0;
+static volatile bool timeoutEnabled = false;
+static volatile uint8_t timeoutInts = 0;
 
 /**
  * Selects the radio to talk to via SPI.
@@ -69,6 +69,23 @@ static void setMode(uint8_t mode) {
 static void clearIrqFlags(void) {
     irqFlags1 = 0;
     irqFlags2 = 0;
+}
+
+/**
+ * Enables timeout (sets timeout interrupt flag on expiration).
+ * 
+ * @param enable
+ */
+static void timeoutEnable(bool enable) {
+    timeoutEnabled = enable;
+    if (!enable) timeoutInts = 0;
+}
+
+/**
+ * Times out the current operation.
+ */
+static void timeout(void) {
+    irqFlags1 |= (1 << 2);
 }
 
 /**
@@ -201,19 +218,10 @@ uint8_t getOutputPower(void) {
 }
 
 void timeRadio(void) {
-    if (toena && toints++ >= TIMEOUT_INTS) {
+    if (timeoutEnabled && timeoutInts++ >= TIMEOUT_INTS) {
         timeoutEnable(false);
-        timeoutRadio();
+        timeout();
     }
-}
-
-void timeoutEnable(bool enable) {
-    toena = enable;
-    if (!enable) toints = 0;
-}
-
-void timeoutRadio(void) {
-    irqFlags1 |= (1 << 2);
 }
 
 void sleepRadio(void) {
@@ -267,19 +275,20 @@ size_t readPayload(uint8_t *payload, size_t size) {
     return len;
 }
 
-size_t receivePayload(uint8_t *payload, size_t size) {
+size_t receivePayload(uint8_t *payload, size_t size, bool timeout) {
+    timeoutEnable(timeout);
     startReceive();
 
     // wait until "PayloadReady" or timeout
     do {} while (!(irqFlags2 & (1 << 2)) && !(irqFlags1 & (1 << 2)));
     bool ready = irqFlags2 & (1 << 2);
-    bool timeout = irqFlags1 & (1 << 2);
+    bool timedout = irqFlags1 & (1 << 2);
     
     clearIrqFlags();
     if (ready) timeoutEnable(false);
     setMode(MODE_STDBY);
 
-    if (timeout) {
+    if (timedout) {
         regWrite(PA_LEVEL, 0x5f);
 
         return 0;

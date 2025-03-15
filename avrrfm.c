@@ -256,9 +256,8 @@ static void handlePayload(PayloadFlags flags) {
  * Waits for a response from the receiver with timeout.
  */
 static void waitResponse(void) {
-    timeoutEnable(true);
     uint8_t response[1];
-    int8_t len = receivePayload(response, sizeof (response));
+    int8_t len = receivePayload(response, sizeof (response), true);
     if (len > 0) {
         // receiver RSSI
         int8_t rssi = divRoundNearest(response[0], 2);
