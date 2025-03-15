@@ -80,18 +80,6 @@ ISR(INT0_vect) {
     // printString("irq\r\n");
 }
 
-/**
- * Called about 30 times a second while the controller 
- * isn't in power down sleep mode.
- */
-ISR(TIMER0_COMPA_vect) {
-    if (toena && toints++ >= TIMEOUT_INTS) {
-        toints = 0;
-        toena = false;
-        timeoutRadio();
-    }
-}
-
 void initRadio(uint64_t freq, uint8_t node) {
     // wait a bit after power on
     _delay_ms(10);
@@ -210,6 +198,13 @@ void setOutputPower(uint8_t rssi) {
 
 uint8_t getOutputPower(void) {
     return regRead(PA_LEVEL);
+}
+
+void timeRadio(void) {
+    if (toena && toints++ >= TIMEOUT_INTS) {
+        timeoutEnable(false);
+        timeoutRadio();
+    }
 }
 
 void timeoutEnable(bool enable) {

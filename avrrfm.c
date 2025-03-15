@@ -66,6 +66,14 @@ ISR(WDT_vect) {
 }
 
 /**
+ * Called about 30 times a second while the controller 
+ * isn't in power down sleep mode.
+ */
+ISR(TIMER0_COMPA_vect) {
+    timeRadio();
+}
+
+/**
  * Sets up the pins.
  */
 static void initPins(void) {
@@ -177,20 +185,6 @@ static void transmitTemp(uint8_t node) {
 }
 
 /**
- * Waits for a response from the receiver with timeout.
- */
-static void waitResponse(void) {
-    timeoutEnable(true);
-    uint8_t response[1];
-    int8_t len = receivePayload(response, sizeof (response));
-    if (len > 0) {
-        // receiver RSSI
-        int8_t rssi = divRoundNearest(response[0], 2);
-        setOutputPower(rssi);
-    }
-}
-
-/**
  * Converts the raw temperature to °C and lets it float around the display.
  * 
  * @param rssi RSSI value
@@ -241,6 +235,37 @@ static Temperature readTemp(void) {
     return temp;
 }
 
+/**
+ * Handles the payload received from the transmitter.
+ * 
+ * @param flags
+ */
+static void handlePayload(PayloadFlags flags) {
+    uint8_t rssi = readRssi();
+    Temperature temp = readTemp();
+
+    // communicate RSSI back to transmitter
+    uint8_t payload[] = {rssi};
+    transmitPayload(payload, sizeof (payload), NODE2);
+
+    displayTemp(rssi, flags.crc, &temp);
+    startReceive();
+}
+
+/**
+ * Waits for a response from the receiver with timeout.
+ */
+static void waitResponse(void) {
+    timeoutEnable(true);
+    uint8_t response[1];
+    int8_t len = receivePayload(response, sizeof (response));
+    if (len > 0) {
+        // receiver RSSI
+        int8_t rssi = divRoundNearest(response[0], 2);
+        setOutputPower(rssi);
+    }
+}
+
 int main(void) {
     initUSART();
     initPins();
@@ -289,15 +314,7 @@ int main(void) {
         } else {
             PayloadFlags flags = payloadReady();
             if (flags.ready) {
-                uint8_t rssi = readRssi();
-                Temperature temp = readTemp();
-
-                // communicate RSSI back to transmitter
-                uint8_t payload[] = {rssi};
-                transmitPayload(payload, sizeof (payload), NODE2);
-
-                displayTemp(rssi, flags.crc, &temp);
-                startReceive();
+                handlePayload(flags);
             }
         }
 
