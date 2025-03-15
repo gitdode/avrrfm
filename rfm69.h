@@ -80,6 +80,8 @@
 #define F_STEP          6103515625ULL
 #define CAST_ADDRESS    0x84
 
+#define TIMEOUT_INTS    3 // about 100 milliseconds 
+
 /**
  * Initializes the radio module with the given carrier frequency in kilohertz
  * and node address.
@@ -99,6 +101,13 @@ void setOutputPower(uint8_t rssi);
  * @return ouput power
  */
 uint8_t getOutputPower(void);
+
+/**
+ * Enables or disables the radio timeout.
+ * 
+ * @param enable
+ */
+void timeoutEnable(bool enable);
 
 /**
  * Indicates a timeout.

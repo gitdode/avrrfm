@@ -34,7 +34,6 @@
 #include "unifont.h"
 
 #define MEASURE_INTS    4  // about 32 seconds
-#define TIMEOUT_INTS    30 // about one second
 
 #define LABEL_OFFSET    10
 
@@ -52,9 +51,6 @@
 /* 1 int = 8 seconds */
 static volatile uint8_t wdints = 0;
 
-static volatile bool toena = false;
-static volatile uint8_t toints = 0;
-
 /* Temp. label coordinates */
 static x_t xl = 0;
 static y_t yl = 0;
@@ -62,16 +58,11 @@ static x_t xo = 0;
 static y_t yo = 0;
 static width_t width = 0;
 
+/**
+ * Called when the watchdog barks.
+ */
 ISR(WDT_vect) {
     wdints++;
-}
-
-ISR(TIMER0_COMPA_vect) {
-    if (toena && toints++ >= TIMEOUT_INTS) {
-        toints = 0;
-        toena = false;
-        timeoutRadio();
-    }
 }
 
 /**
@@ -189,7 +180,7 @@ static void transmitTemp(uint8_t node) {
  * Waits for a response from the receiver with timeout.
  */
 static void waitResponse(void) {
-    toena = true;
+    timeoutEnable(true);
     uint8_t response[1];
     int8_t len = receivePayload(response, sizeof (response));
     if (len > 0) {
@@ -301,8 +292,7 @@ int main(void) {
                 uint8_t rssi = readRssi();
                 Temperature temp = readTemp();
 
-                // TODO delay?
-                _delay_ms(10);
+                // communicate RSSI back to transmitter
                 uint8_t payload[] = {rssi};
                 transmitPayload(payload, sizeof (payload), NODE2);
 

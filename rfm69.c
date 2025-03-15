@@ -11,6 +11,9 @@
 static volatile uint8_t irqFlags1 = 0;
 static volatile uint8_t irqFlags2 = 0;
 
+static volatile bool toena = false;
+static volatile uint8_t toints = 0;
+
 /**
  * Selects the radio to talk to via SPI.
  */
@@ -68,10 +71,25 @@ static void clearIrqFlags(void) {
     irqFlags2 = 0;
 }
 
+/**
+ * Reads interrupt flags when a radio interrupt occurs.
+ */
 ISR(INT0_vect) {
     irqFlags1 = regRead(IRQ_FLAGS1);
     irqFlags2 = regRead(IRQ_FLAGS2);
     // printString("irq\r\n");
+}
+
+/**
+ * Called about 30 times a second while the controller 
+ * isn't in power down sleep mode.
+ */
+ISR(TIMER0_COMPA_vect) {
+    if (toena && toints++ >= TIMEOUT_INTS) {
+        toints = 0;
+        toena = false;
+        timeoutRadio();
+    }
 }
 
 void initRadio(uint64_t freq, uint8_t node) {
@@ -194,6 +212,11 @@ uint8_t getOutputPower(void) {
     return regRead(PA_LEVEL);
 }
 
+void timeoutEnable(bool enable) {
+    toena = enable;
+    if (!enable) toints = 0;
+}
+
 void timeoutRadio(void) {
     irqFlags1 |= (1 << 2);
 }
@@ -254,8 +277,11 @@ size_t receivePayload(uint8_t *payload, size_t size) {
 
     // wait until "PayloadReady" or timeout
     do {} while (!(irqFlags2 & (1 << 2)) && !(irqFlags1 & (1 << 2)));
+    bool ready = irqFlags2 & (1 << 2);
     bool timeout = irqFlags1 & (1 << 2);
+    
     clearIrqFlags();
+    if (ready) timeoutEnable(false);
     setMode(MODE_STDBY);
 
     if (timeout) {
