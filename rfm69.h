@@ -103,6 +103,11 @@ void setOutputPower(uint8_t rssi);
 uint8_t getOutputPower(void);
 
 /**
+ * Gives a timer pulse to the radio.
+ */
+void timeRadio(void);
+
+/**
  * Enables or disables the radio timeout.
  * 
  * @param enable
