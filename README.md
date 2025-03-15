@@ -34,7 +34,7 @@ very good and in an actual "field" test, packet reception was still reliable
 with an RSSI of about -90 dBm at about 2.2 km distance - with simple wire 
 antennas. What would be the range with +20 dBm and decent antennas?  
 
-![IMG_20250306_180139c](https://github.com/user-attachments/assets/27c66e7a-ec16-4e98-9f94-7713fe54c7d0)
+![IMG_20250315_175920c](https://github.com/user-attachments/assets/03405774-57c2-42f1-a39a-8fa4cc2801ac)
 
 ![FieldTest3](https://github.com/user-attachments/assets/f2289f8e-1f81-4b85-9146-07c2ce1bb563)
 
