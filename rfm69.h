@@ -108,18 +108,6 @@ uint8_t getOutputPower(void);
 void timeRadio(void);
 
 /**
- * Enables or disables the radio timeout.
- * 
- * @param enable
- */
-void timeoutEnable(bool enable);
-
-/**
- * Indicates a timeout.
- */
-void timeoutRadio(void);
-
-/**
  * Shuts down the radio.
  */
 void sleepRadio(void);
@@ -166,9 +154,10 @@ size_t readPayload(uint8_t *payload, size_t size);
  * 
  * @param payload buffer for payload
  * @param size of payload buffer
+ * @param timeout enable timeout
  * @return payload bytes actually received
  */
-size_t receivePayload(uint8_t *payload, size_t size);
+size_t receivePayload(uint8_t *payload, size_t size, bool timeout);
 
 /**
  * Transmits up to 64 bytes of the given payload with the given node address.
