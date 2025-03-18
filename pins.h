@@ -33,6 +33,11 @@
 #define PIN_RCS   PB1 // radio chip select
 #define PIN_RRST  PB0 // radio reset
 
+/* SD Card */
+#define DDR_SDC   DDRD
+#define PORT_SDC  PORTD
+#define PIN_SDCS  PD4 // sdcard chip select
+
 /* Display */
 #define DDR_DISP  DDRD
 #define PORT_DISP PORTD

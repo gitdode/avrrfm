@@ -28,6 +28,7 @@
 #include "utils.h"
 #include "rfm69.h"
 #include "mcp9808.h"
+#include "sdcard.h"
 #include "tft.h"
 #include "display.h"
 #include "dejavu.h"
@@ -42,7 +43,7 @@
 #define NODE2   0x42
 
 #ifndef RECEIVER
-    #define RECEIVER    1
+    #define RECEIVER    0
 #endif
 
 /* Temp. label coordinates */
@@ -85,6 +86,9 @@ static void initPins(void) {
     DDR_RFM |= (1 << PIN_RCS);
     DDR_RFM |= (1 << PIN_RRST);
 
+    // set SD card CS as output pin
+    DDR_SDC |= (1 << PIN_SDCS);
+
     // set display CS, D/C and RST pin as output pin
     DDR_DISP |= (1 << PIN_DCS);
     DDR_DISP |= (1 << PIN_DDC);
@@ -92,6 +96,7 @@ static void initPins(void) {
 
     // drive output pins high
     PORT_RFM |= (1 << PIN_RCS);
+    PORT_SDC |= (1 << PIN_SDCS);
     PORT_DISP |= (1 << PIN_DCS);
     PORT_DISP |= (1 << PIN_DDC);
     PORT_DISP |= (1 << PIN_DRST);
@@ -101,6 +106,11 @@ static void initPins(void) {
  * Enables SPI master mode.
  */
 static void initSPI(void) {
+    // set 250 kHz @ 8 MHz F_CPU for starters
+    // SPCR &= ~(1 << SPR0);
+    // SPCR |= (1 << SPR1);
+    // SPSR |= (1 << SPI2X);
+
     SPCR |= (1 << MSTR);
     SPCR |= (1 << SPE);
 }
@@ -258,22 +268,35 @@ static void waitResponse(void) {
     }
 }
 
+static void receiveData(void) {
+    
+}
+
+static void transmitData(void) {
+    uint8_t block[SD_BLOCK_SIZE];
+    readSingleBlock(0, block);
+}
+
 int main(void) {
     initUSART();
     initPins();
     initSPI();
     initI2C();
     initRadioInt();
+    
+    printString("Hello Radio!\r\n");
+    
     if (!RECEIVER) {
         // used only for tx
-        initWatchdog();
-        initTimer();
+        // initWatchdog();
+        // initTimer();
     }
+    
+    bool sdcard = initSDCard();
+    // spiFast();
 
     // enable global interrupts
     sei();
-
-    printString("Hello Radio!\r\n");
 
     uint8_t node = RECEIVER ? NODE1 : NODE2;
     initRadio(868600, node);
@@ -283,6 +306,10 @@ int main(void) {
         fillArea(0, 0, DISPLAY_WIDTH, 16, BLACK);
         // initial rx mode
         startReceive();
+    }
+    
+    if (sdcard) {
+        transmitData();
     }
 
     while (true) {
@@ -310,8 +337,8 @@ int main(void) {
 
         // power down until woken up by watchdog (tx)
         // or "PayloadReady" (rx) interrupt
-        set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-        sleep_mode();
+        // set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+        // sleep_mode();
     }
 
     return 0;
