@@ -11,8 +11,11 @@
 static volatile uint8_t irqFlags1 = 0;
 static volatile uint8_t irqFlags2 = 0;
 
-static volatile bool timeoutEnabled = false;
-static volatile uint8_t timeoutInts = 0;
+static uint8_t watchdogInts = 0;
+static uint8_t measureInts = TRANSMIT_FAST;
+static uint8_t timeoutInts = 0;
+static uint8_t timeoutCount = 0;
+static bool timeoutEnabled = false;
 
 /**
  * Selects the radio to talk to via SPI.
@@ -86,6 +89,10 @@ static void timeoutEnable(bool enable) {
  */
 static void timeout(void) {
     irqFlags1 |= (1 << 2);
+    if (timeoutCount++ > MAX_TIMEOUTS) {
+        measureInts = TRANSMIT_SLOW;
+        timeoutCount = 0;
+    }
 }
 
 /**
@@ -217,6 +224,20 @@ uint8_t getOutputPower(void) {
     return regRead(PA_LEVEL);
 }
 
+void barkRadio(void) {
+    watchdogInts++;
+}
+
+bool wouldTransmit(void) {
+    if (watchdogInts % measureInts == 0) {
+        watchdogInts = 0;
+        
+        return true;
+    }
+    
+    return false;
+}
+
 void timeRadio(void) {
     if (timeoutEnabled && timeoutInts++ >= TIMEOUT_INTS) {
         timeoutEnable(false);
@@ -285,10 +306,14 @@ size_t receivePayload(uint8_t *payload, size_t size, bool timeout) {
     bool timedout = irqFlags1 & (1 << 2);
     
     clearIrqFlags();
-    if (ready) timeoutEnable(false);
+    if (ready) {
+        timeoutEnable(false);
+        measureInts = TRANSMIT_FAST;
+    }
     setMode(MODE_STDBY);
 
     if (timedout) {
+        // full power as last resort
         regWrite(PA_LEVEL, 0x5f);
 
         return 0;
