@@ -80,7 +80,10 @@
 #define F_STEP          6103515625ULL
 #define CAST_ADDRESS    0x84
 
-#define TIMEOUT_INTS    3 // about 100 milliseconds 
+#define TRANSMIT_FAST   1 // 4 ~ 32 seconds
+#define TRANSMIT_SLOW   9 // 38 ~ 5 minutes
+#define TIMEOUT_INTS    3 // about 100 milliseconds
+#define MAX_TIMEOUTS    9 // slow down tx attempts after so many timeouts
 
 /**
  * Initializes the radio module with the given carrier frequency in kilohertz
@@ -101,6 +104,18 @@ void setOutputPower(uint8_t rssi);
  * @return ouput power
  */
 uint8_t getOutputPower(void);
+
+/**
+ * Gives a watchdog "wakeup" pulse to the radio.
+ */
+void barkRadio(void);
+
+/**
+ * Returns true if the transmitter would actually transmit.
+ * 
+ * @return transmit or not
+ */
+bool wouldTransmit(void);
 
 /**
  * Gives a timer pulse to the radio.

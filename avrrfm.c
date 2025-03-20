@@ -33,13 +33,10 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define MEASURE_INTS    4  // about 32 seconds
-
 #define LABEL_OFFSET    10
-
-#define BLACK   0x0000
-#define RED     0xf800
-#define WHITE   0xffff
+#define BLACK           0x0000
+#define RED             0xf800
+#define WHITE           0xffff
 
 #define NODE1   0x24
 #define NODE2   0x42
@@ -47,9 +44,6 @@
 #ifndef RECEIVER
     #define RECEIVER    1
 #endif
-
-/* 1 int = 8 seconds */
-static volatile uint8_t wdints = 0;
 
 /* Temp. label coordinates */
 static x_t xl = 0;
@@ -59,15 +53,14 @@ static y_t yo = 0;
 static width_t width = 0;
 
 /**
- * Called when the watchdog barks.
+ * Called when the watchdog barks to wake up the transmitter.
  */
 ISR(WDT_vect) {
-    wdints++;
+    barkRadio();
 }
 
 /**
- * Called about 30 times a second while the controller 
- * isn't in power down sleep mode.
+ * Called while the controller isn't in power down sleep mode.
  */
 ISR(TIMER0_COMPA_vect) {
     timeRadio();
@@ -298,9 +291,7 @@ int main(void) {
         // _delay_ms(1000);
 
         if (!RECEIVER) {
-            if (wdints % MEASURE_INTS == 0) {
-                wdints = 0;
-
+            if (wouldTransmit()) {
                 enableSPI();
                 wakeTSens();
                 wakeRadio();
