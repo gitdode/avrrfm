@@ -3,11 +3,21 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="/home/dode/dev/avrrfm" name="0">
       <in>avrrfm.c</in>
+      <in>bitmaps.c</in>
+      <in>colorspace.c</in>
+      <in>dejavu.c</in>
+      <in>display.c</in>
+      <in>font.c</in>
+      <in>i2c.c</in>
       <in>mcp9808.c</in>
       <in>mcp9808.h</in>
       <in>rfm69.c</in>
       <in>rfm69.h</in>
+      <in>sdcard.c</in>
       <in>spi.c</in>
+      <in>tft.c</in>
+      <in>unifont.c</in>
+      <in>usart.c</in>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -45,6 +55,18 @@
       </compileType>
       <item path="/home/dode/dev/avrrfm/avrrfm.c" ex="false" tool="0" flavor2="3">
       </item>
+      <item path="/home/dode/dev/avrrfm/bitmaps.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="/home/dode/dev/avrrfm/colorspace.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="/home/dode/dev/avrrfm/dejavu.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="/home/dode/dev/avrrfm/display.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="/home/dode/dev/avrrfm/font.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="/home/dode/dev/avrrfm/i2c.c" ex="false" tool="0" flavor2="0">
+      </item>
       <item path="/home/dode/dev/avrrfm/mcp9808.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/mcp9808.h" ex="false" tool="3" flavor2="0">
@@ -53,7 +75,15 @@
       </item>
       <item path="/home/dode/dev/avrrfm/rfm69.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="/home/dode/dev/avrrfm/sdcard.c" ex="false" tool="0" flavor2="0">
+      </item>
       <item path="/home/dode/dev/avrrfm/spi.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="/home/dode/dev/avrrfm/tft.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="/home/dode/dev/avrrfm/unifont.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="/home/dode/dev/avrrfm/usart.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
   </confs>

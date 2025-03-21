@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   rfm69.c
  * Author: torsten.roemer@luniks.net
  *
@@ -33,7 +33,7 @@ static void spiDes(void) {
 
 /**
  * Writes the given value to the given register.
- * 
+ *
  * @param reg
  * @param value
  */
@@ -46,7 +46,7 @@ static void regWrite(uint8_t reg, uint8_t value) {
 
 /**
  * Reads and returns the value of the given register.
- * 
+ *
  * @param reg
  * @return value
  */
@@ -76,7 +76,7 @@ static void clearIrqFlags(void) {
 
 /**
  * Enables timeout (sets timeout interrupt flag on expiration).
- * 
+ *
  * @param enable
  */
 static void timeoutEnable(bool enable) {
@@ -89,7 +89,7 @@ static void timeoutEnable(bool enable) {
  */
 static void timeout(void) {
     irqFlags1 |= (1 << 2);
-    if (timeoutCount++ > MAX_TIMEOUTS) {
+    if (++timeoutCount > MAX_TIMEOUTS) {
         measureInts = TRANSMIT_SLOW;
         timeoutCount = 0;
     }
@@ -124,7 +124,7 @@ void initRadio(uint64_t freq, uint8_t node) {
     // regWrite(BITRATE_MSB, 0x0d);
     // regWrite(BITRATE_LSB, 0x05);
 
-    // frequency deviation (default 5 kHz) - increasing to 10 kHz 
+    // frequency deviation (default 5 kHz) - increasing to 10 kHz
     // completely removes susceptibility to temperature changes
     // RX_BW must be increased accordingly
     regWrite(FDEV_MSB, 0x00);
@@ -150,19 +150,19 @@ void initRadio(uint64_t freq, uint8_t node) {
     // regWrite(TEST_LNA, 0x2d);
 
     // freq of DC offset canceller and channel filter bandwith (default 10.4 kHz)
-    // increasing to 20.8 kHz in connection with setting FDEV_*SB to 10 kHz 
+    // increasing to 20.8 kHz in connection with setting FDEV_*SB to 10 kHz
     // completely removes susceptibility to temperature changes
     regWrite(RX_BW, 0x54);
 
     // RX_BW during AFC (default 0x8b)
     regWrite(AFC_BW, 0x54);
-    
+
     // AFC auto on
     // regWrite(AFC_FEI, 0x04);
 
     // RSSI threshold (default, POR 0xff)
     regWrite(RSSI_THRESH, 0xe4);
-    
+
     // Preamble size
     regWrite(PREAMB_MSB, 0x00);
     regWrite(PREAMB_LSB, 0x0f);
@@ -206,11 +206,15 @@ void initRadio(uint64_t freq, uint8_t node) {
 
     // set TX start condition to "at least one byte in FIFO"
     regWrite(FIFO_THRESH, 0x8f);
-    
+
     // Fading Margin Improvement, improved margin, use if AfcLowBetaOn=0
     regWrite(TEST_DAGC, 0x30);
 
     printString("Radio init done\r\n");
+}
+
+void setNodeAddress(uint8_t address) {
+    regWrite(NODE_ADDR, address);
 }
 
 void setOutputPower(uint8_t rssi) {
@@ -231,10 +235,10 @@ void barkRadio(void) {
 bool wouldTransmit(void) {
     if (watchdogInts % measureInts == 0) {
         watchdogInts = 0;
-        
+
         return true;
     }
-    
+
     return false;
 }
 
@@ -279,7 +283,7 @@ PayloadFlags payloadReady(void) {
 }
 
 size_t readPayload(uint8_t *payload, size_t size) {
-    size_t len = min(regRead(FIFO), FIFO_SIZE) - 1;
+    size_t len = regRead(FIFO);
     len = min(len, size);
 
     // TODO assume and ignore address for now
@@ -292,7 +296,6 @@ size_t readPayload(uint8_t *payload, size_t size) {
     }
     spiDes();
 
-    // FIXME this is not the actual length of the payload received
     return len;
 }
 
@@ -304,7 +307,7 @@ size_t receivePayload(uint8_t *payload, size_t size, bool timeout) {
     do {} while (!(irqFlags2 & (1 << 2)) && !(irqFlags1 & (1 << 2)));
     bool ready = irqFlags2 & (1 << 2);
     bool timedout = irqFlags1 & (1 << 2);
-    
+
     clearIrqFlags();
     if (ready) {
         timeoutEnable(false);
@@ -324,8 +327,8 @@ size_t receivePayload(uint8_t *payload, size_t size, bool timeout) {
 }
 
 size_t transmitPayload(uint8_t *payload, size_t size, uint8_t node) {
-    // payload + address byte
-    size_t len = min(size, FIFO_SIZE) + 1;
+    // message + address byte
+    size_t len = min(size, MESSAGE_SIZE) + 1;
 
     spiSel();
     transmit(FIFO | 0x80);
@@ -343,8 +346,8 @@ size_t transmitPayload(uint8_t *payload, size_t size, uint8_t node) {
 
     loop_until_bit_is_set(irqFlags2, 3);
     clearIrqFlags();
-    
+
     setMode(MODE_STDBY);
-    
+
     return len;
 }

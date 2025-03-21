@@ -28,6 +28,7 @@
 #include "utils.h"
 #include "rfm69.h"
 #include "mcp9808.h"
+#include "sdcard.h"
 #include "tft.h"
 #include "display.h"
 #include "dejavu.h"
@@ -38,6 +39,7 @@
 #define RED             0xf800
 #define WHITE           0xffff
 
+#define NODE0   0x12
 #define NODE1   0x24
 #define NODE2   0x42
 
@@ -85,6 +87,9 @@ static void initPins(void) {
     DDR_RFM |= (1 << PIN_RCS);
     DDR_RFM |= (1 << PIN_RRST);
 
+    // set SD card CS as output pin
+    DDR_SDC |= (1 << PIN_SDCS);
+
     // set display CS, D/C and RST pin as output pin
     DDR_DISP |= (1 << PIN_DCS);
     DDR_DISP |= (1 << PIN_DDC);
@@ -92,6 +97,7 @@ static void initPins(void) {
 
     // drive output pins high
     PORT_RFM |= (1 << PIN_RCS);
+    PORT_SDC |= (1 << PIN_SDCS);
     PORT_DISP |= (1 << PIN_DCS);
     PORT_DISP |= (1 << PIN_DDC);
     PORT_DISP |= (1 << PIN_DRST);
@@ -101,6 +107,7 @@ static void initPins(void) {
  * Enables SPI master mode.
  */
 static void initSPI(void) {
+    // default fOSC/4
     SPCR |= (1 << MSTR);
     SPCR |= (1 << SPE);
 }
@@ -179,7 +186,7 @@ static void transmitTemp(uint8_t node) {
 
 /**
  * Converts the raw temperature to °C and lets it float around the display.
- * 
+ *
  * @param rssi RSSI value
  * @param crc CRC result
  * @param temp temperature + info
@@ -214,7 +221,7 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
 
 /**
  * Reads and returns the raw temperature + other info.
- * 
+ *
  * @return temperature + info
  */
 static Temperature readTemp(void) {
@@ -230,7 +237,7 @@ static Temperature readTemp(void) {
 
 /**
  * Handles the payload received from the transmitter.
- * 
+ *
  * @param flags
  */
 static void handlePayload(PayloadFlags flags) {
@@ -258,22 +265,66 @@ static void waitResponse(void) {
     }
 }
 
+/**
+ * Receives data read from SD card.
+ *
+ * @param flags
+ */
+static void receiveData(PayloadFlags flags) {
+    uint8_t payload[MESSAGE_SIZE + 1]; // + address byte
+    uint8_t len = readPayload(payload, sizeof (payload));
+
+    char buf[MESSAGE_SIZE + 1];
+    snprintf(buf, len, "%s", payload);
+    printString(buf);
+    _delay_ms(10);
+
+    startReceive();
+}
+
+/**
+ * Transmits data read from SD card.
+ */
+static void transmitData(void) {
+    uint8_t block[SD_BLOCK_SIZE];
+    bool read = readSingleBlock(0, block);
+    if (read) {
+        void *start = &block;
+        div_t packets = div(SD_BLOCK_SIZE, MESSAGE_SIZE);
+        for (size_t i = 0; i < packets.quot; i++) {
+            transmitPayload(start, MESSAGE_SIZE, NODE0);
+            start += MESSAGE_SIZE;
+            // a little break in between packets for now
+            _delay_ms(100);
+        }
+        if (packets.rem > 0) {
+            transmitPayload(start, packets.rem, NODE0);
+        }
+    }
+}
+
 int main(void) {
     initUSART();
     initPins();
     initSPI();
     initI2C();
     initRadioInt();
+    bool sdcard = false;
+
+    printString("Hello Radio!\r\n");
+
     if (!RECEIVER) {
         // used only for tx
         initWatchdog();
         initTimer();
+        // TODO with the radio breakout on the same SPI bus,
+        // first SD card init fails, second succeeds always
+        sdcard = initSDCard();
+        if (!sdcard) sdcard = initSDCard();
     }
 
     // enable global interrupts
     sei();
-
-    printString("Hello Radio!\r\n");
 
     uint8_t node = RECEIVER ? NODE1 : NODE2;
     initRadio(868600, node);
@@ -295,8 +346,12 @@ int main(void) {
                 enableSPI();
                 wakeTSens();
                 wakeRadio();
-                transmitTemp(NODE1);
-                waitResponse();
+                if (sdcard) {
+                    transmitData();
+                } else {
+                    transmitTemp(NODE1);
+                    waitResponse();
+                }
                 sleepTSens();
                 sleepRadio();
                 disableSPI();
@@ -305,6 +360,7 @@ int main(void) {
             PayloadFlags flags = payloadReady();
             if (flags.ready) {
                 handlePayload(flags);
+                // receiveData(flags);
             }
         }
 

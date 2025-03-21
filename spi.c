@@ -10,7 +10,7 @@
 void spiSlow(void) {
     SPCR &= ~(1 << SPR0);
     SPCR |= (1 << SPR1);
-    SPSR &= ~(1 << SPI2X);
+    SPSR |= (1 << SPI2X);
 }
 
 void spiFast(void) {
