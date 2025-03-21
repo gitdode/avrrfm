@@ -89,7 +89,7 @@ static void timeoutEnable(bool enable) {
  */
 static void timeout(void) {
     irqFlags1 |= (1 << 2);
-    if (timeoutCount++ > MAX_TIMEOUTS) {
+    if (++timeoutCount > MAX_TIMEOUTS) {
         measureInts = TRANSMIT_SLOW;
         timeoutCount = 0;
     }
