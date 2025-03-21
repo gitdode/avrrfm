@@ -268,21 +268,26 @@ static void waitResponse(void) {
     }
 }
 
+/**
+ * Receives data read from SD card.
+ */
 static void receiveData(void) {
     
 }
 
+/**
+ * Transmits data read from SD card.
+ */
 static void transmitData(void) {
     uint8_t block[SD_BLOCK_SIZE];
     bool read = readSingleBlock(0, block);
     
     if (read) {
-        char buf[64];
-        snprintf(buf, sizeof (buf), "%s\r\n", block);
-        printString(buf);
-        
-        transmitPayload(block, FIFO_SIZE, NODE1);
-        printString("Transmitted\r\n");
+        void *start = &block;
+        for (size_t i = 0; i < SD_BLOCK_SIZE / FIFO_SIZE; i++) {
+            transmitPayload(start, FIFO_SIZE, 0x12);
+            start += FIFO_SIZE;
+        }
     }
 }
 
@@ -295,15 +300,14 @@ int main(void) {
     
     printString("Hello Radio!\r\n");
     
+    bool sdcard = false;
     if (!RECEIVER) {
         // used only for tx
-        // initWatchdog();
-        // initTimer();
+        initWatchdog();
+        initTimer();
+        sdcard = initSDCard();
     }
     
-    bool sdcard = initSDCard();
-    // spiFast();
-
     // enable global interrupts
     sei();
 
@@ -346,8 +350,8 @@ int main(void) {
 
         // power down until woken up by watchdog (tx)
         // or "PayloadReady" (rx) interrupt
-        // set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-        // sleep_mode();
+        set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+        sleep_mode();
     }
 
     return 0;

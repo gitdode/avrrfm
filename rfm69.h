@@ -80,10 +80,10 @@
 #define F_STEP          6103515625ULL
 #define CAST_ADDRESS    0x84
 
-#define TRANSMIT_FAST   1 // 4 ~ 32 seconds
-#define TRANSMIT_SLOW   9 // 38 ~ 5 minutes
-#define TIMEOUT_INTS    3 // about 100 milliseconds
-#define MAX_TIMEOUTS    9 // slow down tx attempts after so many timeouts
+#define TRANSMIT_FAST   4  // 4 ~ 32 seconds
+#define TRANSMIT_SLOW   38 // 38 ~ 5 minutes
+#define TIMEOUT_INTS    3  // about 100 milliseconds
+#define MAX_TIMEOUTS    9  // slow down tx attempts after so many timeouts
 
 /**
  * Initializes the radio module with the given carrier frequency in kilohertz
