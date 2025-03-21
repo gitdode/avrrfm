@@ -274,7 +274,16 @@ static void receiveData(void) {
 
 static void transmitData(void) {
     uint8_t block[SD_BLOCK_SIZE];
-    readSingleBlock(0, block);
+    bool read = readSingleBlock(0, block);
+    
+    if (read) {
+        char buf[64];
+        snprintf(buf, sizeof (buf), "%s\r\n", block);
+        printString(buf);
+        
+        transmitPayload(block, FIFO_SIZE, NODE1);
+        printString("Transmitted\r\n");
+    }
 }
 
 int main(void) {
