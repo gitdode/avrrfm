@@ -36,9 +36,19 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/48b9ad18/avrrfm.o \
+	${OBJECTDIR}/_ext/48b9ad18/bitmaps.o \
+	${OBJECTDIR}/_ext/48b9ad18/colorspace.o \
+	${OBJECTDIR}/_ext/48b9ad18/dejavu.o \
+	${OBJECTDIR}/_ext/48b9ad18/display.o \
+	${OBJECTDIR}/_ext/48b9ad18/font.o \
+	${OBJECTDIR}/_ext/48b9ad18/i2c.o \
 	${OBJECTDIR}/_ext/48b9ad18/mcp9808.o \
 	${OBJECTDIR}/_ext/48b9ad18/rfm69.o \
-	${OBJECTDIR}/_ext/48b9ad18/spi.o
+	${OBJECTDIR}/_ext/48b9ad18/sdcard.o \
+	${OBJECTDIR}/_ext/48b9ad18/spi.o \
+	${OBJECTDIR}/_ext/48b9ad18/tft.o \
+	${OBJECTDIR}/_ext/48b9ad18/unifont.o \
+	${OBJECTDIR}/_ext/48b9ad18/usart.o
 
 
 # C Compiler Flags
@@ -69,6 +79,30 @@ ${OBJECTDIR}/_ext/48b9ad18/avrrfm.o: /home/dode/dev/avrrfm/avrrfm.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
 	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -std=c99 -o ${OBJECTDIR}/_ext/48b9ad18/avrrfm.o /home/dode/dev/avrrfm/avrrfm.c
 
+${OBJECTDIR}/_ext/48b9ad18/bitmaps.o: /home/dode/dev/avrrfm/bitmaps.c
+	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/bitmaps.o /home/dode/dev/avrrfm/bitmaps.c
+
+${OBJECTDIR}/_ext/48b9ad18/colorspace.o: /home/dode/dev/avrrfm/colorspace.c
+	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/colorspace.o /home/dode/dev/avrrfm/colorspace.c
+
+${OBJECTDIR}/_ext/48b9ad18/dejavu.o: /home/dode/dev/avrrfm/dejavu.c
+	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/dejavu.o /home/dode/dev/avrrfm/dejavu.c
+
+${OBJECTDIR}/_ext/48b9ad18/display.o: /home/dode/dev/avrrfm/display.c
+	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/display.o /home/dode/dev/avrrfm/display.c
+
+${OBJECTDIR}/_ext/48b9ad18/font.o: /home/dode/dev/avrrfm/font.c
+	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/font.o /home/dode/dev/avrrfm/font.c
+
+${OBJECTDIR}/_ext/48b9ad18/i2c.o: /home/dode/dev/avrrfm/i2c.c
+	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/i2c.o /home/dode/dev/avrrfm/i2c.c
+
 ${OBJECTDIR}/_ext/48b9ad18/mcp9808.o: /home/dode/dev/avrrfm/mcp9808.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
 	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/mcp9808.o /home/dode/dev/avrrfm/mcp9808.c
@@ -77,9 +111,25 @@ ${OBJECTDIR}/_ext/48b9ad18/rfm69.o: /home/dode/dev/avrrfm/rfm69.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
 	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/rfm69.o /home/dode/dev/avrrfm/rfm69.c
 
+${OBJECTDIR}/_ext/48b9ad18/sdcard.o: /home/dode/dev/avrrfm/sdcard.c
+	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/sdcard.o /home/dode/dev/avrrfm/sdcard.c
+
 ${OBJECTDIR}/_ext/48b9ad18/spi.o: /home/dode/dev/avrrfm/spi.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
 	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -std=c99 -o ${OBJECTDIR}/_ext/48b9ad18/spi.o /home/dode/dev/avrrfm/spi.c
+
+${OBJECTDIR}/_ext/48b9ad18/tft.o: /home/dode/dev/avrrfm/tft.c
+	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/tft.o /home/dode/dev/avrrfm/tft.c
+
+${OBJECTDIR}/_ext/48b9ad18/unifont.o: /home/dode/dev/avrrfm/unifont.c
+	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/unifont.o /home/dode/dev/avrrfm/unifont.c
+
+${OBJECTDIR}/_ext/48b9ad18/usart.o: /home/dode/dev/avrrfm/usart.c
+	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/usart.o /home/dode/dev/avrrfm/usart.c
 
 # Subprojects
 .build-subprojects:

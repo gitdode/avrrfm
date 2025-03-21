@@ -54,6 +54,7 @@
 #define SYNC_VAL7   0x35
 #define SYNC_VAL8   0x36
 #define PCK_CFG1    0x37
+#define PAYLOAD_LEN 0x38
 #define NODE_ADDR   0x39
 #define CAST_ADDR   0x3a
 #define AUTO_MODES  0x3b
@@ -76,7 +77,7 @@
 #define PA_MIN      16
 #define PA_MAX      31
 
-#define FIFO_SIZE       64
+#define MESSAGE_SIZE    63
 #define F_STEP          6103515625ULL
 #define CAST_ADDRESS    0x84
 
@@ -90,6 +91,13 @@
  * and node address.
  */
 void initRadio(uint64_t freq, uint8_t node);
+
+/**
+ * Sets the node address.
+ * 
+ * @param address
+ */
+void setNodeAddress(uint8_t address);
 
 /**
  * Sets the output power based on the given receiver RSSI.

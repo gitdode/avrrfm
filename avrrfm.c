@@ -39,11 +39,12 @@
 #define RED             0xf800
 #define WHITE           0xffff
 
+#define NODE0   0x12
 #define NODE1   0x24
 #define NODE2   0x42
 
 #ifndef RECEIVER
-    #define RECEIVER    0
+    #define RECEIVER    1
 #endif
 
 /* Temp. label coordinates */
@@ -106,11 +107,7 @@ static void initPins(void) {
  * Enables SPI master mode.
  */
 static void initSPI(void) {
-    // set 250 kHz @ 8 MHz F_CPU for starters
-    // SPCR &= ~(1 << SPR0);
-    // SPCR |= (1 << SPR1);
-    // SPSR |= (1 << SPI2X);
-
+    // default fOSC/4
     SPCR |= (1 << MSTR);
     SPCR |= (1 << SPE);
 }
@@ -189,7 +186,7 @@ static void transmitTemp(uint8_t node) {
 
 /**
  * Converts the raw temperature to °C and lets it float around the display.
- * 
+ *
  * @param rssi RSSI value
  * @param crc CRC result
  * @param temp temperature + info
@@ -224,7 +221,7 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
 
 /**
  * Reads and returns the raw temperature + other info.
- * 
+ *
  * @return temperature + info
  */
 static Temperature readTemp(void) {
@@ -240,7 +237,7 @@ static Temperature readTemp(void) {
 
 /**
  * Handles the payload received from the transmitter.
- * 
+ *
  * @param flags
  */
 static void handlePayload(PayloadFlags flags) {
@@ -270,9 +267,19 @@ static void waitResponse(void) {
 
 /**
  * Receives data read from SD card.
+ *
+ * @param flags
  */
-static void receiveData(void) {
-    
+static void receiveData(PayloadFlags flags) {
+    uint8_t payload[MESSAGE_SIZE + 1]; // + address byte
+    uint8_t len = readPayload(payload, sizeof (payload));
+
+    char buf[MESSAGE_SIZE + 1];
+    snprintf(buf, len, "%s", payload);
+    printString(buf);
+    _delay_ms(10);
+
+    startReceive();
 }
 
 /**
@@ -281,12 +288,17 @@ static void receiveData(void) {
 static void transmitData(void) {
     uint8_t block[SD_BLOCK_SIZE];
     bool read = readSingleBlock(0, block);
-    
     if (read) {
         void *start = &block;
-        for (size_t i = 0; i < SD_BLOCK_SIZE / FIFO_SIZE; i++) {
-            transmitPayload(start, FIFO_SIZE, 0x12);
-            start += FIFO_SIZE;
+        div_t packets = div(SD_BLOCK_SIZE, MESSAGE_SIZE);
+        for (size_t i = 0; i < packets.quot; i++) {
+            transmitPayload(start, MESSAGE_SIZE, NODE0);
+            start += MESSAGE_SIZE;
+            // a little break in between packets for now
+            _delay_ms(100);
+        }
+        if (packets.rem > 0) {
+            transmitPayload(start, packets.rem, NODE0);
         }
     }
 }
@@ -297,17 +309,20 @@ int main(void) {
     initSPI();
     initI2C();
     initRadioInt();
-    
-    printString("Hello Radio!\r\n");
-    
     bool sdcard = false;
+
+    printString("Hello Radio!\r\n");
+
     if (!RECEIVER) {
         // used only for tx
         initWatchdog();
         initTimer();
+        // TODO with the radio breakout on the same SPI bus,
+        // first SD card init fails, second succeeds always
         sdcard = initSDCard();
+        if (!sdcard) sdcard = initSDCard();
     }
-    
+
     // enable global interrupts
     sei();
 
@@ -320,10 +335,6 @@ int main(void) {
         // initial rx mode
         startReceive();
     }
-    
-    if (sdcard) {
-        transmitData();
-    }
 
     while (true) {
         // do something else besides tx/rx
@@ -335,8 +346,12 @@ int main(void) {
                 enableSPI();
                 wakeTSens();
                 wakeRadio();
-                transmitTemp(NODE1);
-                waitResponse();
+                if (sdcard) {
+                    transmitData();
+                } else {
+                    transmitTemp(NODE1);
+                    waitResponse();
+                }
                 sleepTSens();
                 sleepRadio();
                 disableSPI();
@@ -345,6 +360,7 @@ int main(void) {
             PayloadFlags flags = payloadReady();
             if (flags.ready) {
                 handlePayload(flags);
+                // receiveData(flags);
             }
         }
 
