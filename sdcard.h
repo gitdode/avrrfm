@@ -23,31 +23,30 @@
 #define CMD8_ARG    0x0000001aa
 #define CMD8_CRC    0x86
 
-// TODO CRC
 #define CMD12       12
 #define CMD12_ARG   0x00000000
-#define CMD12_CRC   0x00
+#define CMD12_CRC   0x60
 
 #define CMD17       17
-#define CMD17_CRC   0x3b
+#define CMD17_CRC   0x00
 
 #define CMD18       18
-#define CMD18_CRC   0x57
+#define CMD18_CRC   0x00
 
 #define CMD24       24
-#define CMD24_CRC   0x6f
+#define CMD24_CRC   0x00
 
 #define CMD55       55
 #define CMD55_ARG   0x00000000
-#define CMD55_CRC   0x65
+#define CMD55_CRC   0x64
 
 #define CMD58       58
 #define CMD58_ARG   0x00000000
-#define CMD58_CRC   0xfd
+#define CMD58_CRC   0xfc
 
 #define ACMD41      41
 #define ACMD41_ARG  0x40000000
-#define ACMD41_CRC  0x77
+#define ACMD41_CRC  0x76
 
 // TODO depends on SPI SCK frequency
 #define SD_MAX_READ     50000 // SPI clock ticks in 100 ms
