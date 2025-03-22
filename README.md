@@ -15,9 +15,11 @@ sensor is periodically transmitted to the receiver.
 To save battery power, the controller, radio module and temperature sensor 
 are put to power down/sleep mode in between transmissions. The idle current 
 is ~57 uA, which is still quite a lot (< 10 uA should be possible), but already 
-better than 8 mA 🙂
+better than 8 mA 🙂  
+There is basic SD card support to test sending larger amounts of data, but 
+it might be useful for something else like a data logger.  
 
-![IMG_20250212_190518](https://github.com/user-attachments/assets/dd87b7de-c97d-4ecb-ab24-f5a34b849914)
+![IMG_20250322_012126](https://github.com/user-attachments/assets/e641ddd8-ca52-4149-8d73-3dcee39b7768)
 
 The receiver currently converts the raw temperature reading to °C and displays 
 it with the RSSI value, CRC result and transmitter output power on a nice IPS 
