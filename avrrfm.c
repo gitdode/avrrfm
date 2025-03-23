@@ -317,10 +317,7 @@ int main(void) {
         // used only for tx
         initWatchdog();
         initTimer();
-        // TODO with the radio breakout on the same SPI bus,
-        // first SD card init fails, second succeeds always
         sdcard = initSDCard();
-        if (!sdcard) sdcard = initSDCard();
     }
 
     // enable global interrupts
