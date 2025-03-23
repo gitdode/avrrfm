@@ -44,7 +44,7 @@
 #define NODE2   0x42
 
 #ifndef RECEIVER
-    #define RECEIVER    1
+    #define RECEIVER    0
 #endif
 
 /* Temp. label coordinates */
@@ -66,6 +66,13 @@ ISR(WDT_vect) {
  */
 ISR(TIMER0_COMPA_vect) {
     timeRadio();
+}
+
+/**
+ * Called when an INT0 interrupt occurs.
+ */
+ISR(INT0_vect) {
+    intRadio();
 }
 
 /**
@@ -241,7 +248,7 @@ static Temperature readTemp(void) {
  * @param flags
  */
 static void handlePayload(PayloadFlags flags) {
-    uint8_t rssi = readRssi();
+    uint8_t rssi = getRssi();
     Temperature temp = readTemp();
 
     // communicate RSSI back to transmitter

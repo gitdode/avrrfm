@@ -93,11 +93,52 @@
 void initRadio(uint64_t freq, uint8_t node);
 
 /**
+ * Should be called when a radio interrupt occurred, i.e. 'PayloadReady'.
+ */
+void intRadio(void);
+
+/**
+ * Gives a timer pulse to the radio. Used to time-out blocking functions,
+ * i.e. transmitter waiting for a response from the receiver.
+ */
+void timeRadio(void);
+
+/**
+ * Gives a watchdog "wakeup" pulse to the radio. Used to wake up the 
+ * transmitter periodically.
+ */
+void barkRadio(void);
+
+/**
+ * Returns true if the transmitter would actually transmit.
+ * 
+ * @return transmit or not
+ */
+bool wouldTransmit(void);
+
+/**
+ * Shuts down the radio.
+ */
+void sleepRadio(void);
+
+/**
+ * Wakes up the radio.
+ */
+void wakeRadio(void);
+
+/**
  * Sets the node address.
  * 
  * @param address
  */
 void setNodeAddress(uint8_t address);
+
+/**
+ * Returns the current RSSI value.
+ * 
+ * @return rssi value
+ */
+uint8_t getRssi(void);
 
 /**
  * Sets the output power based on the given receiver RSSI.
@@ -114,43 +155,9 @@ void setOutputPower(uint8_t rssi);
 uint8_t getOutputPower(void);
 
 /**
- * Gives a watchdog "wakeup" pulse to the radio.
- */
-void barkRadio(void);
-
-/**
- * Returns true if the transmitter would actually transmit.
- * 
- * @return transmit or not
- */
-bool wouldTransmit(void);
-
-/**
- * Gives a timer pulse to the radio.
- */
-void timeRadio(void);
-
-/**
- * Shuts down the radio.
- */
-void sleepRadio(void);
-
-/**
- * Wakes up the radio.
- */
-void wakeRadio(void);
-
-/**
  * Sets the radio to receive mode and maps "PayloadReady" to DIO0.
  */
 void startReceive(void);
-
-/**
- * Returns the current RSSI value.
- * 
- * @return rssi value
- */
-uint8_t readRssi(void);
 
 /**
  * Returns true if a "PayloadReady" interrupt arrived and clears the
