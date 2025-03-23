@@ -81,9 +81,7 @@
 #define F_STEP          6103515625ULL
 #define CAST_ADDRESS    0x84
 
-#define TRANSMIT_FAST   4  // 4 ~ 32 seconds
-#define TRANSMIT_SLOW   38 // 38 ~ 5 minutes
-#define TIMEOUT_INTS    3  // about 100 milliseconds
+#define TIMEOUT_INTS    3  // about 100 milliseconds @ 30 Hz
 #define MAX_TIMEOUTS    9  // slow down tx attempts after so many timeouts
 
 /**
@@ -100,21 +98,10 @@ void intRadio(void);
 /**
  * Gives a timer pulse to the radio. Used to time-out blocking functions,
  * i.e. transmitter waiting for a response from the receiver.
+ * TIMEOUT_INTS must be adjusted according to the frequency with that 
+ * this function is called.
  */
 void timeRadio(void);
-
-/**
- * Gives a watchdog "wakeup" pulse to the radio. Used to wake up the 
- * transmitter periodically.
- */
-void barkRadio(void);
-
-/**
- * Returns true if the transmitter would actually transmit.
- * 
- * @return transmit or not
- */
-bool wouldTransmit(void);
 
 /**
  * Shuts down the radio.

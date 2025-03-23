@@ -8,13 +8,10 @@
 #include "rfm69.h"
 #include "types.h"
 
-static uint8_t irqFlags1 = 0;
-static uint8_t irqFlags2 = 0;
-static uint8_t watchdogInts = 0;
-static uint8_t measureInts = TRANSMIT_FAST;
-static uint8_t timeoutInts = 0;
-static uint8_t timeoutCount = 0;
-static bool timeoutEnabled = false;
+static volatile uint8_t irqFlags1 = 0;
+static volatile uint8_t irqFlags2 = 0;
+static volatile uint8_t timeoutInts = 0;
+static volatile bool timeoutEnabled = false;
 
 /**
  * Selects the radio to talk to via SPI.
@@ -88,10 +85,6 @@ static void timeoutEnable(bool enable) {
  */
 static void timeout(void) {
     irqFlags1 |= (1 << 2);
-    if (++timeoutCount > MAX_TIMEOUTS) {
-        measureInts = TRANSMIT_SLOW;
-        timeoutCount = 0;
-    }
 }
 
 void initRadio(uint64_t freq, uint8_t node) {
@@ -209,7 +202,6 @@ void initRadio(uint64_t freq, uint8_t node) {
 void intRadio(void) {
     irqFlags1 = regRead(IRQ_FLAGS1);
     irqFlags2 = regRead(IRQ_FLAGS2);
-    // printString("irq\r\n");
 }
 
 void timeRadio(void) {
@@ -217,20 +209,6 @@ void timeRadio(void) {
         timeoutEnable(false);
         timeout();
     }
-}
-
-void barkRadio(void) {
-    watchdogInts++;
-}
-
-bool wouldTransmit(void) {
-    if (watchdogInts % measureInts == 0) {
-        watchdogInts = 0;
-
-        return true;
-    }
-
-    return false;
 }
 
 void sleepRadio(void) {
@@ -310,8 +288,6 @@ size_t receivePayload(uint8_t *payload, size_t size, bool timeout) {
     clearIrqFlags();
     if (ready) {
         timeoutEnable(false);
-        timeoutCount = 0;
-        measureInts = TRANSMIT_FAST;
     }
     setMode(MODE_STDBY);
 

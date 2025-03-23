@@ -34,6 +34,9 @@
 #include "dejavu.h"
 #include "unifont.h"
 
+#define TRANSMIT_FAST   4  // 4 ~ 32 seconds
+#define TRANSMIT_SLOW   38 // 38 ~ 5 minutes
+
 #define LABEL_OFFSET    10
 #define BLACK           0x0000
 #define RED             0xf800
@@ -44,8 +47,12 @@
 #define NODE2   0x42
 
 #ifndef RECEIVER
-    #define RECEIVER    0
+    #define RECEIVER    1
 #endif
+
+static volatile uint8_t watchdogInts = 0;
+static uint8_t measureInts = TRANSMIT_FAST;
+static uint8_t timeoutCount = 0;
 
 /* Temp. label coordinates */
 static x_t xl = 0;
@@ -58,7 +65,7 @@ static width_t width = 0;
  * Called when the watchdog barks to wake up the transmitter.
  */
 ISR(WDT_vect) {
-    barkRadio();
+    watchdogInts++;
 }
 
 /**
@@ -261,15 +268,21 @@ static void handlePayload(PayloadFlags flags) {
 
 /**
  * Waits for a response from the receiver with timeout.
+ *
+ * @return true if timeout occurred, false otherwise
  */
-static void waitResponse(void) {
+static bool waitResponse(void) {
     uint8_t response[1];
     int8_t len = receivePayload(response, sizeof (response), true);
     if (len > 0) {
         // receiver RSSI
         int8_t rssi = divRoundNearest(response[0], 2);
         setOutputPower(rssi);
+
+        return false;
     }
+
+    return true;
 }
 
 /**
@@ -346,7 +359,9 @@ int main(void) {
         // _delay_ms(1000);
 
         if (!RECEIVER) {
-            if (wouldTransmit()) {
+            if (watchdogInts % measureInts == 0) {
+                watchdogInts = 0;
+
                 enableSPI();
                 wakeTSens();
                 wakeRadio();
@@ -354,7 +369,16 @@ int main(void) {
                     transmitData();
                 } else {
                     transmitTemp(NODE1);
-                    waitResponse();
+                    bool timeout = waitResponse();
+                    if (timeout) {
+                        if (++timeoutCount > MAX_TIMEOUTS) {
+                            measureInts = TRANSMIT_SLOW;
+                            timeoutCount = 0;
+                        }
+                    } else {
+                        timeoutCount = 0;
+                        measureInts = TRANSMIT_FAST;
+                    }
                 }
                 sleepTSens();
                 sleepRadio();
