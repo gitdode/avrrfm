@@ -55,6 +55,11 @@ typedef struct {
 } Temperature;
 
 /**
+ * Pointer to a function that takes no argument and returns void.
+ */
+typedef void (*Function)(void);
+
+/**
  * Pointer to a function that takes an array of bytes
  * and returns a boolean.
  */

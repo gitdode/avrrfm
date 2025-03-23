@@ -10,12 +10,8 @@
 
 static volatile uint8_t irqFlags1 = 0;
 static volatile uint8_t irqFlags2 = 0;
-
-static uint8_t watchdogInts = 0;
-static uint8_t measureInts = TRANSMIT_FAST;
-static uint8_t timeoutInts = 0;
-static uint8_t timeoutCount = 0;
-static bool timeoutEnabled = false;
+static volatile uint8_t timeoutInts = 0;
+static volatile bool timeoutEnabled = false;
 
 /**
  * Selects the radio to talk to via SPI.
@@ -89,19 +85,6 @@ static void timeoutEnable(bool enable) {
  */
 static void timeout(void) {
     irqFlags1 |= (1 << 2);
-    if (++timeoutCount > MAX_TIMEOUTS) {
-        measureInts = TRANSMIT_SLOW;
-        timeoutCount = 0;
-    }
-}
-
-/**
- * Reads interrupt flags when a radio interrupt occurs.
- */
-ISR(INT0_vect) {
-    irqFlags1 = regRead(IRQ_FLAGS1);
-    irqFlags2 = regRead(IRQ_FLAGS2);
-    // printString("irq\r\n");
 }
 
 void initRadio(uint64_t freq, uint8_t node) {
@@ -213,33 +196,12 @@ void initRadio(uint64_t freq, uint8_t node) {
     printString("Radio init done\r\n");
 }
 
-void setNodeAddress(uint8_t address) {
-    regWrite(NODE_ADDR, address);
-}
-
-void setOutputPower(uint8_t rssi) {
-    uint8_t pa = 0x40; // -18 dBm with PA1
-    // adjust power from -2 to +13 dBm
-    pa += min(max(rssi - 69, PA_MIN), PA_MAX);
-    regWrite(PA_LEVEL, pa);
-}
-
-uint8_t getOutputPower(void) {
-    return regRead(PA_LEVEL);
-}
-
-void barkRadio(void) {
-    watchdogInts++;
-}
-
-bool wouldTransmit(void) {
-    if (watchdogInts % measureInts == 0) {
-        watchdogInts = 0;
-
-        return true;
-    }
-
-    return false;
+/**
+ * Reads interrupt flags when a radio interrupt occurs.
+ */
+void intRadio(void) {
+    irqFlags1 = regRead(IRQ_FLAGS1);
+    irqFlags2 = regRead(IRQ_FLAGS2);
 }
 
 void timeRadio(void) {
@@ -259,15 +221,30 @@ void wakeRadio(void) {
     _delay_ms(5);
 }
 
+void setNodeAddress(uint8_t address) {
+    regWrite(NODE_ADDR, address);
+}
+
+uint8_t getRssi(void) {
+    return regRead(RSSI_VALUE);
+}
+
+void setOutputPower(uint8_t rssi) {
+    uint8_t pa = 0x40; // -18 dBm with PA1
+    // adjust power from -2 to +13 dBm
+    pa += min(max(rssi - 69, PA_MIN), PA_MAX);
+    regWrite(PA_LEVEL, pa);
+}
+
+uint8_t getOutputPower(void) {
+    return regRead(PA_LEVEL);
+}
+
 void startReceive(void) {
     // get "PayloadReady" on DIO0
     regWrite(DIO_MAP1, 0x40);
 
     setMode(MODE_RX);
-}
-
-uint8_t readRssi(void) {
-    return regRead(RSSI_VALUE);
 }
 
 PayloadFlags payloadReady(void) {
@@ -311,8 +288,6 @@ size_t receivePayload(uint8_t *payload, size_t size, bool timeout) {
     clearIrqFlags();
     if (ready) {
         timeoutEnable(false);
-        timeoutCount = 0;
-        measureInts = TRANSMIT_FAST;
     }
     setMode(MODE_STDBY);
 

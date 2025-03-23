@@ -200,12 +200,12 @@ bool initSDCard(void) {
 
     // CMD0 - go to idle state
     response[0] = sendIdle();
-    if (response[0] > 0x01) {
+    if (response[0] != 0x01) {
         // retry solves failure possibly caused by another component
         // on the same SPI bus
         response[0] = sendIdle();
     }
-    if (response[0] > 0x01) {
+    if (response[0] != 0x01) {
         printString("SD card error 0\r\n");
         return false;
     }
