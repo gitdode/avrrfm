@@ -1,21 +1,16 @@
 /* 
- * File:   rfm69.h
+ * File:   librfm.h
  * Author: torsten.roemer@luniks.net
  *
- * Created on 28. Januar 2025, 19:55
+ * Created on 23. März 2025, 23:04
  */
 
-#ifndef RFM69_H
-#define RFM69_H
+#ifndef LIBRFM_H
+#define LIBRFM_H
 
+#include <stddef.h>
+#include <stdint.h>
 #include <stdbool.h>
-#include <util/delay.h>
-
-#include "rfm69.h"
-#include "pins.h"
-#include "types.h"
-#include "spi.h"
-#include "usart.h"
 
 #define FIFO        0x00
 #define OP_MODE     0x01
@@ -85,15 +80,57 @@
 #define MAX_TIMEOUTS    9  // slow down tx attempts after so many timeouts
 
 /**
+ * Flags for "payload ready" event.
+ */
+typedef struct {
+    bool ready;
+    bool crc;
+} PayloadFlags;
+
+/**
+ * F_CPU dependent delay of 5 milliseconds.
+ * _delay_ms(5);
+ * 
+ * @param ms
+ */
+void _rfmDelay5(void);
+
+/**
+ * Turns the radio on by pulling its reset pin LOW.
+ * PORT_RFM &= ~(1 << PIN_RRST);
+ */
+void _rfmOn(void);
+
+/**
+ * Selects the radio to talk to via SPI.
+ * PORT_RFM &= ~(1 << PIN_RCS);
+ */
+void _rfmSel(void);
+
+/**
+ * Deselects the radio to talk to via SPI.
+ * PORT_RFM |= (1 << PIN_RCS);
+ */
+void _rfmDes(void);
+
+/**
+ * SPI transmits/receives given data/returns it.
+ * 
+ * @param data
+ * @return data
+ */
+uint8_t _rfmTx(uint8_t data);
+
+/**
  * Initializes the radio module with the given carrier frequency in kilohertz
  * and node address.
  */
-void initRadio(uint64_t freq, uint8_t node);
+void rfmInit(uint64_t freq, uint8_t node);
 
 /**
  * Should be called when a radio interrupt occurred, i.e. 'PayloadReady'.
  */
-void intRadio(void);
+void rfmInt(void);
 
 /**
  * Gives a timer pulse to the radio. Used to time-out blocking functions,
@@ -101,50 +138,50 @@ void intRadio(void);
  * TIMEOUT_INTS must be adjusted according to the frequency with that 
  * this function is called.
  */
-void timeRadio(void);
+void rfmTimer(void);
 
 /**
  * Shuts down the radio.
  */
-void sleepRadio(void);
+void rfmSleep(void);
 
 /**
  * Wakes up the radio.
  */
-void wakeRadio(void);
+void rfmWake(void);
 
 /**
  * Sets the node address.
  * 
  * @param address
  */
-void setNodeAddress(uint8_t address);
+void rfmSetNodeAddress(uint8_t address);
 
 /**
  * Returns the current RSSI value.
  * 
  * @return rssi value
  */
-uint8_t getRssi(void);
+uint8_t rfmGetRssi(void);
 
 /**
  * Sets the output power based on the given receiver RSSI.
  * 
  * @param rssi
  */
-void setOutputPower(uint8_t rssi);
+void rfmSetOutputPower(uint8_t rssi);
 
 /**
  * Returns the current output power setting.
  *
  * @return ouput power
  */
-uint8_t getOutputPower(void);
+uint8_t rfmGetOutputPower(void);
 
 /**
  * Sets the radio to receive mode and maps "PayloadReady" to DIO0.
  */
-void startReceive(void);
+void rfmStartReceive(void);
 
 /**
  * Returns true if a "PayloadReady" interrupt arrived and clears the
@@ -152,7 +189,7 @@ void startReceive(void);
  * 
  * @return true if "PayloadReady"
  */
-PayloadFlags payloadReady(void);
+PayloadFlags rfmPayloadReady(void);
 
 /**
  * Sets the radio in standby mode, puts the payload into the given array 
@@ -162,7 +199,7 @@ PayloadFlags payloadReady(void);
  * @param size of payload buffer
  * @return payload bytes actually received
  */
-size_t readPayload(uint8_t *payload, size_t size);
+size_t rfmReadPayload(uint8_t *payload, size_t size);
 
 /**
  * Waits for "PayloadReady", puts the payload into the given array with the 
@@ -174,7 +211,7 @@ size_t readPayload(uint8_t *payload, size_t size);
  * @param timeout enable timeout
  * @return payload bytes actually received
  */
-size_t receivePayload(uint8_t *payload, size_t size, bool timeout);
+size_t rfmReceivePayload(uint8_t *payload, size_t size, bool timeout);
 
 /**
  * Transmits up to 64 bytes of the given payload with the given node address.
@@ -184,7 +221,7 @@ size_t receivePayload(uint8_t *payload, size_t size, bool timeout);
  * @param node address
  * @return payload bytes actually sent
  */
-size_t transmitPayload(uint8_t *payload, size_t size, uint8_t node);
+size_t rfmTransmitPayload(uint8_t *payload, size_t size, uint8_t node);
 
-#endif /* RFM69_H */
+#endif /* LIBRFM_H */
 

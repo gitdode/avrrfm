@@ -26,7 +26,7 @@
 #include "usart.h"
 #include "spi.h"
 #include "utils.h"
-#include "rfm69.h"
+#include "librfm.h"
 #include "mcp9808.h"
 #include "sdcard.h"
 #include "tft.h"
@@ -47,7 +47,7 @@
 #define NODE2   0x42
 
 #ifndef RECEIVER
-    #define RECEIVER    1
+    #define RECEIVER    0
 #endif
 
 static volatile uint8_t watchdogInts = 0;
@@ -72,14 +72,14 @@ ISR(WDT_vect) {
  * Called while the controller isn't in power down sleep mode.
  */
 ISR(TIMER0_COMPA_vect) {
-    timeRadio();
+    rfmTimer();
 }
 
 /**
  * Called when an INT0 interrupt occurs.
  */
 ISR(INT0_vect) {
-    intRadio();
+    rfmInt();
 }
 
 /**
@@ -192,9 +192,9 @@ static void disableSPI(void) {
  */
 static void transmitTemp(uint8_t node) {
     uint16_t temp = readTSens();
-    uint8_t power = getOutputPower();
+    uint8_t power = rfmGetOutputPower();
     uint8_t payload[] = {(temp >> 8), temp & 0x00ff, power};
-    transmitPayload(payload, sizeof (payload), node);
+    rfmTransmitPayload(payload, sizeof (payload), node);
     // printString("Transmitted\r\n");
 }
 
@@ -240,7 +240,7 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
  */
 static Temperature readTemp(void) {
     uint8_t payload[3];
-    readPayload(payload, sizeof (payload));
+    rfmReadPayload(payload, sizeof (payload));
     Temperature temp = {0};
     temp.raw |= payload[0] << 8;
     temp.raw |= payload[1];
@@ -255,15 +255,15 @@ static Temperature readTemp(void) {
  * @param flags
  */
 static void handlePayload(PayloadFlags flags) {
-    uint8_t rssi = getRssi();
+    uint8_t rssi = rfmGetRssi();
     Temperature temp = readTemp();
 
     // communicate RSSI back to transmitter
     uint8_t payload[] = {rssi};
-    transmitPayload(payload, sizeof (payload), NODE2);
+    rfmTransmitPayload(payload, sizeof (payload), NODE2);
 
     displayTemp(rssi, flags.crc, &temp);
-    startReceive();
+    rfmStartReceive();
 }
 
 /**
@@ -273,11 +273,11 @@ static void handlePayload(PayloadFlags flags) {
  */
 static bool waitResponse(void) {
     uint8_t response[1];
-    int8_t len = receivePayload(response, sizeof (response), true);
+    int8_t len = rfmReceivePayload(response, sizeof (response), true);
     if (len > 0) {
         // receiver RSSI
         int8_t rssi = divRoundNearest(response[0], 2);
-        setOutputPower(rssi);
+        rfmSetOutputPower(rssi);
 
         return false;
     }
@@ -292,14 +292,14 @@ static bool waitResponse(void) {
  */
 static void receiveData(PayloadFlags flags) {
     uint8_t payload[MESSAGE_SIZE + 1]; // + address byte
-    uint8_t len = readPayload(payload, sizeof (payload));
+    uint8_t len = rfmReadPayload(payload, sizeof (payload));
 
     char buf[MESSAGE_SIZE + 1];
     snprintf(buf, len, "%s", payload);
     printString(buf);
     _delay_ms(10);
 
-    startReceive();
+    rfmStartReceive();
 }
 
 /**
@@ -312,13 +312,13 @@ static void transmitData(void) {
         void *start = &block;
         div_t packets = div(SD_BLOCK_SIZE, MESSAGE_SIZE);
         for (size_t i = 0; i < packets.quot; i++) {
-            transmitPayload(start, MESSAGE_SIZE, NODE0);
+            rfmTransmitPayload(start, MESSAGE_SIZE, NODE0);
             start += MESSAGE_SIZE;
             // a little break in between packets for now
             _delay_ms(100);
         }
         if (packets.rem > 0) {
-            transmitPayload(start, packets.rem, NODE0);
+            rfmTransmitPayload(start, packets.rem, NODE0);
         }
     }
 }
@@ -344,13 +344,13 @@ int main(void) {
     sei();
 
     uint8_t node = RECEIVER ? NODE1 : NODE2;
-    initRadio(868600, node);
+    rfmInit(868600, node);
     if (RECEIVER) {
         initDisplay();
         setFrame(WHITE);
         fillArea(0, 0, DISPLAY_WIDTH, 16, BLACK);
         // initial rx mode
-        startReceive();
+        rfmStartReceive();
     }
 
     while (true) {
@@ -364,7 +364,7 @@ int main(void) {
 
                 enableSPI();
                 wakeTSens();
-                wakeRadio();
+                rfmWake();
                 if (sdcard) {
                     transmitData();
                 } else {
@@ -381,11 +381,11 @@ int main(void) {
                     }
                 }
                 sleepTSens();
-                sleepRadio();
+                rfmSleep();
                 disableSPI();
             }
         } else {
-            PayloadFlags flags = payloadReady();
+            PayloadFlags flags = rfmPayloadReady();
             if (flags.ready) {
                 handlePayload(flags);
                 // receiveData(flags);

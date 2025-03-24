@@ -8,8 +8,6 @@
 #ifndef BITMAPS_H
 #define BITMAPS_H
 
-#include <stdio.h>
-#include <stdint.h>
 #include "types.h"
 #include "colorspace.h"
 

@@ -43,12 +43,12 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/48b9ad18/font.o \
 	${OBJECTDIR}/_ext/48b9ad18/i2c.o \
 	${OBJECTDIR}/_ext/48b9ad18/mcp9808.o \
-	${OBJECTDIR}/_ext/48b9ad18/rfm69.o \
 	${OBJECTDIR}/_ext/48b9ad18/sdcard.o \
 	${OBJECTDIR}/_ext/48b9ad18/spi.o \
 	${OBJECTDIR}/_ext/48b9ad18/tft.o \
 	${OBJECTDIR}/_ext/48b9ad18/unifont.o \
-	${OBJECTDIR}/_ext/48b9ad18/usart.o
+	${OBJECTDIR}/_ext/48b9ad18/usart.o \
+	${OBJECTDIR}/rfm.o
 
 
 # C Compiler Flags
@@ -107,10 +107,6 @@ ${OBJECTDIR}/_ext/48b9ad18/mcp9808.o: /home/dode/dev/avrrfm/mcp9808.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
 	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/mcp9808.o /home/dode/dev/avrrfm/mcp9808.c
 
-${OBJECTDIR}/_ext/48b9ad18/rfm69.o: /home/dode/dev/avrrfm/rfm69.c
-	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
-	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/rfm69.o /home/dode/dev/avrrfm/rfm69.c
-
 ${OBJECTDIR}/_ext/48b9ad18/sdcard.o: /home/dode/dev/avrrfm/sdcard.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
 	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/sdcard.o /home/dode/dev/avrrfm/sdcard.c
@@ -130,6 +126,10 @@ ${OBJECTDIR}/_ext/48b9ad18/unifont.o: /home/dode/dev/avrrfm/unifont.c
 ${OBJECTDIR}/_ext/48b9ad18/usart.o: /home/dode/dev/avrrfm/usart.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
 	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/usart.o /home/dode/dev/avrrfm/usart.c
+
+${OBJECTDIR}/rfm.o: rfm.c
+	${MKDIR} -p ${OBJECTDIR}
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/rfm.o rfm.c
 
 # Subprojects
 .build-subprojects:
