@@ -11,8 +11,6 @@
       <in>i2c.c</in>
       <in>mcp9808.c</in>
       <in>mcp9808.h</in>
-      <in>rfm69.c</in>
-      <in>rfm69.h</in>
       <in>sdcard.c</in>
       <in>spi.c</in>
       <in>tft.c</in>
@@ -70,10 +68,6 @@
       <item path="/home/dode/dev/avrrfm/mcp9808.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/mcp9808.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="/home/dode/dev/avrrfm/rfm69.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="/home/dode/dev/avrrfm/rfm69.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/sdcard.c" ex="false" tool="0" flavor2="0">
       </item>

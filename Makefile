@@ -40,10 +40,10 @@ CFLAGS += -ffunction-sections -fdata-sections -Wl,--gc-sections -mrelax
 CFLAGS += -std=gnu99
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
 # CFLAGS += --param=min-pagesize=0
-CFLAGS += -Wl,-L. -Wl,-lrfm
 
 TARGET = $(strip $(basename $(MAIN)))
 SRC += $(TARGET).c
+SRC += librfm.a
 
 OBJ = $(SRC:.c=.o) 
 OBJ = $(SRC:.S=.o)
