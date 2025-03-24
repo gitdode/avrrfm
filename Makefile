@@ -21,7 +21,7 @@ VFLIP = 0
 
 MAIN = avrrfm.c
 SRC = bitmaps.c colorspace.c dejavu.c display.c font.c i2c.c mcp9808.c \
-      sdcard.c spi.c tft.c unifont.c usart.c
+      sdcard.c spi.c tft.c unifont.c usart.c rfm.c
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy

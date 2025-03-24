@@ -38,14 +38,6 @@ typedef struct {
 } Point;
 
 /**
- * Flags for "payload ready" event.
- */
-typedef struct {
-    bool ready;
-    bool crc;
-} PayloadFlags;
-
-/**
  * Temperature read from transmitter including
  * additional information.
  */
