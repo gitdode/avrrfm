@@ -26,7 +26,7 @@
 #include "usart.h"
 #include "spi.h"
 #include "utils.h"
-#include "rfm69.h"
+#include "librfm.h"
 #include "mcp9808.h"
 #include "sdcard.h"
 #include "tft.h"
@@ -47,7 +47,7 @@
 #define NODE2   0x42
 
 #ifndef RECEIVER
-    #define RECEIVER    1
+    #define RECEIVER    0
 #endif
 
 static volatile uint8_t watchdogInts = 0;

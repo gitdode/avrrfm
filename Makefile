@@ -20,7 +20,7 @@ HFLIP = 1
 VFLIP = 0
 
 MAIN = avrrfm.c
-SRC = bitmaps.h colorspace.c dejavu.c display.c font.c i2c.c mcp9808.c rfm69.c \
+SRC = bitmaps.c colorspace.c dejavu.c display.c font.c i2c.c mcp9808.c \
       sdcard.c spi.c tft.c unifont.c usart.c
 
 CC = avr-gcc
@@ -40,6 +40,7 @@ CFLAGS += -ffunction-sections -fdata-sections -Wl,--gc-sections -mrelax
 CFLAGS += -std=gnu99
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
 # CFLAGS += --param=min-pagesize=0
+CFLAGS += -Wl,-L. -Wl,-lrfm
 
 TARGET = $(strip $(basename $(MAIN)))
 SRC += $(TARGET).c
@@ -48,7 +49,7 @@ OBJ = $(SRC:.c=.o)
 OBJ = $(SRC:.S=.o)
 	
 $(TARGET).elf: bitmaps.h colorspace.h dejavu.h display.h font.h i2c.h \
-	mcp9808.h pins.h rfm69.h sdcard.h spi.h tft.h types.h unifont.h \
+	mcp9808.h pins.h sdcard.h spi.h tft.h types.h unifont.h \
         usart.h utils.h Makefile
 
 all: $(TARGET).hex

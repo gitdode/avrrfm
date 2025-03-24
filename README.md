@@ -7,6 +7,12 @@ and an Atmega328p MCU.
 
 This is work in progress. Simple Tx-Rx with response is working so far.  
 
+## Build
+
+    avr-gcc -mmcu=atmega328p -DF_CPU=8000000UL -DBAUD=9600 -DDISPLAY_WIDTH=320 -DDISPLAY_HEIGHT=240 -DINVERT=1 -DBGR=0 -DHFLIP=1 -DVFLIP=0 -O2 -I. -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums  -Wall -Wstrict-prototypes -g -ggdb -ffunction-sections -fdata-sections -Wl,--gc-sections -mrelax -std=gnu99 bitmaps.c colorspace.c dejavu.c display.c font.c i2c.c mcp9808.c sdcard.c spi.c tft.c unifont.c usart.c avrrfm.c -MMD -MP -MFavrrfm.d -MTavrrfm.d -c
+
+    avr-gcc -mmcu=atmega328p avrrfm.o bitmaps.o colorspace.o dejavu.o display.o font.o i2c.o mcp9808.o sdcard.o spi.o tft.o unifont.o usart.o -L. -lrfm -Wl,-Map,avrrfm.map -o avrrfm.elf
+
 I'm impressed how well these radio modules work; the range achieved with 
 simple wire antennas as well as the reliable packet transmission.
 
