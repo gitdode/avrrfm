@@ -22,6 +22,7 @@
 #include <avr/sleep.h>
 #include <util/delay.h>
 
+#include "types.h"
 #include "pins.h"
 #include "usart.h"
 #include "spi.h"
@@ -47,7 +48,7 @@
 #define NODE2   0x42
 
 #ifndef RECEIVER
-    #define RECEIVER    0
+    #define RECEIVER    1
 #endif
 
 static volatile uint8_t watchdogInts = 0;
