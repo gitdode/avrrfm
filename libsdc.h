@@ -5,8 +5,8 @@
  * Created on 25.03.2025, 20:29
  */
 
-#ifndef SDCARD_H
-#define SDCARD_H
+#ifndef LIBSDC_H
+#define LIBSDC_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -95,7 +95,7 @@ uint8_t _sdcTx(uint8_t data);
  *
  * @return true on success, false otherwise
  */
-bool initSDCard(void);
+bool sdcInit(void);
 
 /**
  * Reads a single block of 512 bytes at the given address into
@@ -105,7 +105,7 @@ bool initSDCard(void);
  * @param block 512 byte buffer
  * @return success
  */
-bool readSingleBlock(uint32_t address, uint8_t *block);
+bool sdcReadSingleBlock(uint32_t address, uint8_t *block);
 
 /**
  * Reads multiple blocks of 512 bytes starting at the given address
@@ -116,7 +116,7 @@ bool readSingleBlock(uint32_t address, uint8_t *block);
  * @param consume
  * @return success
  */
-bool readMultiBlock(uint32_t address, SDConsumer consume);
+bool sdcReadMultiBlock(uint32_t address, SDConsumer consume);
 
 /**
  * Writes a single block of 512 bytes starting at the given address
@@ -126,6 +126,6 @@ bool readMultiBlock(uint32_t address, SDConsumer consume);
  * @param block 512 byte buffer
  * @return success
  */
-bool writeSingleBlock(uint32_t address, uint8_t *block);
+bool sdcWriteSingleBlock(uint32_t address, uint8_t *block);
 
-#endif /* SDCARD_H */
+#endif /* LIBSDC_H */

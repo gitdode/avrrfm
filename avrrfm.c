@@ -308,7 +308,7 @@ static void receiveData(PayloadFlags flags) {
  */
 static void transmitData(void) {
     uint8_t block[SD_BLOCK_SIZE];
-    bool read = readSingleBlock(0, block);
+    bool read = sdcReadSingleBlock(0, block);
     if (read) {
         void *start = &block;
         div_t packets = div(SD_BLOCK_SIZE, MESSAGE_SIZE);
@@ -338,7 +338,7 @@ int main(void) {
         // used only for tx
         initWatchdog();
         initTimer();
-        sdcard = initSDCard();
+        sdcard = sdcInit();
     }
 
     // enable global interrupts
