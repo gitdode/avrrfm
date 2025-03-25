@@ -12,7 +12,7 @@
       <in>mcp9808.c</in>
       <in>mcp9808.h</in>
       <in>rfm.c</in>
-      <in>sdcard.c</in>
+      <in>sdc.c</in>
       <in>spi.c</in>
       <in>tft.c</in>
       <in>unifont.c</in>
@@ -70,7 +70,9 @@
       </item>
       <item path="/home/dode/dev/avrrfm/mcp9808.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="/home/dode/dev/avrrfm/sdcard.c" ex="false" tool="0" flavor2="0">
+      <item path="/home/dode/dev/avrrfm/rfm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="/home/dode/dev/avrrfm/sdc.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/spi.c" ex="false" tool="0" flavor2="3">
       </item>
@@ -79,8 +81,6 @@
       <item path="/home/dode/dev/avrrfm/unifont.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/usart.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="rfm.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
   </confs>

@@ -51,11 +51,5 @@ typedef struct {
  */
 typedef void (*Function)(void);
 
-/**
- * Pointer to a function that takes an array of bytes
- * and returns a boolean.
- */
-typedef bool (*Consumer)(uint8_t*);
-
 #endif /* TYPES_H */
 

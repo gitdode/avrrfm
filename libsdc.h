@@ -1,19 +1,16 @@
 /*
- * File:   sdcard.h
+ * File:   libsdc.h
  * Author: torsten.roemer@luniks.net
  *
- * Created on 24. Februar 2024, 00:13
+ * Created on 25.03.2025, 20:29
  */
 
 #ifndef SDCARD_H
 #define SDCARD_H
 
+#include <stddef.h>
+#include <stdint.h>
 #include <stdbool.h>
-#include <util/delay.h>
-#include "pins.h"
-#include "spi.h"
-#include "usart.h"
-#include "types.h"
 
 #define CMD0        0
 #define CMD0_ARG    0x00000000
@@ -60,6 +57,40 @@
 #define SD_START_BLOCK  0xfe
 
 /**
+ * Pointer to a function that takes an array of bytes
+ * and returns a boolean.
+ */
+typedef bool (*SDConsumer)(uint8_t*);
+
+/**
+ * F_CPU dependent delay of 10 milliseconds.
+ * _delay_ms(10);
+ * 
+ * @param ms
+ */
+void _sdcDelay10(void);
+
+/**
+ * Selects the radio to talk to via SPI.
+ * PORTB &= ~(1 << PB1);
+ */
+void _sdcSel(void);
+
+/**
+ * Deselects the radio to talk to via SPI.
+ * PORTB |= (1 << PB1);
+ */
+void _sdcDes(void);
+
+/**
+ * SPI transmits/receives given data/returns it.
+ * 
+ * @param data
+ * @return data
+ */
+uint8_t _sdcTx(uint8_t data);
+
+/**
  * Initializes the SD Card and returns true on success, false otherwise.
  *
  * @return true on success, false otherwise
@@ -85,7 +116,7 @@ bool readSingleBlock(uint32_t address, uint8_t *block);
  * @param consume
  * @return success
  */
-bool readMultiBlock(uint32_t address, Consumer consume);
+bool readMultiBlock(uint32_t address, SDConsumer consume);
 
 /**
  * Writes a single block of 512 bytes starting at the given address
