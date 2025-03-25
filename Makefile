@@ -21,7 +21,7 @@ VFLIP = 0
 
 MAIN = avrrfm.c
 SRC = bitmaps.c colorspace.c dejavu.c display.c font.c i2c.c mcp9808.c \
-      sdcard.c spi.c tft.c unifont.c usart.c rfm.c
+      spi.c tft.c unifont.c usart.c rfm.c sdc.c
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
@@ -43,14 +43,13 @@ CFLAGS += -std=gnu99
 
 TARGET = $(strip $(basename $(MAIN)))
 SRC += $(TARGET).c
-SRC += librfm.a
+SRC += librfm.a libsdc.a
 
 OBJ = $(SRC:.c=.o) 
 OBJ = $(SRC:.S=.o)
 	
 $(TARGET).elf: bitmaps.h colorspace.h dejavu.h display.h font.h i2c.h \
-	mcp9808.h pins.h sdcard.h spi.h tft.h types.h unifont.h \
-        usart.h utils.h Makefile
+	mcp9808.h pins.h spi.h tft.h types.h unifont.h usart.h utils.h Makefile
 
 all: $(TARGET).hex
 
