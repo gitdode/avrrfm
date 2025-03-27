@@ -1,5 +1,7 @@
 # avrrfm
 
+[![make](https://github.com/gitdode/avrrfm/actions/workflows/build.yml/badge.svg)](https://github.com/gitdode/avrrfm/actions/workflows/build.yml)
+
 ## About
 
 Experimental project around RFM radio modules using an ATmega328P MCU 
