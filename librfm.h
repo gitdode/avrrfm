@@ -34,8 +34,8 @@
 #define DIO_MAP2    0x26
 #define IRQ_FLAGS1  0x27
 #define RSSI_THRESH 0x29
-#define RX_TIMEOUT1 0x2a
-#define RX_TIMEOUT2 0x2b
+#define RX_TO_RSSI  0x2a
+#define RX_TO_PRDY  0x2b
 #define PREAMB_MSB  0x2c
 #define PREAMB_LSB  0x2d
 #define IRQ_FLAGS2  0x28
@@ -69,6 +69,14 @@
 #define MODE_TX     0x0c
 #define MODE_RX     0x10
 
+#define DIO0        0
+#define DIO1        1
+#define DIO2        2
+#define DIO3        3
+#define DIO4        4
+#define DIO5        5
+#define DIO_NONE    6
+
 #define PA_MIN      16
 #define PA_MAX      31
 
@@ -76,15 +84,13 @@
 #define F_STEP          6103515625ULL
 #define CAST_ADDRESS    0x84
 
-#define TIMEOUT_INTS    3  // about 100 milliseconds @ 30 Hz
-#define MAX_TIMEOUTS    9  // slow down tx attempts after so many timeouts
-
 /**
  * Flags for "payload ready" event.
  */
 typedef struct {
     bool ready;
     bool crc;
+    uint8_t rssi;
 } PayloadFlags;
 
 /**
@@ -128,17 +134,9 @@ uint8_t _rfmTx(uint8_t data);
 void rfmInit(uint64_t freq, uint8_t node);
 
 /**
- * Should be called when a radio interrupt occurred, i.e. 'PayloadReady'.
+ * Notifies of an interrupt on the given DIO pin.
  */
-void rfmInt(void);
-
-/**
- * Gives a timer pulse to the radio. Used to time-out blocking functions,
- * i.e. transmitter waiting for a response from the receiver.
- * TIMEOUT_INTS must be adjusted according to the frequency with that 
- * this function is called.
- */
-void rfmTimer(void);
+void rfmIrq(uint8_t dio);
 
 /**
  * Shuts down the radio.
@@ -156,13 +154,6 @@ void rfmWake(void);
  * @param address
  */
 void rfmSetNodeAddress(uint8_t address);
-
-/**
- * Returns the current RSSI value.
- * 
- * @return rssi value
- */
-uint8_t rfmGetRssi(void);
 
 /**
  * Sets the output power based on the given receiver RSSI.

@@ -35,8 +35,9 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define TRANSMIT_FAST   4  // 4 ~ 32 seconds
-#define TRANSMIT_SLOW   38 // 38 ~ 5 minutes
+#define TRANSMIT_FAST   1  // 4 ~ 32 seconds
+#define TRANSMIT_SLOW   9 // 38 ~ 5 minutes
+#define MAX_TIMEOUTS    9  // slow down tx attempts after so many timeouts
 
 #define LABEL_OFFSET    10
 #define BLACK           0x0000
@@ -70,17 +71,17 @@ ISR(WDT_vect) {
 }
 
 /**
- * Called while the controller isn't in power down sleep mode.
- */
-ISR(TIMER0_COMPA_vect) {
-    rfmTimer();
-}
-
-/**
  * Called when an INT0 interrupt occurs.
  */
 ISR(INT0_vect) {
-    rfmInt();
+    rfmIrq(DIO0);
+}
+
+/**
+ * Called when an INT1 interrupt occurs.
+ */
+ISR(INT1_vect) {
+    rfmIrq(DIO4);
 }
 
 /**
@@ -137,13 +138,23 @@ static void initI2C(void) {
 }
 
 /**
- * Enables radio interrupt.
+ * Enables radio interrupts.
  */
 static void initRadioInt(void) {
     EIMSK |= (1 << INT0);
-    // EICRA |= (1 << ISC00); // interrupt on any logical change
-    // EICRA |= (1 << ISC01); // interrupt on falling edge
-    EICRA |= (1 << ISC01) | (1 << ISC00); // interrupt on rising edge
+    EIMSK |= (1 << INT1);
+
+    // interrupt on any logical change
+    // EICRA |= (1 << ISC00);
+    // EICRA |= (1 << ISC10);
+
+    // interrupt on falling edge
+    // EICRA |= (1 << ISC01);
+    // EICRA |= (1 << ISC11);
+
+    // interrupt on rising edge
+    EICRA |= (1 << ISC01) | (1 << ISC00);
+    EICRA |= (1 << ISC11) | (1 << ISC10);
 }
 
 /**
@@ -156,20 +167,6 @@ static void initWatchdog(void) {
     WDTCSR |= (1 << WDCE) | (1 << WDE);
     // enable interrupt, disable system reset, bark every 8 seconds
     WDTCSR = (1 << WDIE) | (0 << WDE) | (1 << WDP3) | (1 << WDP0);
-}
-
-/**
- * Sets up the timer.
- */
-static void initTimer(void) {
-    // timer0 clear timer on compare match mode, TOP OCR0A
-    TCCR0A |= (1 << WGM01);
-    // timer0 clock prescaler/1024/255 ~ 46 Hz @ 12 MHz ~ 61 Hz @ 16 MHz
-    TCCR0B |= (1 << CS02) | (1 << CS00);
-    OCR0A = 255;
-
-    // enable timer0 compare match A interrupt
-    TIMSK0 |= (1 << OCIE0A);
 }
 
 /**
@@ -196,7 +193,6 @@ static void transmitTemp(uint8_t node) {
     uint8_t power = rfmGetOutputPower();
     uint8_t payload[] = {(temp >> 8), temp & 0x00ff, power};
     rfmTransmitPayload(payload, sizeof (payload), node);
-    // printString("Transmitted\r\n");
 }
 
 /**
@@ -256,14 +252,13 @@ static Temperature readTemp(void) {
  * @param flags
  */
 static void handlePayload(PayloadFlags flags) {
-    uint8_t rssi = rfmGetRssi();
     Temperature temp = readTemp();
 
     // communicate RSSI back to transmitter
-    uint8_t payload[] = {rssi};
+    uint8_t payload[] = {flags.rssi};
     rfmTransmitPayload(payload, sizeof (payload), NODE2);
 
-    displayTemp(rssi, flags.crc, &temp);
+    displayTemp(flags.rssi, flags.crc, &temp);
     rfmStartReceive();
 }
 
@@ -337,7 +332,6 @@ int main(void) {
     if (!RECEIVER) {
         // used only for tx
         initWatchdog();
-        initTimer();
         sdcard = sdcInit();
     }
 
