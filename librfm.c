@@ -5,6 +5,8 @@
  * Created on 28. Januar 2025, 19:57
  */
 
+#include <util/delay.h>
+
 #include "librfm.h"
 #include "utils.h"
 
@@ -126,7 +128,7 @@ void rfmInit(uint64_t freq, uint8_t node) {
 
     // Preamble size
     regWrite(PREAMB_MSB, 0x00);
-    regWrite(PREAMB_LSB, 0x0f);
+    regWrite(PREAMB_LSB, 0x03);
 
     // turn off CLKOUT (not used)
     regWrite(DIO_MAP2, 0x07);
@@ -192,16 +194,15 @@ void rfmSetNodeAddress(uint8_t address) {
     regWrite(NODE_ADDR, address);
 }
 
-// TODO make pure setter
-void rfmSetOutputPower(uint8_t rssi) {
+void rfmSetOutputPower(int8_t dBm) {
     uint8_t pa = 0x40; // -18 dBm with PA1
     // adjust power from -2 to +13 dBm
-    pa += min(max(rssi - 69, PA_MIN), PA_MAX);
+    pa |= (min(max(dBm + PA_OFF, PA_MIN), PA_MAX)) & 0x1f;
     regWrite(PA_LEVEL, pa);
 }
 
-uint8_t rfmGetOutputPower(void) {
-    return regRead(PA_LEVEL);
+int8_t rfmGetOutputPower(void) {
+    return (regRead(PA_LEVEL) & 0x1f) - PA_OFF;
 }
 
 void rfmStartReceive(void) {
@@ -245,7 +246,6 @@ size_t rfmReadPayload(uint8_t *payload, size_t size) {
 size_t rfmReceivePayload(uint8_t *payload, size_t size, bool timeout) {
     timeoutEnable(timeout);
     rfmStartReceive();
-    printUint(0);
 
     // wait until "PayloadReady" or "Timeout"
     do {} while (dio == DIO_NONE);
@@ -253,16 +253,13 @@ size_t rfmReceivePayload(uint8_t *payload, size_t size, bool timeout) {
     bool timedout = dio == DIO4;
     dio = DIO_NONE;
 
-    setMode(MODE_STDBY);
-
     if (ready) {
-        printUint(1);
         timeoutEnable(false);
-        rfmReadPayload(payload, size);
     }
 
+    setMode(MODE_STDBY);
+
     if (timedout) {
-        printUint(9);
         // full power as last resort
         regWrite(PA_LEVEL, 0x5f);
 

@@ -64,21 +64,21 @@ static y_t yo = 0;
 static width_t width = 0;
 
 /**
- * Called when the watchdog barks to wake up the transmitter.
+ * Wakes up the controller and increments the watchdog bark counter.
  */
 ISR(WDT_vect) {
     watchdogInts++;
 }
 
 /**
- * Called when an INT0 interrupt occurs.
+ * Wakes up the controller and notifies of an interrupt on DIO.
  */
 ISR(INT0_vect) {
     rfmIrq(DIO0);
 }
 
 /**
- * Called when an INT1 interrupt occurs.
+ * Wakes up the controller and notifies of an interrupt on DIO4.
  */
 ISR(INT1_vect) {
     rfmIrq(DIO4);
@@ -211,7 +211,7 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
 
     // display some info (receiver RSSI + CRC, transmitter output power)
     snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d, PA: %+3d dBm",
-            -_rssi, crc, -18 + (temp->power & 0x1f));
+            -_rssi, crc, temp->power);
     const __flash Font *unifont = &unifontFont;
     writeString(0, 0, unifont, buf, BLACK, WHITE);
 
@@ -271,9 +271,10 @@ static bool waitResponse(void) {
     uint8_t response[1];
     int8_t len = rfmReceivePayload(response, sizeof (response), true);
     if (len > 0) {
-        // receiver RSSI
+        // request more output power starting from -95 dBm
+        // TODO needs some hysteresis/something more elaborate
         int8_t rssi = divRoundNearest(response[0], 2);
-        rfmSetOutputPower(rssi);
+        rfmSetOutputPower(rssi - 97);
 
         return false;
     }

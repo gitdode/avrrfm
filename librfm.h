@@ -77,6 +77,7 @@
 #define DIO5        5
 #define DIO_NONE    6
 
+#define PA_OFF      18
 #define PA_MIN      16
 #define PA_MAX      31
 
@@ -156,18 +157,19 @@ void rfmWake(void);
 void rfmSetNodeAddress(uint8_t address);
 
 /**
- * Sets the output power based on the given receiver RSSI.
+ * Sets the output power to -2 to +13 dBm. Values outside that range are
+ * silently ignored.
  * 
- * @param rssi
+ * @param dBm ouput power
  */
-void rfmSetOutputPower(uint8_t rssi);
+void rfmSetOutputPower(int8_t dBm);
 
 /**
- * Returns the current output power setting.
+ * Returns the current output power setting in dBm.
  *
  * @return ouput power
  */
-uint8_t rfmGetOutputPower(void);
+int8_t rfmGetOutputPower(void);
 
 /**
  * Sets the radio to receive mode and maps "PayloadReady" to DIO0.

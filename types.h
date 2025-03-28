@@ -43,7 +43,7 @@ typedef struct {
  */
 typedef struct {
     uint16_t raw;
-    uint8_t power;
+    int8_t power;
 } Temperature;
 
 /**
