@@ -35,8 +35,9 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define TRANSMIT_FAST   4  // 4 ~ 32 seconds
-#define TRANSMIT_SLOW   38 // 38 ~ 5 minutes
+#define TRANSMIT_FAST   1  // 4 ~ 32 seconds
+#define TRANSMIT_SLOW   9 // 38 ~ 5 minutes
+#define MAX_TIMEOUTS    9  // slow down tx attempts after so many timeouts
 
 #define LABEL_OFFSET    10
 #define BLACK           0x0000
@@ -63,24 +64,24 @@ static y_t yo = 0;
 static width_t width = 0;
 
 /**
- * Called when the watchdog barks to wake up the transmitter.
+ * Wakes up the controller and increments the watchdog bark counter.
  */
 ISR(WDT_vect) {
     watchdogInts++;
 }
 
 /**
- * Called while the controller isn't in power down sleep mode.
+ * Wakes up the controller and notifies of an interrupt on DIO.
  */
-ISR(TIMER0_COMPA_vect) {
-    rfmTimer();
+ISR(INT0_vect) {
+    rfmIrq();
 }
 
 /**
- * Called when an INT0 interrupt occurs.
+ * Wakes up the controller and notifies of an interrupt on DIO4.
  */
-ISR(INT0_vect) {
-    rfmInt();
+ISR(INT1_vect) {
+    rfmIrq();
 }
 
 /**
@@ -137,13 +138,19 @@ static void initI2C(void) {
 }
 
 /**
- * Enables radio interrupt.
+ * Enables radio interrupts.
  */
 static void initRadioInt(void) {
     EIMSK |= (1 << INT0);
-    // EICRA |= (1 << ISC00); // interrupt on any logical change
-    // EICRA |= (1 << ISC01); // interrupt on falling edge
-    EICRA |= (1 << ISC01) | (1 << ISC00); // interrupt on rising edge
+    // interrupt on rising edge
+    EICRA |= (1 << ISC01) | (1 << ISC00);
+
+    // irq from DIO4 only used for transmitter (timeout waiting for response)
+    if (!RECEIVER) {
+        EIMSK |= (1 << INT1);
+        // interrupt on rising edge
+        EICRA |= (1 << ISC11) | (1 << ISC10);
+    }
 }
 
 /**
@@ -156,20 +163,6 @@ static void initWatchdog(void) {
     WDTCSR |= (1 << WDCE) | (1 << WDE);
     // enable interrupt, disable system reset, bark every 8 seconds
     WDTCSR = (1 << WDIE) | (0 << WDE) | (1 << WDP3) | (1 << WDP0);
-}
-
-/**
- * Sets up the timer.
- */
-static void initTimer(void) {
-    // timer0 clear timer on compare match mode, TOP OCR0A
-    TCCR0A |= (1 << WGM01);
-    // timer0 clock prescaler/1024/255 ~ 46 Hz @ 12 MHz ~ 61 Hz @ 16 MHz
-    TCCR0B |= (1 << CS02) | (1 << CS00);
-    OCR0A = 255;
-
-    // enable timer0 compare match A interrupt
-    TIMSK0 |= (1 << OCIE0A);
 }
 
 /**
@@ -196,7 +189,6 @@ static void transmitTemp(uint8_t node) {
     uint8_t power = rfmGetOutputPower();
     uint8_t payload[] = {(temp >> 8), temp & 0x00ff, power};
     rfmTransmitPayload(payload, sizeof (payload), node);
-    // printString("Transmitted\r\n");
 }
 
 /**
@@ -215,7 +207,7 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
 
     // display some info (receiver RSSI + CRC, transmitter output power)
     snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d, PA: %+3d dBm",
-            -_rssi, crc, -18 + (temp->power & 0x1f));
+            -_rssi, crc, temp->power);
     const __flash Font *unifont = &unifontFont;
     writeString(0, 0, unifont, buf, BLACK, WHITE);
 
@@ -256,14 +248,13 @@ static Temperature readTemp(void) {
  * @param flags
  */
 static void handlePayload(PayloadFlags flags) {
-    uint8_t rssi = rfmGetRssi();
     Temperature temp = readTemp();
 
     // communicate RSSI back to transmitter
-    uint8_t payload[] = {rssi};
+    uint8_t payload[] = {flags.rssi};
     rfmTransmitPayload(payload, sizeof (payload), NODE2);
 
-    displayTemp(rssi, flags.crc, &temp);
+    displayTemp(flags.rssi, flags.crc, &temp);
     rfmStartReceive();
 }
 
@@ -276,9 +267,10 @@ static bool waitResponse(void) {
     uint8_t response[1];
     int8_t len = rfmReceivePayload(response, sizeof (response), true);
     if (len > 0) {
-        // receiver RSSI
+        // request more output power starting from -95 dBm
+        // TODO needs some hysteresis/something more elaborate
         int8_t rssi = divRoundNearest(response[0], 2);
-        rfmSetOutputPower(rssi);
+        rfmSetOutputPower(rssi - 97);
 
         return false;
     }
@@ -337,7 +329,6 @@ int main(void) {
     if (!RECEIVER) {
         // used only for tx
         initWatchdog();
-        initTimer();
         sdcard = sdcInit();
     }
 

@@ -9,6 +9,7 @@
       <in>display.c</in>
       <in>font.c</in>
       <in>i2c.c</in>
+      <in>librfm.c</in>
       <in>mcp9808.c</in>
       <in>mcp9808.h</in>
       <in>rfm.c</in>
@@ -65,6 +66,8 @@
       <item path="/home/dode/dev/avrrfm/font.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/i2c.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="/home/dode/dev/avrrfm/librfm.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/mcp9808.c" ex="false" tool="0" flavor2="0">
       </item>
