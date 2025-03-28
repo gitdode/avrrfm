@@ -69,14 +69,6 @@
 #define MODE_TX     0x0c
 #define MODE_RX     0x10
 
-#define DIO0        0
-#define DIO1        1
-#define DIO2        2
-#define DIO3        3
-#define DIO4        4
-#define DIO5        5
-#define DIO_NONE    6
-
 #define PA_OFF      18
 #define PA_MIN      16
 #define PA_MAX      31
@@ -135,9 +127,10 @@ uint8_t _rfmTx(uint8_t data);
 void rfmInit(uint64_t freq, uint8_t node);
 
 /**
- * Notifies of an interrupt on the given DIO pin.
+ * Reads interrupt flags. Should be called when any interrupt occurs 
+ * on DIO0 or DIO4.
  */
-void rfmIrq(uint8_t dio);
+void rfmIrq(void);
 
 /**
  * Shuts down the radio.

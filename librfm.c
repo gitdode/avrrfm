@@ -12,7 +12,8 @@
 
 #include "usart.h"
 
-static volatile uint8_t dio = DIO_NONE;
+static volatile uint8_t irqFlags1 = 0;
+static volatile uint8_t irqFlags2 = 0;
 
 /**
  * Writes the given value to the given register.
@@ -50,6 +51,14 @@ static void setMode(uint8_t mode) {
 }
 
 /**
+ * Clears the IRQ flags read from the module.
+ */
+static void clearIrqFlags(void) {
+    irqFlags1 = 0;
+    irqFlags2 = 0;
+}
+
+/**
  * Enables or disables timeouts.
  *
  * @param enable
@@ -58,6 +67,7 @@ static void timeoutEnable(bool enable) {
     if (enable) {
         // get "Timeout" on DIO4 (default)
         regWrite(DIO_MAP2, 0x00);
+        // both sum up to about 100 ms
         regWrite(RX_TO_RSSI, 0x1f);
         regWrite(RX_TO_PRDY, 0x1f);
     } else {
@@ -176,8 +186,9 @@ void rfmInit(uint64_t freq, uint8_t node) {
     // printString("Radio init done\r\n");
 }
 
-void rfmIrq(uint8_t _dio) {
-    dio = _dio;
+void rfmIrq(void) {
+    irqFlags1 = regRead(IRQ_FLAGS1);
+    irqFlags2 = regRead(IRQ_FLAGS2);
 }
 
 void rfmSleep(void) {
@@ -214,8 +225,8 @@ void rfmStartReceive(void) {
 
 PayloadFlags rfmPayloadReady(void) {
     PayloadFlags flags = {.ready = false, .rssi = 255, .crc = false};
-    if (dio == DIO0) {
-        dio = DIO_NONE;
+    if (irqFlags2 & (1 << 2)) {
+        clearIrqFlags();
 
         flags.ready = true;
         flags.rssi = regRead(RSSI_VALUE);
@@ -248,10 +259,10 @@ size_t rfmReceivePayload(uint8_t *payload, size_t size, bool timeout) {
     rfmStartReceive();
 
     // wait until "PayloadReady" or "Timeout"
-    do {} while (dio == DIO_NONE);
-    bool ready = dio == DIO0;
-    bool timedout = dio == DIO4;
-    dio = DIO_NONE;
+    do {} while (!(irqFlags2 & (1 << 2)) && !(irqFlags1 & (1 << 2)));
+    bool ready = irqFlags2 & (1 << 2);
+    bool timedout = irqFlags1 & (1 << 2);
+    clearIrqFlags();
 
     if (ready) {
         timeoutEnable(false);
@@ -260,7 +271,7 @@ size_t rfmReceivePayload(uint8_t *payload, size_t size, bool timeout) {
     setMode(MODE_STDBY);
 
     if (timedout) {
-        // full power as last resort
+        // full power as last resort, indicate timeout
         regWrite(PA_LEVEL, 0x5f);
 
         return 0;
@@ -287,8 +298,8 @@ size_t rfmTransmitPayload(uint8_t *payload, size_t size, uint8_t node) {
 
     setMode(MODE_TX);
 
-    do {} while (dio != DIO0);
-    dio = DIO_NONE;
+    do {} while (!(irqFlags2 & (1 << 3)));
+    clearIrqFlags();
 
     setMode(MODE_STDBY);
 

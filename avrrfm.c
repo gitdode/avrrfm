@@ -74,14 +74,14 @@ ISR(WDT_vect) {
  * Wakes up the controller and notifies of an interrupt on DIO.
  */
 ISR(INT0_vect) {
-    rfmIrq(DIO0);
+    rfmIrq();
 }
 
 /**
  * Wakes up the controller and notifies of an interrupt on DIO4.
  */
 ISR(INT1_vect) {
-    rfmIrq(DIO4);
+    rfmIrq();
 }
 
 /**
@@ -142,19 +142,15 @@ static void initI2C(void) {
  */
 static void initRadioInt(void) {
     EIMSK |= (1 << INT0);
-    EIMSK |= (1 << INT1);
-
-    // interrupt on any logical change
-    // EICRA |= (1 << ISC00);
-    // EICRA |= (1 << ISC10);
-
-    // interrupt on falling edge
-    // EICRA |= (1 << ISC01);
-    // EICRA |= (1 << ISC11);
-
     // interrupt on rising edge
     EICRA |= (1 << ISC01) | (1 << ISC00);
-    EICRA |= (1 << ISC11) | (1 << ISC10);
+
+    // irq from DIO4 only used for transmitter (timeout waiting for response)
+    if (!RECEIVER) {
+        EIMSK |= (1 << INT1);
+        // interrupt on rising edge
+        EICRA |= (1 << ISC11) | (1 << ISC10);
+    }
 }
 
 /**
