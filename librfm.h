@@ -150,8 +150,8 @@ void rfmWake(void);
 void rfmSetNodeAddress(uint8_t address);
 
 /**
- * Sets the output power to -2 to +13 dBm. Values outside that range are
- * silently ignored.
+ * Sets the output power to -2 to +13 dBm. 
+ * Values outside that range are ignored.
  * 
  * @param dBm ouput power
  */
