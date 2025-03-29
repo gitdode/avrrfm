@@ -46,9 +46,9 @@ void getUSARTData(char *data, size_t length);
 void printString(const char *data);
 
 /**
- * Prints the given unsigned integer including CR + LF via USART.
+ * Prints the given integer including CR + LF via USART.
  */
-void printUint(uint8_t data);
+void printInt(int8_t data);
 
 /**
  * Prints the given unsigned integer in hex notation including CR + LF 
