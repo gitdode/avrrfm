@@ -33,7 +33,7 @@ void initUSART(void) {
 
     UCSR0B = (1 << TXEN0) | (1 << RXEN0);
     UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
-    
+
     // enable USART RX complete interrupt 0
     UCSR0B |= (1 << RXCIE0);
 }
@@ -60,8 +60,8 @@ void printString(const char *data) {
     }
 }
 
-void printUint(uint8_t data) {
-    char buf[6];
+void printInt(int8_t data) {
+    char buf[7];
     snprintf(buf, sizeof (buf), "%d\r\n", data);
     printString(buf);
 }

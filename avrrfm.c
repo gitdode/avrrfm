@@ -36,7 +36,7 @@
 #include "unifont.h"
 
 #define TRANSMIT_FAST   1  // 4 ~ 32 seconds
-#define TRANSMIT_SLOW   9 // 38 ~ 5 minutes
+#define TRANSMIT_SLOW   9  // 38 ~ 5 minutes
 #define MAX_TIMEOUTS    9  // slow down tx attempts after so many timeouts
 
 #define LABEL_OFFSET    10
@@ -62,6 +62,9 @@ static y_t yl = 0;
 static x_t xo = 0;
 static y_t yo = 0;
 static width_t width = 0;
+
+/* Averaged output power requested from transmitter */
+static int8_t power = DBM_MAX;
 
 /**
  * Wakes up the controller and increments the watchdog bark counter.
@@ -203,11 +206,12 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
     int16_t tempx10 = convertTSens(temp->raw);
     div_t tdiv = div(tempx10, 10);
 
-    char buf[42];
-
     // display some info (receiver RSSI + CRC, transmitter output power)
-    snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d, PA: %+3d dBm",
-            -_rssi, crc, temp->power);
+    char paf[5];
+    char buf[42];
+    snprintf(paf, sizeof (paf), "%+3d", temp->power);
+    snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d, PA: %s dBm",
+            -_rssi, crc, crc ? paf : "---");
     const __flash Font *unifont = &unifontFont;
     writeString(0, 0, unifont, buf, BLACK, WHITE);
 
@@ -267,10 +271,10 @@ static bool waitResponse(void) {
     uint8_t response[1];
     int8_t len = rfmReceivePayload(response, sizeof (response), true);
     if (len > 0) {
-        // request more output power starting from -95 dBm
-        // TODO needs some hysteresis/something more elaborate
+        // set more output power starting from -95 dBm
         int8_t rssi = divRoundNearest(response[0], 2);
-        rfmSetOutputPower(rssi - 97);
+        power = divRoundNearest(power + rssi - 97, 2);
+        rfmSetOutputPower(min(max(power, DBM_MIN), DBM_MAX));
 
         return false;
     }
