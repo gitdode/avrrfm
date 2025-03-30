@@ -36,7 +36,7 @@
 #include "unifont.h"
 
 #define TRANSMIT_FAST   1  // 4 ~ 32 seconds
-#define TRANSMIT_SLOW   9  // 38 ~ 5 minutes
+#define TRANSMIT_SLOW   8  // 38 ~ 5 minutes
 #define MAX_TIMEOUTS    9  // slow down tx attempts after so many timeouts
 
 #define LABEL_OFFSET    10
@@ -340,13 +340,17 @@ int main(void) {
     sei();
 
     uint8_t node = RECEIVER ? NODE1 : NODE2;
-    rfmInit(868600, node);
+    bool radio = rfmInit(868600, node);
+    if (!radio) {
+        printString("Radio init failed!\r\n");
+    }
+
     if (RECEIVER) {
         initDisplay();
         setFrame(WHITE);
         fillArea(0, 0, DISPLAY_WIDTH, 16, BLACK);
         // initial rx mode
-        rfmStartReceive();
+        if (radio) rfmStartReceive();
     }
 
     while (true) {
@@ -354,37 +358,39 @@ int main(void) {
         // printString("Running...\r\n");
         // _delay_ms(1000);
 
-        if (!RECEIVER) {
-            if (watchdogInts % measureInts == 0) {
-                watchdogInts = 0;
+        if (radio) {
+            if (!RECEIVER) {
+                if (watchdogInts % measureInts == 0) {
+                    watchdogInts = 0;
 
-                enableSPI();
-                wakeTSens();
-                rfmWake();
-                if (sdcard) {
-                    transmitData();
-                } else {
-                    transmitTemp(NODE1);
-                    bool timeout = waitResponse();
-                    if (timeout) {
-                        if (++timeoutCount > MAX_TIMEOUTS) {
-                            measureInts = TRANSMIT_SLOW;
-                            timeoutCount = 0;
-                        }
+                    enableSPI();
+                    wakeTSens();
+                    rfmWake();
+                    if (sdcard) {
+                        transmitData();
                     } else {
-                        timeoutCount = 0;
-                        measureInts = TRANSMIT_FAST;
+                        transmitTemp(NODE1);
+                        bool timeout = waitResponse();
+                        if (timeout) {
+                            if (++timeoutCount > MAX_TIMEOUTS) {
+                                measureInts = TRANSMIT_SLOW;
+                                timeoutCount = 0;
+                            }
+                        } else {
+                            timeoutCount = 0;
+                            measureInts = TRANSMIT_FAST;
+                        }
                     }
+                    sleepTSens();
+                    rfmSleep();
+                    disableSPI();
                 }
-                sleepTSens();
-                rfmSleep();
-                disableSPI();
-            }
-        } else {
-            PayloadFlags flags = rfmPayloadReady();
-            if (flags.ready) {
-                handlePayload(flags);
-                // receiveData(flags);
+            } else {
+                PayloadFlags flags = rfmPayloadReady();
+                if (flags.ready) {
+                    handlePayload(flags);
+                    // receiveData(flags);
+                }
             }
         }
 
