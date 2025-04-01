@@ -259,7 +259,7 @@ static void handlePayload(PayloadFlags flags) {
     rfmTransmitPayload(payload, sizeof (payload), NODE2);
 
     displayTemp(flags.rssi, flags.crc, &temp);
-    rfmStartReceive();
+    rfmStartReceive(false);
 }
 
 /**
@@ -296,7 +296,7 @@ static void receiveData(PayloadFlags flags) {
     printString(buf);
     _delay_ms(10);
 
-    rfmStartReceive();
+    rfmStartReceive(false);
 }
 
 /**
@@ -350,7 +350,7 @@ int main(void) {
         setFrame(WHITE);
         fillArea(0, 0, DISPLAY_WIDTH, 16, BLACK);
         // initial rx mode
-        if (radio) rfmStartReceive();
+        if (radio) rfmStartReceive(false);
     }
 
     while (true) {

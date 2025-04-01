@@ -102,8 +102,8 @@ typedef struct {
 void _rfmDelay5(void);
 
 /**
- * Turns the radio on by pulling its reset pin LOW.
- * PORTB &= ~(1 << PB0);
+ * Turns the radio on by pulling its reset pin high.
+ * PORTB |= (1 << PB0);
  */
 void _rfmOn(void);
 
@@ -174,9 +174,12 @@ void rfmSetOutputPower(int8_t dBm);
 int8_t rfmGetOutputPower(void);
 
 /**
- * Sets the radio to receive mode and maps "PayloadReady" to DIO0.
+ * Sets the radio to receive mode and maps "PayloadReady" to DIO0 and enables
+ * or disables timeout.
+ * 
+ * @param timeout enable timeout
  */
-void rfmStartReceive(void);
+void rfmStartReceive(bool timeout);
 
 /**
  * Returns true if a "PayloadReady" interrupt arrived and clears the
@@ -198,8 +201,8 @@ size_t rfmReadPayload(uint8_t *payload, size_t size);
 
 /**
  * Waits for "PayloadReady", puts the payload into the given array with the 
- * given size, and returns the length of the payload, or 0 if a timeout 
- * occurred.
+ * given size, enables or disables timeout, and returns the length of the 
+ * payload, or 0 if a timeout occurred.
  * 
  * @param payload buffer for payload
  * @param size of payload buffer
