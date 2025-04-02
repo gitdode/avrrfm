@@ -48,6 +48,9 @@
 #define NODE1   0x24
 #define NODE2   0x42
 
+/* Carrier frequency in kHz */
+#define FREQ    868600
+
 #ifndef RECEIVER
     #define RECEIVER    1
 #endif
@@ -71,6 +74,7 @@ static int8_t power = DBM_MAX;
  */
 ISR(WDT_vect) {
     watchdogInts++;
+    rfmTimeout();
 }
 
 /**
@@ -340,7 +344,7 @@ int main(void) {
     sei();
 
     uint8_t node = RECEIVER ? NODE1 : NODE2;
-    bool radio = rfmInit(868600, node);
+    bool radio = rfmInit(FREQ, node);
     if (!radio) {
         printString("Radio init failed!\r\n");
     }
