@@ -35,8 +35,8 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define TRANSMIT_FAST   1  // 4 ~ 32 seconds
-#define TRANSMIT_SLOW   9  // 38 ~ 5 minutes
+#define TRANSMIT_FAST   5  // 15 ~ 30 seconds
+#define TRANSMIT_SLOW   30 // 150 ~ 5 minutes
 #define MAX_TIMEOUTS    9  // slow down tx attempts after so many timeouts
 
 #define LABEL_OFFSET    10
@@ -44,9 +44,13 @@
 #define RED             0xf800
 #define WHITE           0xffff
 
+/* Node addresses */
 #define NODE0   0x12
 #define NODE1   0x24
 #define NODE2   0x42
+
+/* Carrier frequency in kHz */
+#define FREQ    868600
 
 #ifndef RECEIVER
     #define RECEIVER    1
@@ -71,6 +75,7 @@ static int8_t power = DBM_MAX;
  */
 ISR(WDT_vect) {
     watchdogInts++;
+    rfmTimeout();
 }
 
 /**
@@ -129,6 +134,8 @@ static void initSPI(void) {
     // default fOSC/4
     SPCR |= (1 << MSTR);
     SPCR |= (1 << SPE);
+    // slow down for the breadboard wiring
+    spiMid();
 }
 
 /**
@@ -164,8 +171,8 @@ static void initWatchdog(void) {
     wdt_reset();
     // watchdog change enable
     WDTCSR |= (1 << WDCE) | (1 << WDE);
-    // enable interrupt, disable system reset, bark every 8 seconds
-    WDTCSR = (1 << WDIE) | (0 << WDE) | (1 << WDP3) | (1 << WDP0);
+    // enable interrupt, disable system reset, bark every 2 seconds
+    WDTCSR = (1 << WDIE) | (0 << WDE) | (1 << WDP2) | (1 << WDP1) | (1 << WDP0);
 }
 
 /**
@@ -259,7 +266,7 @@ static void handlePayload(PayloadFlags flags) {
     rfmTransmitPayload(payload, sizeof (payload), NODE2);
 
     displayTemp(flags.rssi, flags.crc, &temp);
-    rfmStartReceive();
+    rfmStartReceive(false);
 }
 
 /**
@@ -296,7 +303,7 @@ static void receiveData(PayloadFlags flags) {
     printString(buf);
     _delay_ms(10);
 
-    rfmStartReceive();
+    rfmStartReceive(false);
 }
 
 /**
@@ -340,13 +347,17 @@ int main(void) {
     sei();
 
     uint8_t node = RECEIVER ? NODE1 : NODE2;
-    rfmInit(868600, node);
+    bool radio = rfmInit(FREQ, node);
+    if (!radio) {
+        printString("Radio init failed!\r\n");
+    }
+
     if (RECEIVER) {
         initDisplay();
         setFrame(WHITE);
         fillArea(0, 0, DISPLAY_WIDTH, 16, BLACK);
         // initial rx mode
-        rfmStartReceive();
+        if (radio) rfmStartReceive(false);
     }
 
     while (true) {
@@ -354,37 +365,39 @@ int main(void) {
         // printString("Running...\r\n");
         // _delay_ms(1000);
 
-        if (!RECEIVER) {
-            if (watchdogInts % measureInts == 0) {
-                watchdogInts = 0;
+        if (radio) {
+            if (!RECEIVER) {
+                if (watchdogInts % measureInts == 0) {
+                    watchdogInts = 0;
 
-                enableSPI();
-                wakeTSens();
-                rfmWake();
-                if (sdcard) {
-                    transmitData();
-                } else {
-                    transmitTemp(NODE1);
-                    bool timeout = waitResponse();
-                    if (timeout) {
-                        if (++timeoutCount > MAX_TIMEOUTS) {
-                            measureInts = TRANSMIT_SLOW;
-                            timeoutCount = 0;
-                        }
+                    enableSPI();
+                    wakeTSens();
+                    rfmWake();
+                    if (sdcard) {
+                        transmitData();
                     } else {
-                        timeoutCount = 0;
-                        measureInts = TRANSMIT_FAST;
+                        transmitTemp(NODE1);
+                        bool timeout = waitResponse();
+                        if (timeout) {
+                            if (++timeoutCount > MAX_TIMEOUTS) {
+                                measureInts = TRANSMIT_SLOW;
+                                timeoutCount = 0;
+                            }
+                        } else {
+                            timeoutCount = 0;
+                            measureInts = TRANSMIT_FAST;
+                        }
                     }
+                    sleepTSens();
+                    rfmSleep();
+                    disableSPI();
                 }
-                sleepTSens();
-                rfmSleep();
-                disableSPI();
-            }
-        } else {
-            PayloadFlags flags = rfmPayloadReady();
-            if (flags.ready) {
-                handlePayload(flags);
-                // receiveData(flags);
+            } else {
+                PayloadFlags flags = rfmPayloadReady();
+                if (flags.ready) {
+                    handlePayload(flags);
+                    // receiveData(flags);
+                }
             }
         }
 

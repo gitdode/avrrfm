@@ -16,7 +16,7 @@ void _rfmDelay5() {
 }
 
 void _rfmOn() {
-    PORT_RFM &= ~(1 << PIN_RRST);
+    PORT_RFM |= (1 << PIN_RRST);
 }
 
 void _rfmSel() {

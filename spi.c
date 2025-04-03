@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   spi.c
  * Author: torsten.roemer@luniks.net
  *
@@ -8,12 +8,21 @@
 #include "spi.h"
 
 void spiSlow(void) {
-    SPCR &= ~(1 << SPR0);
+    // fOSC/64
+    SPCR |= (1 << SPR0);
     SPCR |= (1 << SPR1);
     SPSR |= (1 << SPI2X);
 }
 
+void spiMid(void) {
+    // fOSC/16
+    SPCR &= ~(1 << SPR0);
+    SPCR |= (1 << SPR1);
+    SPSR &= ~(1 << SPI2X);
+}
+
 void spiFast(void) {
+    // fOSC/4 (default)
     SPCR &= ~(1 << SPR1) & ~(1 << SPR0);
     SPSR &= ~(1 << SPI2X);
 }

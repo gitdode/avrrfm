@@ -18,6 +18,11 @@
 void spiSlow(void);
 
 /**
+ * Sets medium SPI speed.
+ */
+void spiMid(void);
+
+/**
  * Sets fast SPI speed.
  */
 void spiFast(void);
