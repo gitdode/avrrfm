@@ -42,7 +42,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/48b9ad18/display.o \
 	${OBJECTDIR}/_ext/48b9ad18/font.o \
 	${OBJECTDIR}/_ext/48b9ad18/i2c.o \
-	${OBJECTDIR}/_ext/48b9ad18/librfm.o \
 	${OBJECTDIR}/_ext/48b9ad18/mcp9808.o \
 	${OBJECTDIR}/_ext/48b9ad18/rfm.o \
 	${OBJECTDIR}/_ext/48b9ad18/sdc.o \
@@ -103,10 +102,6 @@ ${OBJECTDIR}/_ext/48b9ad18/font.o: /home/dode/dev/avrrfm/font.c
 ${OBJECTDIR}/_ext/48b9ad18/i2c.o: /home/dode/dev/avrrfm/i2c.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
 	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/i2c.o /home/dode/dev/avrrfm/i2c.c
-
-${OBJECTDIR}/_ext/48b9ad18/librfm.o: /home/dode/dev/avrrfm/librfm.c
-	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
-	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/librfm.o /home/dode/dev/avrrfm/librfm.c
 
 ${OBJECTDIR}/_ext/48b9ad18/mcp9808.o: /home/dode/dev/avrrfm/mcp9808.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18

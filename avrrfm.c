@@ -35,8 +35,8 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define TRANSMIT_FAST   1  // 4 ~ 32 seconds
-#define TRANSMIT_SLOW   8  // 38 ~ 5 minutes
+#define TRANSMIT_FAST   5  // 15 ~ 30 seconds
+#define TRANSMIT_SLOW   30 // 150 ~ 5 minutes
 #define MAX_TIMEOUTS    9  // slow down tx attempts after so many timeouts
 
 #define LABEL_OFFSET    10
@@ -44,9 +44,13 @@
 #define RED             0xf800
 #define WHITE           0xffff
 
+/* Node addresses */
 #define NODE0   0x12
 #define NODE1   0x24
 #define NODE2   0x42
+
+/* Carrier frequency in kHz */
+#define FREQ    868600
 
 #ifndef RECEIVER
     #define RECEIVER    1
@@ -71,6 +75,7 @@ static int8_t power = DBM_MAX;
  */
 ISR(WDT_vect) {
     watchdogInts++;
+    rfmTimeout();
 }
 
 /**
@@ -129,6 +134,8 @@ static void initSPI(void) {
     // default fOSC/4
     SPCR |= (1 << MSTR);
     SPCR |= (1 << SPE);
+    // slow down for the breadboard wiring
+    spiMid();
 }
 
 /**
@@ -164,8 +171,8 @@ static void initWatchdog(void) {
     wdt_reset();
     // watchdog change enable
     WDTCSR |= (1 << WDCE) | (1 << WDE);
-    // enable interrupt, disable system reset, bark every 8 seconds
-    WDTCSR = (1 << WDIE) | (0 << WDE) | (1 << WDP3) | (1 << WDP0);
+    // enable interrupt, disable system reset, bark every 2 seconds
+    WDTCSR = (1 << WDIE) | (0 << WDE) | (1 << WDP2) | (1 << WDP1) | (1 << WDP0);
 }
 
 /**
@@ -340,7 +347,7 @@ int main(void) {
     sei();
 
     uint8_t node = RECEIVER ? NODE1 : NODE2;
-    bool radio = rfmInit(868600, node);
+    bool radio = rfmInit(FREQ, node);
     if (!radio) {
         printString("Radio init failed!\r\n");
     }
