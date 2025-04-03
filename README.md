@@ -5,19 +5,20 @@
 ## About
 
 Experimental project around RFM radio modules using an ATmega328P MCU 
-and [librfm](https://github.com/gitdode/librfm/tree/main).
+and [librfm](https://github.com/gitdode/librfm/tree/main)/[librfm95](https://github.com/gitdode/librfm95/tree/main).
 
 To do something really extraordinary, the temperature reading of an MCP9808
 sensor is periodically transmitted to the receiver.  
 To save battery power, the controller, radio module and temperature sensor 
 are put to power down/sleep mode in between transmissions. The idle current 
-is ~57 uA, which is still quite a lot (< 10 uA should be possible), but already 
-better than 8 mA 🙂  
+is ~75µA, which is still quite a lot, but already better than 8mA 🙂  
+MCU, radio and temp sensor take about 5µA, so the TC1262 3.3V regulator seems 
+to account for ~70µA.  
 There is basic [SD card support](https://github.com/gitdode/libsdc/tree/main) 
 to test sending larger amounts of data, but it might be useful for something 
 else like a data logger.  
 
-![IMG_20250322_012126](https://github.com/user-attachments/assets/e641ddd8-ca52-4149-8d73-3dcee39b7768)
+![IMG_20250403_220824](https://github.com/user-attachments/assets/5ad1cdd6-68a3-4055-904f-f2452e3b7b60)
 
 The receiver currently converts the raw temperature reading to °C and displays 
 it with the RSSI value, CRC result and transmitter output power on a nice IPS 
