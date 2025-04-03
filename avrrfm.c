@@ -44,6 +44,7 @@
 #define RED             0xf800
 #define WHITE           0xffff
 
+/* Node addresses */
 #define NODE0   0x12
 #define NODE1   0x24
 #define NODE2   0x42
@@ -133,6 +134,8 @@ static void initSPI(void) {
     // default fOSC/4
     SPCR |= (1 << MSTR);
     SPCR |= (1 << SPE);
+    // slow down for the breadboard wiring
+    spiMid();
 }
 
 /**
