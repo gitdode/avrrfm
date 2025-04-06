@@ -52,6 +52,9 @@
 /* Carrier frequency in kHz */
 #define FREQ    868600
 
+/* Limit to FSK max size for now */
+#define MSG_SIZE    RFM_FSK_MSG_SIZE
+
 #ifndef RECEIVER
     #define RECEIVER    1
 #endif
@@ -68,7 +71,7 @@ static y_t yo = 0;
 static width_t width = 0;
 
 /* Averaged output power requested from transmitter */
-static int8_t power = DBM_MAX;
+static int8_t power = RFM_DBM_MAX;
 
 /**
  * Wakes up the controller and increments the watchdog bark counter.
@@ -281,7 +284,7 @@ static bool waitResponse(void) {
         // set more output power starting from -95 dBm
         int8_t rssi = divRoundNearest(response[0], 2);
         power = divRoundNearest(power + rssi - 97, 2);
-        rfmSetOutputPower(min(max(power, DBM_MIN), DBM_MAX));
+        rfmSetOutputPower(min(max(power, RFM_DBM_MIN), RFM_DBM_MAX));
 
         return false;
     }
@@ -295,10 +298,10 @@ static bool waitResponse(void) {
  * @param flags
  */
 static void receiveData(PayloadFlags flags) {
-    uint8_t payload[MESSAGE_SIZE + 1]; // + address byte
+    uint8_t payload[MSG_SIZE + 1]; // + address byte
     uint8_t len = rfmReadPayload(payload, sizeof (payload));
 
-    char buf[MESSAGE_SIZE + 1];
+    char buf[MSG_SIZE + 1];
     snprintf(buf, len, "%s", payload);
     printString(buf);
     _delay_ms(10);
@@ -314,10 +317,10 @@ static void transmitData(void) {
     bool read = sdcReadSingleBlock(0, block);
     if (read) {
         void *start = &block;
-        div_t packets = div(SD_BLOCK_SIZE, MESSAGE_SIZE);
+        div_t packets = div(SD_BLOCK_SIZE, MSG_SIZE);
         for (size_t i = 0; i < packets.quot; i++) {
-            rfmTransmitPayload(start, MESSAGE_SIZE, NODE0);
-            start += MESSAGE_SIZE;
+            rfmTransmitPayload(start, MSG_SIZE, NODE0);
+            start += MSG_SIZE;
             // a little break in between packets for now
             _delay_ms(100);
         }
@@ -347,7 +350,7 @@ int main(void) {
     sei();
 
     uint8_t node = RECEIVER ? NODE1 : NODE2;
-    bool radio = rfmInit(FREQ, node);
+    bool radio = rfmInit(FREQ, node, false);
     if (!radio) {
         printString("Radio init failed!\r\n");
     }
