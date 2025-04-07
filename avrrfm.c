@@ -56,8 +56,10 @@
 #define MSG_SIZE    RFM_FSK_MSG_SIZE
 
 #ifndef RECEIVER
-    #define RECEIVER    1
+    #define RECEIVER    0
 #endif
+
+#define LORA    0
 
 static volatile uint8_t watchdogInts = 0;
 static uint8_t measureInts = TRANSMIT_FAST;
@@ -137,8 +139,10 @@ static void initSPI(void) {
     // default fOSC/4
     SPCR |= (1 << MSTR);
     SPCR |= (1 << SPE);
-    // slow down for the breadboard wiring
-    spiMid();
+    if (!RECEIVER) {
+        // slow down for the breadboard wiring
+        spiMid();
+    }
 }
 
 /**
@@ -350,7 +354,7 @@ int main(void) {
     sei();
 
     uint8_t node = RECEIVER ? NODE1 : NODE2;
-    bool radio = rfmInit(FREQ, node, false);
+    bool radio = rfmInit(FREQ, node, LORA);
     if (!radio) {
         printString("Radio init failed!\r\n");
     }
