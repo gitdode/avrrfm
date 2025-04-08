@@ -48,7 +48,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/48b9ad18/spi.o \
 	${OBJECTDIR}/_ext/48b9ad18/tft.o \
 	${OBJECTDIR}/_ext/48b9ad18/unifont.o \
-	${OBJECTDIR}/_ext/48b9ad18/usart.o
+	${OBJECTDIR}/_ext/48b9ad18/usart.o \
+	${OBJECTDIR}/librfm.o
 
 
 # C Compiler Flags
@@ -130,6 +131,10 @@ ${OBJECTDIR}/_ext/48b9ad18/unifont.o: /home/dode/dev/avrrfm/unifont.c
 ${OBJECTDIR}/_ext/48b9ad18/usart.o: /home/dode/dev/avrrfm/usart.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/48b9ad18
 	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/_ext/48b9ad18/usart.o /home/dode/dev/avrrfm/usart.c
+
+${OBJECTDIR}/librfm.o: librfm.c
+	${MKDIR} -p ${OBJECTDIR}
+	$(COMPILE.c) -g -DBAUD=38400 -DDRIVER=1 -DF_CPU=16000000UL -D__AVR_ATmega328P__ -D__flash=volatile -I. -o ${OBJECTDIR}/librfm.o librfm.c
 
 # Subprojects
 .build-subprojects:

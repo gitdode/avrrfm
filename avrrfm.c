@@ -35,8 +35,8 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define TRANSMIT_FAST   5  // 15 ~ 30 seconds
-#define TRANSMIT_SLOW   30 // 150 ~ 5 minutes
+#define TRANSMIT_FAST   150 // 15 ~ 30 seconds
+#define TRANSMIT_SLOW   150 // 150 ~ 5 minutes
 #define MAX_TIMEOUTS    9  // slow down tx attempts after so many timeouts
 
 #define LABEL_OFFSET    10
@@ -56,10 +56,10 @@
 #define MSG_SIZE    RFM_FSK_MSG_SIZE
 
 #ifndef RECEIVER
-    #define RECEIVER    0
+    #define RECEIVER    1
 #endif
 
-#define LORA    0
+#define LORA    1
 
 static volatile uint8_t watchdogInts = 0;
 static uint8_t measureInts = TRANSMIT_FAST;
@@ -91,7 +91,8 @@ ISR(INT0_vect) {
 }
 
 /**
- * Wakes up the controller and notifies of an interrupt on DIO4.
+ * Wakes up the controller and notifies of an interrupt on DIO4 (FSK)/
+ * DIO1 (LoRa).
  */
 ISR(INT1_vect) {
     rfmIrq();
@@ -162,12 +163,9 @@ static void initRadioInt(void) {
     // interrupt on rising edge
     EICRA |= (1 << ISC01) | (1 << ISC00);
 
-    // irq from DIO4 only used for transmitter (timeout waiting for response)
-    if (!RECEIVER) {
-        EIMSK |= (1 << INT1);
-        // interrupt on rising edge
-        EICRA |= (1 << ISC11) | (1 << ISC10);
-    }
+    EIMSK |= (1 << INT1);
+    // interrupt on rising edge
+    EICRA |= (1 << ISC11) | (1 << ISC10);
 }
 
 /**
@@ -205,7 +203,11 @@ static void transmitTemp(uint8_t node) {
     uint16_t temp = readTSens();
     uint8_t power = rfmGetOutputPower();
     uint8_t payload[] = {(temp >> 8), temp & 0x00ff, power};
-    rfmTransmitPayload(payload, sizeof (payload), node);
+    if (LORA) {
+        rfmLoRaTx(payload, sizeof (payload));
+    } else {
+        rfmTransmitPayload(payload, sizeof (payload), node);
+    }
 }
 
 /**
@@ -251,7 +253,11 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
  */
 static Temperature readTemp(void) {
     uint8_t payload[3];
-    rfmReadPayload(payload, sizeof (payload));
+    if (LORA) {
+        rfmLoRaRxRead(payload, sizeof (payload));
+    } else {
+        rfmReadPayload(payload, sizeof (payload));
+    }
     Temperature temp = {0};
     temp.raw |= payload[0] << 8;
     temp.raw |= payload[1];
@@ -265,15 +271,14 @@ static Temperature readTemp(void) {
  *
  * @param flags
  */
-static void handlePayload(PayloadFlags flags) {
+static void handlePayload(RxFlags flags) {
     Temperature temp = readTemp();
 
     // communicate RSSI back to transmitter
-    uint8_t payload[] = {flags.rssi};
-    rfmTransmitPayload(payload, sizeof (payload), NODE2);
+    // uint8_t payload[] = {flags.rssi};
+    // rfmTransmitPayload(payload, sizeof (payload), NODE2);
 
     displayTemp(flags.rssi, flags.crc, &temp);
-    rfmStartReceive(false);
 }
 
 /**
@@ -301,7 +306,7 @@ static bool waitResponse(void) {
  *
  * @param flags
  */
-static void receiveData(PayloadFlags flags) {
+static void receiveData(RxFlags flags) {
     uint8_t payload[MSG_SIZE + 1]; // + address byte
     uint8_t len = rfmReadPayload(payload, sizeof (payload));
 
@@ -364,7 +369,13 @@ int main(void) {
         setFrame(WHITE);
         fillArea(0, 0, DISPLAY_WIDTH, 16, BLACK);
         // initial rx mode
-        if (radio) rfmStartReceive(false);
+        if (radio) {
+            if (LORA) {
+                rfmLoRaStartRx();
+            } else {
+                rfmStartReceive(false);
+            }
+        }
     }
 
     while (true) {
@@ -383,16 +394,20 @@ int main(void) {
                     if (sdcard) {
                         transmitData();
                     } else {
-                        transmitTemp(NODE1);
-                        bool timeout = waitResponse();
-                        if (timeout) {
-                            if (++timeoutCount > MAX_TIMEOUTS) {
-                                measureInts = TRANSMIT_SLOW;
-                                timeoutCount = 0;
-                            }
+                        if (LORA) {
+                            transmitTemp(NODE1);
                         } else {
-                            timeoutCount = 0;
-                            measureInts = TRANSMIT_FAST;
+                            transmitTemp(NODE1);
+                            bool timeout = waitResponse();
+                            if (timeout) {
+                                if (++timeoutCount > MAX_TIMEOUTS) {
+                                    measureInts = TRANSMIT_SLOW;
+                                    timeoutCount = 0;
+                                }
+                            } else {
+                                timeoutCount = 0;
+                                measureInts = TRANSMIT_FAST;
+                            }
                         }
                     }
                     sleepTSens();
@@ -400,10 +415,20 @@ int main(void) {
                     disableSPI();
                 }
             } else {
-                PayloadFlags flags = rfmPayloadReady();
-                if (flags.ready) {
-                    handlePayload(flags);
-                    // receiveData(flags);
+                if (LORA) {
+                    RxFlags flags = rfmLoRaRxDone();
+                    if (flags.ready) {
+                        handlePayload(flags);
+                        rfmLoRaStartRx();
+                        // receiveData(flags);
+                    }
+                } else {
+                    RxFlags flags = rfmPayloadReady();
+                    if (flags.ready) {
+                        handlePayload(flags);
+                        rfmStartReceive(false);
+                        // receiveData(flags);
+                    }
                 }
             }
         }
