@@ -35,9 +35,9 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define TRANSMIT_FAST   150 // 15 ~ 30 seconds
+#define TRANSMIT_FAST   15  // 15 ~ 30 seconds
 #define TRANSMIT_SLOW   150 // 150 ~ 5 minutes
-#define MAX_TIMEOUTS    9  // slow down tx attempts after so many timeouts
+#define MAX_TIMEOUTS    9   // slow down tx attempts after so many timeouts
 
 #define LABEL_OFFSET    10
 #define BLACK           0x0000
@@ -45,21 +45,21 @@
 #define WHITE           0xffff
 
 /* Node addresses */
-#define NODE0   0x12
-#define NODE1   0x24
-#define NODE2   0x42
+#define NODE0           0x12
+#define NODE1           0x24
+#define NODE2           0x42
 
 /* Carrier frequency in kHz */
-#define FREQ    868600
+#define FREQ            868600
 
 /* Limit to FSK max size for now */
-#define MSG_SIZE    RFM_FSK_MSG_SIZE
+#define MSG_SIZE        RFM_FSK_MSG_SIZE
 
 #ifndef RECEIVER
     #define RECEIVER    1
 #endif
 
-#define LORA    1
+#define LORA            1
 
 static volatile uint8_t watchdogInts = 0;
 static uint8_t measureInts = TRANSMIT_FAST;
@@ -218,7 +218,6 @@ static void transmitTemp(uint8_t node) {
  * @param temp temperature + info
  */
 static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
-    uint8_t _rssi = divRoundNearest(rssi, 2);
     int16_t tempx10 = convertTSens(temp->raw);
     div_t tdiv = div(tempx10, 10);
 
@@ -227,7 +226,7 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
     char buf[42];
     snprintf(paf, sizeof (paf), "%+3d", temp->power);
     snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d, PA: %s dBm",
-            -_rssi, crc, crc ? paf : "---");
+            -rssi, crc, crc ? paf : "---");
     const __flash Font *unifont = &unifontFont;
     writeString(0, 0, unifont, buf, BLACK, WHITE);
 
@@ -275,8 +274,12 @@ static void handlePayload(RxFlags flags) {
     Temperature temp = readTemp();
 
     // communicate RSSI back to transmitter
-    // uint8_t payload[] = {flags.rssi};
-    // rfmTransmitPayload(payload, sizeof (payload), NODE2);
+    uint8_t payload[] = {flags.rssi};
+    if (LORA) {
+        rfmLoRaTx(payload, sizeof (payload));
+    } else {
+        rfmTransmitPayload(payload, sizeof (payload), NODE2);
+    }
 
     displayTemp(flags.rssi, flags.crc, &temp);
 }
@@ -288,11 +291,16 @@ static void handlePayload(RxFlags flags) {
  */
 static bool waitResponse(void) {
     uint8_t response[1];
-    int8_t len = rfmReceivePayload(response, sizeof (response), true);
+    int8_t len = 0;
+    if (LORA) {
+        len = rfmLoRaRx(response, sizeof (response));
+    } else {
+        len = rfmReceivePayload(response, sizeof (response), true);
+    }
     if (len > 0) {
-        // set more output power starting from -95 dBm
+        // set more output power starting from -100 dBm
         int8_t rssi = divRoundNearest(response[0], 2);
-        power = divRoundNearest(power + rssi - 97, 2);
+        power = divRoundNearest(power + rssi - 98, 2);
         rfmSetOutputPower(min(max(power, RFM_DBM_MIN), RFM_DBM_MAX));
 
         return false;
@@ -394,20 +402,17 @@ int main(void) {
                     if (sdcard) {
                         transmitData();
                     } else {
-                        if (LORA) {
-                            transmitTemp(NODE1);
-                        } else {
-                            transmitTemp(NODE1);
-                            bool timeout = waitResponse();
-                            if (timeout) {
-                                if (++timeoutCount > MAX_TIMEOUTS) {
-                                    measureInts = TRANSMIT_SLOW;
-                                    timeoutCount = 0;
-                                }
-                            } else {
+                        transmitTemp(NODE1);
+                        bool timeout = waitResponse();
+                        if (timeout) {
+                            if (++timeoutCount > MAX_TIMEOUTS) {
+                                measureInts = TRANSMIT_SLOW;
                                 timeoutCount = 0;
-                                measureInts = TRANSMIT_FAST;
                             }
+                            rfmSetOutputPower(RFM_DBM_MAX);
+                        } else {
+                            timeoutCount = 0;
+                            measureInts = TRANSMIT_FAST;
                         }
                     }
                     sleepTSens();

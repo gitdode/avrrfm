@@ -124,7 +124,7 @@
 #define RFM_LORA_MSG_SIZE       128
 
 /**
- * Flags for "payload ready" event.
+ * Flags for 'PayloadReady'/'RxDone' event.
  */
 typedef struct {
     bool ready;
@@ -183,7 +183,8 @@ void rfmIrq(void);
 
 /**
  * Sets the "Timeout" interrupt flag, allowing to "unlock" a possibly hanging 
- * wait for either "PayloadReady" or "Timeout" by the radio.
+ * wait for either "PayloadReady" or "Timeout" by the radio in FSK mode, 
+ * ignored in LoRa mode.
  */
 void rfmTimeout(void);
 

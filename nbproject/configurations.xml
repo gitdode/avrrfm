@@ -9,7 +9,6 @@
       <in>display.c</in>
       <in>font.c</in>
       <in>i2c.c</in>
-      <in>librfm.c</in>
       <in>mcp9808.c</in>
       <in>mcp9808.h</in>
       <in>rfm.c</in>
@@ -82,8 +81,6 @@
       <item path="/home/dode/dev/avrrfm/unifont.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/usart.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="librfm.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
   </confs>
