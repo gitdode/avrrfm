@@ -196,21 +196,6 @@ static void disableSPI(void) {
 }
 
 /**
- * Reads the temperature from the sensor and transmits it with the given
- * node address.
- */
-static void transmitTemp(uint8_t node) {
-    uint16_t temp = readTSens();
-    uint8_t power = rfmGetOutputPower();
-    uint8_t payload[] = {(temp >> 8), temp & 0x00ff, power};
-    if (LORA) {
-        rfmLoRaTx(payload, sizeof (payload));
-    } else {
-        rfmTransmitPayload(payload, sizeof (payload), node);
-    }
-}
-
-/**
  * Converts the raw temperature to °C and lets it float around the display.
  *
  * @param rssi RSSI value
@@ -246,17 +231,12 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
 }
 
 /**
- * Reads and returns the raw temperature + other info.
+ * Reads the temperature from the given payload and returns it.
  *
- * @return temperature + info
+ * @param payload
+ * @return raw temperature + tx power in dBm
  */
-static Temperature readTemp(void) {
-    uint8_t payload[3];
-    if (LORA) {
-        rfmLoRaRxRead(payload, sizeof (payload));
-    } else {
-        rfmReadPayload(payload, sizeof (payload));
-    }
+static Temperature readTemp(uint8_t *payload) {
     Temperature temp = {0};
     temp.raw |= payload[0] << 8;
     temp.raw |= payload[1];
@@ -266,22 +246,54 @@ static Temperature readTemp(void) {
 }
 
 /**
- * Handles the payload received from the transmitter.
- *
- * @param flags
+ * Receives the temperature and responds with the RSSI.
  */
-static void handlePayload(RxFlags flags) {
-    Temperature temp = readTemp();
+static void receiveTemp(void) {
+    if (LORA) {
+        RxFlags flags = rfmLoRaRxDone();
+        if (flags.ready) {
+            uint8_t response[] = {flags.rssi};
+            rfmLoRaTx(response, sizeof (response));
 
-    // communicate RSSI back to transmitter
-    uint8_t payload[] = {flags.rssi};
+            uint8_t payload[3];
+            rfmLoRaRxRead(payload, sizeof (payload));
+            Temperature temp = readTemp(payload);
+
+            displayTemp(flags.rssi, flags.crc, &temp);
+
+            rfmLoRaStartRx();
+        }
+    } else {
+        RxFlags flags = rfmPayloadReady();
+        if (flags.ready) {
+            uint8_t response[] = {flags.rssi};
+            rfmTransmitPayload(response, sizeof (response), NODE2);
+
+            uint8_t payload[3];
+            rfmReadPayload(payload, sizeof (payload));
+            Temperature temp = readTemp(payload);
+            displayTemp(flags.rssi, flags.crc, &temp);
+
+            rfmStartReceive(false);
+        }
+    }
+}
+
+/**
+ * Reads the temperature from the sensor and transmits it with the given
+ * node address.
+ *
+ * @param node node address
+ */
+static void transmitTemp(uint8_t node) {
+    uint16_t temp = readTSens();
+    uint8_t power = rfmGetOutputPower();
+    uint8_t payload[] = {(temp >> 8), temp & 0x00ff, power};
     if (LORA) {
         rfmLoRaTx(payload, sizeof (payload));
     } else {
-        rfmTransmitPayload(payload, sizeof (payload), NODE2);
+        rfmTransmitPayload(payload, sizeof (payload), node);
     }
-
-    displayTemp(flags.rssi, flags.crc, &temp);
 }
 
 /**
@@ -309,62 +321,23 @@ static bool waitResponse(void) {
     return true;
 }
 
-/**
- * Receives data read from SD card.
- *
- * @param flags
- */
-static void receiveData(RxFlags flags) {
-    uint8_t payload[MSG_SIZE + 1]; // + address byte
-    uint8_t len = rfmReadPayload(payload, sizeof (payload));
-
-    char buf[MSG_SIZE + 1];
-    snprintf(buf, len, "%s", payload);
-    printString(buf);
-    _delay_ms(10);
-
-    rfmStartReceive(false);
-}
-
-/**
- * Transmits data read from SD card.
- */
-static void transmitData(void) {
-    uint8_t block[SD_BLOCK_SIZE];
-    bool read = sdcReadSingleBlock(0, block);
-    if (read) {
-        void *start = &block;
-        div_t packets = div(SD_BLOCK_SIZE, MSG_SIZE);
-        for (size_t i = 0; i < packets.quot; i++) {
-            rfmTransmitPayload(start, MSG_SIZE, NODE0);
-            start += MSG_SIZE;
-            // a little break in between packets for now
-            _delay_ms(100);
-        }
-        if (packets.rem > 0) {
-            rfmTransmitPayload(start, packets.rem, NODE0);
-        }
-    }
-}
-
 int main(void) {
     initUSART();
     initPins();
     initSPI();
     initI2C();
     initRadioInt();
-    bool sdcard = false;
-
-    printString("Hello Radio!\r\n");
+    // bool sdcard = sdcInit();
 
     if (!RECEIVER) {
         // used only for tx
         initWatchdog();
-        sdcard = sdcInit();
     }
 
     // enable global interrupts
     sei();
+
+    printString("Hello Radio!\r\n");
 
     uint8_t node = RECEIVER ? NODE1 : NODE2;
     bool radio = rfmInit(FREQ, node, LORA);
@@ -399,42 +372,27 @@ int main(void) {
                     enableSPI();
                     wakeTSens();
                     rfmWake();
-                    if (sdcard) {
-                        transmitData();
-                    } else {
-                        transmitTemp(NODE1);
-                        bool timeout = waitResponse();
-                        if (timeout) {
-                            if (++timeoutCount > MAX_TIMEOUTS) {
-                                measureInts = TRANSMIT_SLOW;
-                                timeoutCount = 0;
-                            }
-                            rfmSetOutputPower(RFM_DBM_MAX);
-                        } else {
+                    // transmit temperature
+                    transmitTemp(NODE1);
+                    // wait for response from receiver
+                    bool timeout = waitResponse();
+                    if (timeout) {
+                        if (++timeoutCount > MAX_TIMEOUTS) {
+                            measureInts = TRANSMIT_SLOW;
                             timeoutCount = 0;
-                            measureInts = TRANSMIT_FAST;
                         }
+                        rfmSetOutputPower(RFM_DBM_MAX);
+                    } else {
+                        timeoutCount = 0;
+                        measureInts = TRANSMIT_FAST;
                     }
                     sleepTSens();
                     rfmSleep();
                     disableSPI();
                 }
             } else {
-                if (LORA) {
-                    RxFlags flags = rfmLoRaRxDone();
-                    if (flags.ready) {
-                        handlePayload(flags);
-                        rfmLoRaStartRx();
-                        // receiveData(flags);
-                    }
-                } else {
-                    RxFlags flags = rfmPayloadReady();
-                    if (flags.ready) {
-                        handlePayload(flags);
-                        rfmStartReceive(false);
-                        // receiveData(flags);
-                    }
-                }
+                // receive and display temperature, respond back to transmitter
+                receiveTemp();
             }
         }
 
