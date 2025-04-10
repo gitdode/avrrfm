@@ -5,7 +5,7 @@
 ## About
 
 Experimental project around RFM radio modules using an ATmega328P MCU 
-and [librfm](https://github.com/gitdode/librfm/tree/main)/[librfm95](https://github.com/gitdode/librfm95/tree/main).
+and [librfm69](https://github.com/gitdode/librfm69/tree/main) (FSK)/[librfm95](https://github.com/gitdode/librfm95/tree/main) (FSK + LoRa).
 
 To do something really extraordinary, the temperature reading of an MCP9808
 sensor is periodically transmitted to the receiver.  
@@ -15,8 +15,7 @@ is ~75µA, which is still quite a lot, but already better than 8mA 🙂
 MCU, radio and temp sensor take about 5µA, so the TC1262 3.3V regulator seems 
 to account for ~70µA.  
 There is basic [SD card support](https://github.com/gitdode/libsdc/tree/main) 
-to test sending larger amounts of data, but it might be useful for something 
-else like a data logger.  
+that might be useful for something like a data logger.  
 
 ![IMG_20250403_220824](https://github.com/user-attachments/assets/5ad1cdd6-68a3-4055-904f-f2452e3b7b60)
 
