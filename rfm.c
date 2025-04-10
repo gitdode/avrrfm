@@ -7,7 +7,7 @@
 
 #include <util/delay.h>
 
-#include "librfm.h"
+#include "librfm95.h"
 #include "pins.h"
 #include "spi.h"
 
