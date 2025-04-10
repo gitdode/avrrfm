@@ -27,7 +27,7 @@
 #include "usart.h"
 #include "spi.h"
 #include "utils.h"
-#include "librfm.h"
+#include "librfm95.h"
 #include "libsdc.h"
 #include "mcp9808.h"
 #include "tft.h"
@@ -35,7 +35,7 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define TRANSMIT_FAST   15  // 15 ~ 30 seconds
+#define TRANSMIT_FAST   30  // 30 ~ 60 seconds
 #define TRANSMIT_SLOW   150 // 150 ~ 5 minutes
 #define MAX_TIMEOUTS    9   // slow down tx attempts after so many timeouts
 
@@ -55,11 +55,13 @@
 /* Limit to FSK max size for now */
 #define MSG_SIZE        RFM_FSK_MSG_SIZE
 
+#ifndef LORA
+    #define LORA        1
+#endif
+
 #ifndef RECEIVER
     #define RECEIVER    1
 #endif
-
-#define LORA            1
 
 static volatile uint8_t watchdogInts = 0;
 static uint8_t measureInts = TRANSMIT_FAST;
@@ -252,28 +254,27 @@ static void receiveTemp(void) {
     if (LORA) {
         RxFlags flags = rfmLoRaRxDone();
         if (flags.ready) {
-            uint8_t response[] = {flags.rssi};
-            rfmLoRaTx(response, sizeof (response));
-
             uint8_t payload[3];
             rfmLoRaRxRead(payload, sizeof (payload));
             Temperature temp = readTemp(payload);
 
-            displayTemp(flags.rssi, flags.crc, &temp);
+            uint8_t response[] = {flags.rssi};
+            rfmLoRaTx(response, sizeof (response));
 
+            displayTemp(flags.rssi, flags.crc, &temp);
             rfmLoRaStartRx();
         }
     } else {
         RxFlags flags = rfmPayloadReady();
         if (flags.ready) {
-            uint8_t response[] = {flags.rssi};
-            rfmTransmitPayload(response, sizeof (response), NODE2);
-
             uint8_t payload[3];
             rfmReadPayload(payload, sizeof (payload));
             Temperature temp = readTemp(payload);
-            displayTemp(flags.rssi, flags.crc, &temp);
 
+            uint8_t response[] = {flags.rssi};
+            rfmTransmitPayload(response, sizeof (response), NODE2);
+
+            displayTemp(flags.rssi, flags.crc, &temp);
             rfmStartReceive(false);
         }
     }
