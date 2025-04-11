@@ -312,7 +312,7 @@ static bool waitResponse(void) {
     }
     if (len > 0) {
         // set more output power starting from -100 dBm
-        int8_t rssi = divRoundNearest(response[0], 2);
+        int8_t rssi = response[0];
         power = divRoundNearest(power + rssi - 98, 2);
         rfmSetOutputPower(min(max(power, RFM_DBM_MIN), RFM_DBM_MAX));
 
