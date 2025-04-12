@@ -48,6 +48,7 @@
 #define NODE0           0x12
 #define NODE1           0x24
 #define NODE2           0x42
+#define BCAST           0x84
 
 /* Carrier frequency in kHz */
 #define FREQ            868600
@@ -341,7 +342,7 @@ int main(void) {
     printString("Hello Radio!\r\n");
 
     uint8_t node = RECEIVER ? NODE1 : NODE2;
-    bool radio = rfmInit(FREQ, node, LORA);
+    bool radio = rfmInit(FREQ, node, BCAST, LORA);
     if (!radio) {
         printString("Radio init failed!\r\n");
     }
@@ -361,10 +362,6 @@ int main(void) {
     }
 
     while (true) {
-        // do something else besides tx/rx
-        // printString("Running...\r\n");
-        // _delay_ms(1000);
-
         if (radio) {
             if (!RECEIVER) {
                 if (watchdogInts % measureInts == 0) {
