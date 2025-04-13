@@ -51,17 +51,17 @@
 #define BCAST           0x84
 
 /* Carrier frequency in kHz */
-#define FREQ            868600
+#define FREQ            433600
 
 /* Limit to FSK max size for now */
 #define MSG_SIZE        RFM_FSK_MSG_SIZE
 
 #ifndef LORA
-    #define LORA        1
+    #define LORA        0
 #endif
 
 #ifndef RECEIVER
-    #define RECEIVER    1
+    #define RECEIVER    0
 #endif
 
 static volatile uint8_t watchdogInts = 0;
@@ -83,7 +83,8 @@ static int8_t power = RFM_DBM_MAX;
  */
 ISR(WDT_vect) {
     watchdogInts++;
-    rfmTimeout();
+    // librfm95 only
+    // rfmTimeout();
 }
 
 /**

@@ -43,13 +43,14 @@ CFLAGS += -std=gnu99
 
 TARGET = $(strip $(basename $(MAIN)))
 SRC += $(TARGET).c
-SRC += librfm95.a libsdc.a
+SRC += librfm69.c libsdc.a
 
 OBJ = $(SRC:.c=.o) 
 OBJ = $(SRC:.S=.o)
 	
 $(TARGET).elf: bitmaps.h colorspace.h dejavu.h display.h font.h i2c.h \
-	mcp9808.h pins.h spi.h tft.h types.h unifont.h usart.h utils.h Makefile
+	mcp9808.h pins.h spi.h tft.h types.h unifont.h usart.h utils.h \
+	librfm69.h libsdc.h Makefile
 
 all: $(TARGET).hex
 
