@@ -61,7 +61,7 @@
 #endif
 
 #ifndef RECEIVER
-    #define RECEIVER    0
+    #define RECEIVER    1
 #endif
 
 static volatile uint8_t watchdogInts = 0;
@@ -83,7 +83,7 @@ static int8_t power = RFM_DBM_MAX;
  */
 ISR(WDT_vect) {
     watchdogInts++;
-    // librfm95 only
+    // only used for RFM95 in FSK mode
     // rfmTimeout();
 }
 
