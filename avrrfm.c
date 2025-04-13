@@ -51,13 +51,13 @@
 #define BCAST           0x84
 
 /* Carrier frequency in kHz */
-#define FREQ            433600
+#define FREQ            868600
 
 /* Limit to FSK max size for now */
 #define MSG_SIZE        RFM_FSK_MSG_SIZE
 
 #ifndef LORA
-    #define LORA        0
+    #define LORA        1
 #endif
 
 #ifndef RECEIVER
