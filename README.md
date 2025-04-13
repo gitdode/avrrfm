@@ -17,7 +17,7 @@ to account for ~70µA.
 There is basic [SD card support](https://github.com/gitdode/libsdc/tree/main) 
 that might be useful for something like a data logger.  
 
-![IMG_20250403_220824](https://github.com/user-attachments/assets/5ad1cdd6-68a3-4055-904f-f2452e3b7b60)
+![IMG_20250413_184140](https://github.com/user-attachments/assets/1ac75c87-bcc0-4c7b-a6b3-39a937d728f0)
 
 The receiver currently converts the raw temperature reading to °C and displays 
 it with the RSSI value, CRC result and transmitter output power on a nice IPS 
@@ -27,7 +27,7 @@ supply current from 50 mA down to 22 mA. The transmitter waits for this
 response with a timeout so it won't be blocked and consumes a lot of power just 
 because there is no response coming back.
 
-![IMG_20250315_175920c](https://github.com/user-attachments/assets/03405774-57c2-42f1-a39a-8fa4cc2801ac)
+![IMG_20250413_190306](https://github.com/user-attachments/assets/b6226805-6778-4cc8-bec5-2a36f91b4585)
 
 ## Fun Stuff
 
