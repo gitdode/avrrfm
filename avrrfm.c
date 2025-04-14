@@ -56,8 +56,15 @@
 /* Limit to FSK max size for now */
 #define MSG_SIZE        RFM_FSK_MSG_SIZE
 
+/* Increase output power starting from this RSSI */
+#define PA_THRESH       90
+
 #ifndef LORA
     #define LORA        1
+#endif
+
+#if LORA
+    #define PA_THRESH   100
 #endif
 
 #ifndef RECEIVER
@@ -313,9 +320,9 @@ static bool waitResponse(void) {
         len = rfmReceivePayload(response, sizeof (response), true);
     }
     if (len > 0) {
-        // set more output power starting from -100 dBm
+        // set more output power starting from RSSI level PA_THRESH
         int8_t rssi = response[0];
-        power = divRoundNearest(power + rssi - 98, 2);
+        power = divRoundNearest(power + rssi - PA_THRESH + RFM_DBM_MIN, 2);
         rfmSetOutputPower(min(max(power, RFM_DBM_MIN), RFM_DBM_MAX));
 
         return false;
