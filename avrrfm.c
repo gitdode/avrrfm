@@ -56,15 +56,15 @@
 /* Limit to FSK max size for now */
 #define MSG_SIZE        RFM_FSK_MSG_SIZE
 
-/* Increase output power starting from this RSSI */
-#define PA_THRESH       90
-
 #ifndef LORA
     #define LORA        1
 #endif
 
+/* Increase output power starting from this RSSI */
 #if LORA
     #define PA_THRESH   100
+#else
+    #define PA_THRESH   90
 #endif
 
 #ifndef RECEIVER
