@@ -8,6 +8,9 @@ BAUD = 9600
 PROGRAMMER_TYPE = avrispmkII
 PROGRAMMER_ARGS = 
 
+# Supported radio module variants: 69 and 95
+RFM = 95
+
 # Display dimensions
 DISPLAY_WIDTH = 320
 DISPLAY_HEIGHT = 240
@@ -18,6 +21,10 @@ INVERT = 1
 # Flip image
 HFLIP = 1
 VFLIP = 0
+
+ifndef RFM
+override RFM = 0
+endif
 
 MAIN = avrrfm.c
 SRC = bitmaps.c colorspace.c dejavu.c display.c font.c i2c.c mcp9808.c \
@@ -30,6 +37,7 @@ AVRSIZE = avr-size
 AVRDUDE = avrdude
 
 CFLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU)UL -DBAUD=$(BAUD)
+CFLAGS += -DRFM=$(RFM)
 CFLAGS += -DDISPLAY_WIDTH=$(DISPLAY_WIDTH) -DDISPLAY_HEIGHT=$(DISPLAY_HEIGHT)
 CFLAGS += -DINVERT=$(INVERT) -DBGR=$(BGR) -DHFLIP=$(HFLIP) -DVFLIP=$(VFLIP)
 CFLAGS += -O2 -I.

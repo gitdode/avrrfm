@@ -5,7 +5,7 @@
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, version 2.
  *
- * Experimental project to drive an RFM69HCW radio.
+ * Experimental project around RFM radio modules using an AVR MCU.
  *
  * Created on: 27.01.2025
  *     Author: torsten.roemer@luniks.net
@@ -56,6 +56,10 @@
 /* Limit to FSK max size for now */
 #define MSG_SIZE        RFM_FSK_MSG_SIZE
 
+#if RFM != 69 && RFM != 95
+    #error "Please set RFM to either 69 or 95"
+#endif
+
 #ifndef LORA
     #define LORA        1
 #endif
@@ -90,8 +94,11 @@ static int8_t power = RFM_DBM_MAX;
  */
 ISR(WDT_vect) {
     watchdogInts++;
+
+#if RFM == 95 && !LORA
     // only used for RFM95 in FSK mode
-    // rfmTimeout();
+    rfmTimeout();
+#endif
 }
 
 /**
@@ -232,6 +239,8 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
     const __flash Font *dejaVu = &dejaVuFont;
     if (width > 0) fillArea(xo, yo, width, dejaVu->height, WHITE);
     if (yl == 0) yl = unifont->height;
+    // FIXME required space should be calculated before writing the text
+    // i.e. 9.9° -> 10.0° can go wrong
     width = writeString(xl, yl, dejaVu, buf, WHITE, crc ? BLACK : RED);
     xo = xl;
     yo = yl;

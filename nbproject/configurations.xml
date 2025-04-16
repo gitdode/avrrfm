@@ -47,7 +47,8 @@
           <preprocessorList>
             <Elem>BAUD=38400</Elem>
             <Elem>DRIVER=1</Elem>
-            <Elem>F_CPU=16000000UL</Elem>
+            <Elem>F_CPU=8000000UL</Elem>
+            <Elem>RFM=95</Elem>
             <Elem>__AVR_ATmega328P__</Elem>
             <Elem>__flash=volatile</Elem>
           </preprocessorList>
@@ -67,6 +68,8 @@
       </item>
       <item path="/home/dode/dev/avrrfm/i2c.c" ex="false" tool="0" flavor2="0">
       </item>
+      <item path="/home/dode/dev/avrrfm/librfm69.c" ex="false" tool="0" flavor2="0">
+      </item>
       <item path="/home/dode/dev/avrrfm/mcp9808.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/mcp9808.h" ex="false" tool="3" flavor2="0">
@@ -82,8 +85,6 @@
       <item path="/home/dode/dev/avrrfm/unifont.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/usart.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="librfm69.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
   </confs>
