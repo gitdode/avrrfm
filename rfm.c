@@ -16,10 +16,12 @@ void _rfmDelay5() {
 }
 
 void _rfmOn() {
-    // RFM69
-    // PORT_RFM &= ~(1 << PIN_RRST);
-    // RFM95
+#if RFM == 69
+    PORT_RFM &= ~(1 << PIN_RRST);
+#endif
+#if RFM == 95
     PORT_RFM |= (1 << PIN_RRST);
+#endif
 }
 
 void _rfmSel() {
