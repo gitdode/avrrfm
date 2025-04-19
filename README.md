@@ -22,10 +22,10 @@ that might be useful for something like a data logger.
 The receiver currently converts the raw temperature reading to °C and displays 
 it with the RSSI value, CRC result and transmitter output power on a nice IPS 
 TFT display. It responds to the transmitter as kind of ack with the RSSI, which 
-is used for some very basic power management in the transmitter, reducing the 
-supply current from 50 mA down to 22 mA. The transmitter waits for this 
-response with a timeout so it won't be blocked and consumes a lot of power just 
-because there is no response coming back.
+is used for some very basic power management in the transmitter, significantly 
+reducing the supply current. The transmitter waits for this response with a 
+timeout so it won't be blocked and consumes a lot of power just because there 
+is no response coming back.
 
 ![IMG_20250413_190306](https://github.com/user-attachments/assets/b6226805-6778-4cc8-bec5-2a36f91b4585)
 
