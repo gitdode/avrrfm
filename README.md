@@ -31,7 +31,7 @@ and consumes a lot of power just because there is no response coming back.
 
 ## Fun Stuff
 
-Looking at the payload in the transmitted signal in URH (with an RTL-SDR Blog V4):
+Looking at the payload in the FSK modulated signal from the transmitter in URH (with an RTL-SDR Blog V4):
 
 ![urh](https://github.com/user-attachments/assets/4c0b159a-5ae9-444c-99f1-6edc385ba4b1)
 
@@ -54,3 +54,13 @@ bytes. After the 4 payload bytes, there are 2 CRC bytes as described in the
 datasheet of the RFM69HCW:
 
 ![PackageFormat](https://github.com/user-attachments/assets/11687645-552c-46e5-a0bf-ef490b1bca48)
+
+### LoRa
+
+With LoRa, the signal of course looks a bit different:
+
+![urhLoRa](https://github.com/user-attachments/assets/2f8c4392-da10-4c44-b266-18e3726e1e39)
+
+And it doesn't look like URH can decode LoRa for the time being.
+
+
