@@ -61,6 +61,12 @@ With LoRa, the signal of course looks a bit different:
 
 ![urhLoRa](https://github.com/user-attachments/assets/2f8c4392-da10-4c44-b266-18e3726e1e39)
 
-And it doesn't look like URH can decode LoRa for the time being.
+And it doesn't look like URH can decode LoRa for the time being.  
+Interesting information about decoding LoRa can be found at [DecodingLora - RevSpace](https://revspace.nl/DecodingLora).  
 
+In the waterfall view of SDR++ the individual chirps of the LoRa signal can be seen.
+From bottom to top the 10 upchirps + 2 downchirps of the preamble, above the sync word, 
+header, payload and CRC:
+
+![41_7kHz-SF10s](https://github.com/user-attachments/assets/0c45a3d3-c5cd-4fa7-a8da-a4a13c1b5ae6)
 
