@@ -35,8 +35,8 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define TRANSMIT_FAST   30  // 30 ~ 60 seconds
-#define TRANSMIT_SLOW   150 // 150 ~ 5 minutes
+#define TRANSMIT_FAST   60  // seconds
+#define TRANSMIT_SLOW   300 // seconds
 #define MAX_TIMEOUTS    9   // slow down tx attempts after so many timeouts
 
 #define LABEL_OFFSET    10
@@ -76,7 +76,7 @@
 #endif
 
 static volatile uint8_t watchdogInts = 0;
-static uint8_t measureInts = TRANSMIT_FAST;
+static uint16_t measureInts = TRANSMIT_FAST;
 static uint8_t timeoutCount = 0;
 
 /* Temp. label coordinates */
@@ -194,8 +194,8 @@ static void initWatchdog(void) {
     wdt_reset();
     // watchdog change enable
     WDTCSR |= (1 << WDCE) | (1 << WDE);
-    // enable interrupt, disable system reset, bark every 2 seconds
-    WDTCSR = (1 << WDIE) | (0 << WDE) | (1 << WDP2) | (1 << WDP1) | (1 << WDP0);
+    // enable interrupt, disable system reset, bark every second
+    WDTCSR = (1 << WDIE) | (0 << WDE) | (1 << WDP2) | (1 << WDP1);
 }
 
 /**
