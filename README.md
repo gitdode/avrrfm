@@ -70,6 +70,6 @@ The chirps of the LoRa signal in the waterfall view of SDR++:
 
 ## Silly Stuff
 
-A hopelessly underpowered RFM95 in FSK mode going haywire:
+A hopelessly underpowered RFM95 in FSK mode going haywire (turn on sound):
 
 https://github.com/user-attachments/assets/85de6b50-0ec8-4264-92a5-a77f90162c87
