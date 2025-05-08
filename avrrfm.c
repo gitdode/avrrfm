@@ -35,9 +35,7 @@
 #include "dejavu.h"
 #include "unifont.h"
 
-#define TRANSMIT_FAST   60  // seconds
-#define TRANSMIT_SLOW   300 // seconds
-#define MAX_TIMEOUTS    9   // slow down tx attempts after so many timeouts
+#define TRANSMIT_INT    300 // seconds
 
 #define LABEL_OFFSET    10
 #define BLACK           0x0000
@@ -75,9 +73,7 @@
     #define RECEIVER    1
 #endif
 
-static volatile uint8_t watchdogInts = 0;
-static uint16_t measureInts = TRANSMIT_FAST;
-static uint8_t timeoutCount = 0;
+static volatile uint16_t watchdogInts = 0;
 
 /* Temp. label coordinates */
 static x_t xl = 0;
@@ -381,7 +377,7 @@ int main(void) {
     while (true) {
         if (radio) {
             if (!RECEIVER) {
-                if (watchdogInts % measureInts == 0) {
+                if (watchdogInts % TRANSMIT_INT == 0) {
                     watchdogInts = 0;
 
                     enableSPI();
@@ -392,14 +388,8 @@ int main(void) {
                     // wait for response from receiver
                     bool timeout = waitResponse();
                     if (timeout) {
-                        if (++timeoutCount > MAX_TIMEOUTS) {
-                            measureInts = TRANSMIT_SLOW;
-                            timeoutCount = 0;
-                        }
+                        // max output power if no response
                         rfmSetOutputPower(RFM_DBM_MAX);
-                    } else {
-                        timeoutCount = 0;
-                        measureInts = TRANSMIT_FAST;
                     }
                     sleepTSens();
                     rfmSleep();
