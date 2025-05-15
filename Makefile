@@ -6,7 +6,8 @@ MCU = atmega328p
 F_CPU = 8000000
 BAUD = 9600
 PROGRAMMER_TYPE = avrispmkII
-PROGRAMMER_ARGS = 
+# PROGRAMMER_TYPE = atmelice_isp
+PROGRAMMER_ARGS = -B 125kHz
 
 # Supported RFM radio module variants: 69 and 95
 RFM = 95

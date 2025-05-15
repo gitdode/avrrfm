@@ -272,6 +272,7 @@ static void receiveTemp(void) {
             rfmLoRaRxRead(payload, sizeof (payload));
             Temperature temp = readTemp(payload);
 
+            rfmSetOutputPower(temp.power);
             uint8_t response[] = {flags.rssi};
             rfmLoRaTx(response, sizeof (response));
 
@@ -285,6 +286,7 @@ static void receiveTemp(void) {
             rfmReadPayload(payload, sizeof (payload));
             Temperature temp = readTemp(payload);
 
+            rfmSetOutputPower(temp.power);
             uint8_t response[] = {flags.rssi};
             rfmTransmitPayload(response, sizeof (response), NODE2);
 
@@ -349,9 +351,6 @@ int main(void) {
         initWatchdog();
     }
 
-    // enable global interrupts
-    sei();
-
     printString("Hello Radio!\r\n");
 
     uint8_t node = RECEIVER ? NODE1 : NODE2;
@@ -373,6 +372,9 @@ int main(void) {
             }
         }
     }
+
+    // enable global interrupts
+    sei();
 
     while (true) {
         if (radio) {
