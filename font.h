@@ -8,7 +8,32 @@
 #ifndef FONT_H
 #define FONT_H
 
+#include <stdio.h>
 #include "types.h"
+
+/* Colorspaces */
+#define SPACE_MONO1  1
+#define SPACE_GREY4  4
+#define SPACE_RGB16  16
+
+/**
+ * A bitmap with its width and height, and data.
+ */
+typedef struct {
+    /** Width of the bitmap. */
+    const width_t width;
+    /** Height of the bitmap. */
+    const height_t height;
+    /** Color space of the bitmap. */
+    const space_t space;
+    /** The actual bitmap. */
+    const __flash uint8_t *bitmap;
+} Bitmap;
+
+/**
+ * Available bitmaps.
+ */
+extern const __flash Bitmap bitmaps[];
 
 /**
  * A glyph with its pseudo UTF-8 code point, width and bitmap.

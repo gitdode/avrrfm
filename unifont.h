@@ -10,7 +10,6 @@
 #define UNIFONT_H
 
 #include "font.h"
-#include "colorspace.h"
 
 /**
  * Unifont font.

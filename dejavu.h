@@ -10,7 +10,6 @@
 #define DEJAVU_H
 
 #include "font.h"
-#include "colorspace.h"
 
 /**
  * DejaVu font.

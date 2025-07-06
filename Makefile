@@ -12,18 +12,18 @@ PROGRAMMER_ARGS = -B 125kHz
 # Supported RFM radio module variants: 69 and 95
 RFM = 95
 # LoRa available only with RFM95
-LORA = 1
+LORA = 0
 
 # Display dimensions
 DISPLAY_WIDTH = 320
 DISPLAY_HEIGHT = 240
-# 1 = BGR, 0 = RGB
-BGR = 0
+# true = BGR, false = RGB
+BGR = true
 # Invert color
-INVERT = 1
+INVERT = true
 # Flip image
-HFLIP = 1
-VFLIP = 0
+HFLIP = true
+VFLIP = false
 
 ifndef RFM
 override RFM = 0
@@ -34,8 +34,7 @@ override LORA = 1
 endif
 
 MAIN = avrrfm.c
-SRC = bitmaps.c colorspace.c dejavu.c display.c font.c i2c.c mcp9808.c \
-      spi.c tft.c unifont.c usart.c rfm.c sdc.c
+SRC = dejavu.c i2c.c mcp9808.c spi.c usart.c rfm.c tft.c sdc.c
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
@@ -58,14 +57,13 @@ CFLAGS += -std=gnu99
 
 TARGET = $(strip $(basename $(MAIN)))
 SRC += $(TARGET).c
-SRC += librfm$(RFM).a libsdc.a
+SRC += librfm$(RFM).a libtft.a libsdc.a
 
 OBJ = $(SRC:.c=.o) 
 OBJ = $(SRC:.S=.o)
 	
-$(TARGET).elf: bitmaps.h colorspace.h dejavu.h display.h font.h i2c.h \
-	mcp9808.h pins.h spi.h tft.h types.h unifont.h usart.h utils.h \
-	librfm$(RFM).h libsdc.h Makefile
+$(TARGET).elf: dejavu.h i2c.h mcp9808.h pins.h spi.h types.h unifont.h usart.h \
+	utils.h librfm$(RFM).h libtft.h libsdc.h Makefile
 
 all: $(TARGET).hex
 
