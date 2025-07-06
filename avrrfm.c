@@ -386,6 +386,7 @@ int main(void) {
         tftInit(DISPLAY_WIDTH, DISPLAY_HEIGHT, HFLIP, VFLIP, BGR, INVERT);
         tftSetFrame(WHITE);
         tftFillArea(0, 0, DISPLAY_WIDTH, 16, BLACK);
+        tftWriteBitmap(0, 176, 0, 0xffff, 0x0000);
         // initial rx mode
         if (radio) {
             if (LORA) {

@@ -12,7 +12,7 @@ PROGRAMMER_ARGS = -B 125kHz
 # Supported RFM radio module variants: 69 and 95
 RFM = 95
 # LoRa available only with RFM95
-LORA = 0
+LORA = 1
 
 # Display dimensions
 DISPLAY_WIDTH = 320
@@ -34,7 +34,7 @@ override LORA = 1
 endif
 
 MAIN = avrrfm.c
-SRC = dejavu.c i2c.c mcp9808.c spi.c usart.c rfm.c tft.c sdc.c
+SRC = bitmaps.c dejavu.c i2c.c mcp9808.c spi.c usart.c rfm.c tft.c sdc.c
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
