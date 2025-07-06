@@ -119,22 +119,22 @@ void tftWriteEnd(void);
  * @param color 16-Bit (5/6/5) RGB color
  */
 void tftFillArea(x_t x, y_t y,
-              width_t width, height_t height,
-              uint16_t color);
+                 width_t width, height_t height,
+                 uint16_t color);
 
 /**
  * Sets the area to write image data to.
  * 
  * @param x in pixels, origin top left
  * @param y in pixels, origin top left
- * @param width width of the bitmap in pixels
- * @param height height of the bitmap in pixels
+ * @param width width in pixels
+ * @param height height in pixels
  * @param hflip if image should be flipped horizontally
  * @param vflip if image should be flipped vertically
  */
 void tftSetArea(x_t x, y_t y,
-             width_t width, height_t height,
-             bool hflip, bool vflip);
+                width_t width, height_t height,
+                bool hflip, bool vflip);
 
 /**
  * Sets the whole display to the given 16-Bit (5/6/5) RGB color.
@@ -142,21 +142,6 @@ void tftSetArea(x_t x, y_t y,
  * @param color
  */
 void tftSetFrame(uint16_t color);
-
-/**
- * Helper to write image data to the display, converting from the given 
- * color space to that of the display.
- * 
- * @param bitmap pointer to bitmap data in program memory
- * @param width width of the bitmap in pixels
- * @param height height of the bitmap in pixels
- * @param space color space of the bitmap
- * @param bg background color (used only with SPACE_MONO1)
- * @param fg foreground color (used only with SPACE_MONO1)
- */
-void tftWriteSpace(const __flash uint8_t *bitmap,
-                width_t width, height_t height,
-                space_t space, uint16_t bg, uint16_t fg);
 
 /**
  * Writes image data to the previously set area.
@@ -169,8 +154,8 @@ void tftWriteSpace(const __flash uint8_t *bitmap,
  * @param fg foreground color (used only with SPACE_MONO1)
  */
 void tftWriteData(const __flash uint8_t *bitmap,
-               width_t width, height_t height,
-               space_t space, uint16_t bg, uint16_t fg);
+                  width_t width, height_t height,
+                  space_t space, uint16_t bg, uint16_t fg);
 
 /**
  * Writes the bitmap with the given index to the given row and column 
