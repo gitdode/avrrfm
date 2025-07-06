@@ -4,10 +4,6 @@
     <df root="/home/dode/dev/avrrfm" name="0">
       <in>avrrfm.c</in>
       <in>bitmaps.c</in>
-      <in>colorspace.c</in>
-      <in>dejavu.c</in>
-      <in>display.c</in>
-      <in>font.c</in>
       <in>i2c.c</in>
       <in>librfm69.c</in>
       <in>mcp9808.c</in>
@@ -16,7 +12,6 @@
       <in>sdc.c</in>
       <in>spi.c</in>
       <in>tft.c</in>
-      <in>unifont.c</in>
       <in>usart.c</in>
     </df>
     <logicalFolder name="ExternalFiles"
@@ -56,16 +51,6 @@
       </compileType>
       <item path="/home/dode/dev/avrrfm/avrrfm.c" ex="false" tool="0" flavor2="3">
       </item>
-      <item path="/home/dode/dev/avrrfm/bitmaps.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="/home/dode/dev/avrrfm/colorspace.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="/home/dode/dev/avrrfm/dejavu.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="/home/dode/dev/avrrfm/display.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="/home/dode/dev/avrrfm/font.c" ex="false" tool="0" flavor2="0">
-      </item>
       <item path="/home/dode/dev/avrrfm/i2c.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/librfm69.c" ex="false" tool="0" flavor2="0">
@@ -80,11 +65,11 @@
       </item>
       <item path="/home/dode/dev/avrrfm/spi.c" ex="false" tool="0" flavor2="3">
       </item>
-      <item path="/home/dode/dev/avrrfm/tft.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="/home/dode/dev/avrrfm/unifont.c" ex="false" tool="0" flavor2="0">
-      </item>
       <item path="/home/dode/dev/avrrfm/usart.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="bitmaps.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="tft.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
   </confs>

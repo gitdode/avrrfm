@@ -28,10 +28,9 @@
 #include "spi.h"
 #include "utils.h"
 #include "librfm95.h"
+#include "libtft.h"
 #include "libsdc.h"
 #include "mcp9808.h"
-#include "tft.h"
-#include "display.h"
 #include "dejavu.h"
 #include "unifont.h"
 
@@ -71,6 +70,30 @@
 
 #ifndef RECEIVER
     #define RECEIVER    1
+#endif
+
+#ifndef DISPLAY_WIDTH
+    #define DISPLAY_WIDTH   320
+#endif
+
+#ifndef DISPLAY_HEIGHT
+    #define DISPLAY_HEIGHT  240
+#endif
+
+#ifndef BGR
+    #define BGR     false
+#endif
+
+#ifndef INVERT
+    #define INVERT  false
+#endif
+
+#ifndef HFLIP
+    #define HFLIP   false
+#endif
+
+#ifndef VFLIP
+    #define VFLIP   false
 #endif
 
 static volatile uint16_t watchdogInts = 0;
@@ -227,17 +250,17 @@ static void displayTemp(uint8_t rssi, bool crc, Temperature *temp) {
     snprintf(buf, sizeof (buf), "RSSI: %4d dBm, CRC: %d, PA: %s dBm",
             -rssi, crc, crc ? paf : "---");
     const __flash Font *unifont = &unifontFont;
-    writeString(0, 0, unifont, buf, BLACK, WHITE);
+    tftWriteString(0, 0, unifont, buf, BLACK, WHITE);
 
     // display temperature (floating, red if CRC failed)
     snprintf(buf, sizeof (buf), "%c%d.%d°", tempx10 < 0 ? '-' : ' ',
             abs(tdiv.quot), abs(tdiv.rem));
     const __flash Font *dejaVu = &dejaVuFont;
-    if (width > 0) fillArea(xo, yo, width, dejaVu->height, WHITE);
+    if (width > 0) tftFillArea(xo, yo, width, dejaVu->height, WHITE);
     if (yl == 0) yl = unifont->height;
     // FIXME required space should be calculated before writing the text
     // i.e. 9.9° -> 10.0° can go wrong
-    width = writeString(xl, yl, dejaVu, buf, WHITE, crc ? BLACK : RED);
+    width = tftWriteString(xl, yl, dejaVu, buf, WHITE, crc ? BLACK : RED);
     xo = xl;
     yo = yl;
     xl += LABEL_OFFSET;
@@ -360,9 +383,10 @@ int main(void) {
     }
 
     if (RECEIVER) {
-        initDisplay();
-        setFrame(WHITE);
-        fillArea(0, 0, DISPLAY_WIDTH, 16, BLACK);
+        tftInit(DISPLAY_WIDTH, DISPLAY_HEIGHT, HFLIP, VFLIP, BGR, INVERT);
+        tftSetFrame(WHITE);
+        tftFillArea(0, 0, DISPLAY_WIDTH, 16, BLACK);
+        tftWriteBitmap(0, 176, 0, 0xffff, 0x0000);
         // initial rx mode
         if (radio) {
             if (LORA) {
