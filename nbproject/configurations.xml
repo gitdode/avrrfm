@@ -5,7 +5,6 @@
       <in>avrrfm.c</in>
       <in>bitmaps.c</in>
       <in>i2c.c</in>
-      <in>librfm69.c</in>
       <in>mcp9808.c</in>
       <in>mcp9808.h</in>
       <in>rfm.c</in>
@@ -38,6 +37,7 @@
         <cTool>
           <incDir>
             <pElem>.</pElem>
+            <pElem>/home/dode/dev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>BAUD=38400</Elem>
@@ -51,9 +51,9 @@
       </compileType>
       <item path="/home/dode/dev/avrrfm/avrrfm.c" ex="false" tool="0" flavor2="3">
       </item>
-      <item path="/home/dode/dev/avrrfm/i2c.c" ex="false" tool="0" flavor2="0">
+      <item path="/home/dode/dev/avrrfm/bitmaps.c" ex="false" tool="0" flavor2="0">
       </item>
-      <item path="/home/dode/dev/avrrfm/librfm69.c" ex="false" tool="0" flavor2="0">
+      <item path="/home/dode/dev/avrrfm/i2c.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="/home/dode/dev/avrrfm/mcp9808.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -65,11 +65,9 @@
       </item>
       <item path="/home/dode/dev/avrrfm/spi.c" ex="false" tool="0" flavor2="3">
       </item>
+      <item path="/home/dode/dev/avrrfm/tft.c" ex="false" tool="0" flavor2="0">
+      </item>
       <item path="/home/dode/dev/avrrfm/usart.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="bitmaps.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="tft.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
   </confs>

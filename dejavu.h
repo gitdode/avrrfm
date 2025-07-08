@@ -9,7 +9,7 @@
 #ifndef DEJAVU_H
 #define DEJAVU_H
 
-#include "font.h"
+#include "libtft/font.h"
 
 /**
  * DejaVu font.
