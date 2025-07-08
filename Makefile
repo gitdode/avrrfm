@@ -61,9 +61,9 @@ SRC += ../librfm$(RFM)/librfm$(RFM).a ../libtft/libtft.a ../libsdc/libsdc.a
 
 OBJ = $(SRC:.c=.o) 
 OBJ = $(SRC:.S=.o)
-	
-$(TARGET).elf: dejavu.h i2c.h mcp9808.h pins.h spi.h types.h usart.h \
-	utils.h Makefile
+
+$(TARGET).elf: dejavu.h i2c.h mcp9808.h pins.h spi.h types.h usart.h utils.h \
+	Makefile
 
 all: $(TARGET).hex
 
@@ -79,7 +79,7 @@ eeprom: $(TARGET).eeprom
 
 %.lst: %.elf
 	$(OBJDUMP) -S $< > $@
- 
+
 size:  $(TARGET).elf
 	$(AVRSIZE) --mcu=$(MCU) $(TARGET).elf
 
