@@ -7,7 +7,12 @@
 
 #include <util/delay.h>
 
-#include "librfm95.h"
+#if RFM == 69
+    #include "librfm69/librfm69.h"
+#endif
+#if RFM == 95
+    #include "librfm95/librfm95.h"
+#endif
 #include "pins.h"
 #include "spi.h"
 

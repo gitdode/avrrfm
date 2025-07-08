@@ -27,12 +27,17 @@
 #include "usart.h"
 #include "spi.h"
 #include "utils.h"
-#include "librfm95.h"
-#include "libtft.h"
-#include "libsdc.h"
 #include "mcp9808.h"
 #include "dejavu.h"
-#include "unifont.h"
+#if RFM == 69
+    #include "librfm69/librfm69.h"
+#endif
+#if RFM == 95
+    #include "librfm95/librfm95.h"
+#endif
+#include "libtft/libtft.h"
+#include "libtft/unifont.h"
+#include "libsdc/libsdc.h"
 
 #define TRANSMIT_INT    300 // seconds
 

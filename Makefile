@@ -46,7 +46,7 @@ CFLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU)UL -DBAUD=$(BAUD)
 CFLAGS += -DRFM=$(RFM) -DLORA=$(LORA)
 CFLAGS += -DDISPLAY_WIDTH=$(DISPLAY_WIDTH) -DDISPLAY_HEIGHT=$(DISPLAY_HEIGHT)
 CFLAGS += -DINVERT=$(INVERT) -DBGR=$(BGR) -DHFLIP=$(HFLIP) -DVFLIP=$(VFLIP)
-CFLAGS += -O2 -I.
+CFLAGS += -O2 -I. -I../
 CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums 
 CFLAGS += -Wall -Wstrict-prototypes
 CFLAGS += -g -ggdb
@@ -57,13 +57,13 @@ CFLAGS += -std=gnu99
 
 TARGET = $(strip $(basename $(MAIN)))
 SRC += $(TARGET).c
-SRC += librfm$(RFM).a libtft.a libsdc.a
+SRC += ../librfm$(RFM)/librfm$(RFM).a ../libtft/libtft.a ../libsdc/libsdc.a
 
 OBJ = $(SRC:.c=.o) 
 OBJ = $(SRC:.S=.o)
 	
-$(TARGET).elf: dejavu.h i2c.h mcp9808.h pins.h spi.h types.h unifont.h usart.h \
-	utils.h librfm$(RFM).h libtft.h libsdc.h Makefile
+$(TARGET).elf: dejavu.h i2c.h mcp9808.h pins.h spi.h types.h usart.h \
+	utils.h Makefile
 
 all: $(TARGET).hex
 

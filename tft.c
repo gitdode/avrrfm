@@ -7,7 +7,7 @@
 
 #include <util/delay.h>
 
-#include "libtft.h"
+#include "libtft/libtft.h"
 #include "pins.h"
 #include "spi.h"
 
