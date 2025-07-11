@@ -18,7 +18,7 @@ LORA = 1
 DISPLAY_WIDTH = 320
 DISPLAY_HEIGHT = 240
 # true = BGR, false = RGB
-BGR = true
+BGR = false
 # Invert color
 INVERT = true
 # Flip image
